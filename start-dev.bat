@@ -1,0 +1,13 @@
+@echo off
+echo ================================
+echo   Menjalankan QPARKIN Project
+echo ================================
+
+:: Jalankan Laravel Backend
+start cmd /k "cd qparkin-backend && php artisan serve"
+
+:: Jalankan Flutter Frontend (web di Chrome)
+start cmd /k "cd qparkin-app && flutter run -d chrome"
+
+echo Semua service sudah dijalankan!
+pause
