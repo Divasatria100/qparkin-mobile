@@ -6,6 +6,23 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+/**
+ * @property int $id_user
+ * @property string $nama
+ * @property string $email
+ * @property string $password
+ * @property string $role
+ * @property int $saldo_poin
+ * @property string $status
+ * 
+ * @property-read \App\Models\AdminMall|null $adminMall
+ * @property-read \App\Models\Customer|null $customer
+ * @property-read \App\Models\SuperAdmin|null $superAdmin
+ * 
+ * @method bool isSuperAdmin()
+ * @method bool isAdminMall()
+ * @method bool isCustomer()
+ */
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
