@@ -15,7 +15,6 @@ class SuperAdminController extends Controller
         /** @var User $user */
         $user = Auth::user();
         
-        // Pastikan user adalah super admin
         if (!$user->isSuperAdmin()) {
             abort(403, 'Unauthorized access.');
         }
@@ -25,6 +24,7 @@ class SuperAdminController extends Controller
         $totalCustomer = User::where('role', 'customer')->count();
         $transaksiHariIni = TransaksiParkir::whereDate('waktu_masuk', today())->count();
         
+        // Pastikan variabel dikirim dengan benar
         return view('superadmin.dashboard', compact('totalMall', 'totalAdmin', 'totalCustomer', 'transaksiHariIni'));
     }
 }
