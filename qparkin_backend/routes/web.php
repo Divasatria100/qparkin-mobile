@@ -3,6 +3,12 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\WebAuthController;
 use App\Http\Controllers\SuperAdminController; // Tambahkan ini
+use App\Http\Controllers\AdminController; // Tambahkan ini
+
+// Halaman root langsung ke login form
+Route::get('/', function () {
+    return redirect()->route('login');
+});
 
 // Halaman login
 Route::get('/login', [WebAuthController::class, 'showLoginForm'])->name('login');
