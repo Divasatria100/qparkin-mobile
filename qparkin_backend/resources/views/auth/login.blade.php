@@ -24,8 +24,8 @@
         <form method="POST" action="{{ route('login') }}">
             @csrf
             <div class="mb-4">
-                <label for="nama" class="block text-gray-700 text-sm font-bold mb-2">Nama Pengguna</label>
-                <input type="text" id="nama" name="nama" required 
+                <label for="name" class="block text-gray-700 text-sm font-bold mb-2">Nama Pengguna</label>
+                <input type="text" id="name" name="name" required 
                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
             </div>
             
