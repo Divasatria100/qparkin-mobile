@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('user', function (Blueprint $table) {
             $table->id('id_user'); // primary key default
-            $table->string('nama'); // nama user
+            $table->string('name'); // nama user
             $table->string('no_hp', 20)->unique()->nullable();
             $table->string('email')->unique()->nullable(); // email, dipakai kalau login Google
             $table->timestamp('email_verified_at')->nullable(); // bawaan Laravel auth
