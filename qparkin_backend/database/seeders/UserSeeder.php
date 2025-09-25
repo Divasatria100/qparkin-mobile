@@ -25,5 +25,21 @@ class UserSeeder extends Seeder
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
+        DB::table('user')->insert([
+            'name' => 'berkat',
+            'no_hp' => null,
+            'email' => null,
+            'email_verified_at' => null,
+            'password' => '$2y$10$0sSLBbUcAVyYLCCj6FhUROrJZnqx2blRTC8HYCBoVQe3jO2CNhERm', // sudah hash bcrypt
+            'provider' => null,
+            'provider_id' => null,
+            'role' => 'customer',
+            'saldo_poin' => 0,
+            'status' => 'aktif',
+            'remember_token' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 }

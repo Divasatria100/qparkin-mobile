@@ -3,10 +3,19 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\ApiAuthController;
 
+// Public routes
 Route::post('/login', [ApiAuthController::class, 'login']);
-Route::middleware('auth:sanctum')->post('/logout', [ApiAuthController::class, 'logout']);
 
-// contoh route API protected
-Route::middleware('auth:sanctum')->get('/user', function (\Illuminate\Http\Request $request) {
-    return $request->user();
+// Protected routes
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/logout', [ApiAuthController::class, 'logout']);
+    Route::get('/user', [ApiAuthController::class, 'getUser']);
+});
+
+// Test route untuk cek API
+Route::get('/test', function () {
+    return response()->json([
+        'message' => 'API QParkin is working!',
+        'timestamp' => now()
+    ]);
 });
