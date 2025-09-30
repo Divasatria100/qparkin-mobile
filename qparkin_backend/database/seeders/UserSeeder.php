@@ -28,7 +28,7 @@ class UserSeeder extends Seeder
 
         DB::table('user')->insert([
             'name' => 'berkat',
-            'no_hp' => null,
+            'no_hp' => '082284710929',
             'email' => null,
             'email_verified_at' => null,
             'password' => '$2y$10$0sSLBbUcAVyYLCCj6FhUROrJZnqx2blRTC8HYCBoVQe3jO2CNhERm', // sudah hash bcrypt
