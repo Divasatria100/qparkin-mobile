@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\WebAuthController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\SuperAdminController; // Tambahkan ini
 use App\Http\Controllers\AdminController; // Tambahkan ini
 
@@ -14,6 +15,11 @@ Route::get('/', function () {
 Route::get('/login', [WebAuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [WebAuthController::class, 'login']);
 Route::post('/logout', [WebAuthController::class, 'logout'])->name('logout');
+
+// Pengajuan/Registrasi akun (guest only)
+Route::post('/register', [RegisteredUserController::class, 'store'])
+    ->middleware('guest')
+    ->name('register');
 
 // Contoh dashboard role
 Route::middleware(['auth'])->group(function () {
