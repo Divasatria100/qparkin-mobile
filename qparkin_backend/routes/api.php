@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\ApiAuthController;
 
 // Public routes
 Route::post('/login', [ApiAuthController::class, 'login']);
+Route::post('/google-login', [ApiAuthController::class, 'googleLogin']);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
