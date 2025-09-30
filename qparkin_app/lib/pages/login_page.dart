@@ -47,10 +47,27 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  void _loginWithGoogle() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Login Google akan segera tersedia')),
-    );
+  Future<void> _loginWithGoogle() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+    });
+
+    final result = await _authService.googleLogin();
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (result['success']) {
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        setState(() {
+          _errorMessage = result['message'];
+        });
+      }
+    }
   }
 
   void _navigateToRegister() {
