@@ -17,7 +17,7 @@
                 <form method="POST" action="{{ route('logout') }}" class="inline">
                     @csrf
                     <button type="submit" class="bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded text-white">Logout</button>
-                </form>F
+                </form>
             </div>
         </div>
     </nav>

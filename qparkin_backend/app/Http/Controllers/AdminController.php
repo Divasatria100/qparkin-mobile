@@ -14,29 +14,28 @@ class AdminController extends Controller
 {
     public function dashboard()
     {
-        /** @var User $user */
         $user = Auth::user();
-        
+
         // Pastikan user adalah admin mall
         if (!$user->isAdminMall()) {
             abort(403, 'Unauthorized access.');
         }
-        
-        $adminMall = AdminMall::where('id_user', $user->id_user)->first();
-        
+
+        $adminMall = $user->adminMall; // Pastikan relasi adminMall sudah didefinisikan di model User
+
         if (!$adminMall) {
             abort(404, 'Admin mall data not found.');
         }
-        
+
         $mall = $adminMall->mall;
-        
-        $transaksiHariIni = TransaksiParkir::where('id_mall', $mall->id_mall)
+
+        $transaksiHariIni = \App\Models\TransaksiParkir::where('id_mall', $mall->id_mall)
             ->whereDate('waktu_masuk', today())
             ->count();
-            
-        $parkiranTersedia = Parkiran::where('id_mall', $mall->id_mall)
+
+        $parkiranTersedia = \App\Models\Parkiran::where('id_mall', $mall->id_mall)
             ->sum('kapasitas');
-            
+
         return view('admin.dashboard', compact('mall', 'transaksiHariIni', 'parkiranTersedia'));
     }
 }

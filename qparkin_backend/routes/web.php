@@ -23,15 +23,9 @@ Route::post('/register', [RegisteredUserController::class, 'store'])
 
 // Contoh dashboard role
 Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])
+        ->name('admin.dashboard');
 
-    Route::get('/admin/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('admin.dashboard');
-
-    // PERBAIKI INI: Gunakan Controller, bukan Closure
     Route::get('/superadmin/dashboard', [SuperAdminController::class, 'dashboard'])
         ->name('superadmin.dashboard');
 });
