@@ -15,27 +15,99 @@ class AdminController extends Controller
     public function dashboard()
     {
         $user = Auth::user();
+        if (!$user) {
+            abort(403, 'Unauthorized.');
+        }
 
-        // Pastikan user adalah admin mall
-        if (!$user->isAdminMall()) {
+        // cek apakah user adalah admin mall (method jika ada, fallback ke role)
+        $isAdmin = false;
+        if (method_exists($user, 'isAdminMall')) {
+            $isAdmin = (bool) $user->isAdminMall();
+        } else {
+            $isAdmin = (isset($user->role) && $user->role === 'admin_mall');
+        }
+
+        if (! $isAdmin) {
             abort(403, 'Unauthorized access.');
         }
 
-        $adminMall = $user->adminMall; // Pastikan relasi adminMall sudah didefinisikan di model User
+        // dapatkan id user secara fleksibel
+        $userId = $user->id_user ?? $user->id ?? null;
 
-        if (!$adminMall) {
+        // ambil admin_mall - pakai relasi jika ada, fallback query manual
+        $adminMall = $user->adminMall ?? AdminMall::where('id_user', $userId)->first();
+
+        if (! $adminMall) {
             abort(404, 'Admin mall data not found.');
         }
 
-        $mall = $adminMall->mall;
+        $mall = Mall::find($adminMall->id_mall);
+        if (! $mall) {
+            abort(404, 'Mall not found.');
+        }
 
-        $transaksiHariIni = \App\Models\TransaksiParkir::where('id_mall', $mall->id_mall)
+        $mallId = $mall->id_mall;
+
+        // Transaksi / pendapatan
+        $pendapatanHarian = TransaksiParkir::where('id_mall', $mallId)
+            ->whereDate('waktu_keluar', today())
+            ->sum('biaya');
+
+        $pendapatanMingguan = TransaksiParkir::where('id_mall', $mallId)
+            ->whereBetween('waktu_keluar', [now()->startOfWeek(), now()->endOfWeek()])
+            ->sum('biaya');
+
+        $pendapatanBulanan = TransaksiParkir::where('id_mall', $mallId)
+            ->whereMonth('waktu_keluar', now()->month)
+            ->whereYear('waktu_keluar', now()->year)
+            ->sum('biaya');
+
+        // Counts kendaraan
+        $transaksiHariIni = TransaksiParkir::where('id_mall', $mallId)
             ->whereDate('waktu_masuk', today())
             ->count();
 
-        $parkiranTersedia = \App\Models\Parkiran::where('id_mall', $mall->id_mall)
-            ->sum('kapasitas');
+        $masuk = $transaksiHariIni;
+        $keluar = TransaksiParkir::where('id_mall', $mallId)
+            ->whereDate('waktu_keluar', today())
+            ->count();
 
-        return view('admin.dashboard', compact('mall', 'transaksiHariIni', 'parkiranTersedia'));
+        $aktif = TransaksiParkir::where('id_mall', $mallId)
+            ->whereNull('waktu_keluar')
+            ->count();
+
+        // Kapasitas / slot tersisa
+        $parkiranTersedia = Parkiran::where('id_mall', $mallId)->sum('kapasitas');
+        $kapasitasTersisa = $parkiranTersedia;
+
+        // Transaksi terbaru (5)
+        $transaksiTerbaru = TransaksiParkir::with('kendaraan')
+            ->where('id_mall', $mallId)
+            ->orderBy('id_transaksi', 'DESC')
+            ->limit(5)
+            ->get();
+
+        // Notifikasi (safe: hanya jika model Notifikasi ada)
+        $notifBelumDibaca = 0;
+        if (class_exists(\App\Models\Notifikasi::class)) {
+            $notifBelumDibaca = \App\Models\Notifikasi::where('id_user', $userId)
+                ->where('status', 'belum')
+                ->count();
+        }
+
+        return view('admin.dashboard', compact(
+            'mall',
+            'pendapatanHarian',
+            'pendapatanMingguan',
+            'pendapatanBulanan',
+            'transaksiHariIni',
+            'masuk',
+            'keluar',
+            'aktif',
+            'parkiranTersedia',
+            'kapasitasTersisa',
+            'transaksiTerbaru',
+            'notifBelumDibaca'
+        ));
     }
 }
