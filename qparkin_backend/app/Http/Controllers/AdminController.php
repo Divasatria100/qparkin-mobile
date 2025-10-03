@@ -110,4 +110,11 @@ class AdminController extends Controller
             'notifBelumDibaca'
         ));
     }
+    public function profile()
+    {
+        $user = Auth::user();
+        return view('admin.profile', compact('user'));
+    }
+
+    
 }

@@ -26,6 +26,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])
         ->name('admin.dashboard');
 
+    Route::get('/admin/profile', [AdminController::class, 'profile'])
+        ->name('admin.profile');
+
+    Route::post('/admin/profile/update', [AdminController::class, 'update'])
+        ->name('admin.profile.update');
+
     Route::get('/superadmin/dashboard', [SuperAdminController::class, 'dashboard'])
         ->name('superadmin.dashboard');
 });
