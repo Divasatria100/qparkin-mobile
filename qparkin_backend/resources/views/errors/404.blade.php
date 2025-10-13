@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Halaman Tidak Ditemukan - QParkIn</title>
+    <title>Layanan Tidak Tersedia - QParkIn</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-        <script>
+    <script>
         tailwind.config = {
             theme: {
                 extend: {
@@ -97,6 +98,7 @@
         }
     </style>
 </head>
+
 <body class="bg-gradient-animated min-h-screen flex items-center justify-center relative overflow-hidden">
 
     <!-- Floating background elements -->
@@ -105,15 +107,17 @@
         style="animation-delay: 1s;"></div>
     <div class="floating-element w-48 h-48 bg-blue-300 rounded-full bottom-20 left-10 animate-bounce-gentle"
         style="animation-delay: 2s;"></div>
-    <div class="glass rounded-lg p-8 text-center max-w-md">
-        <i class="fa-solid fa-face-frown fa-2xl" style="color: #ffffff;"></i>
-        <br></br>
-        <h1 class="text-7xl text-white font-bold mb-4">404</h1>
-        <h2 class="text-3xl text-white font-semibold mb-4">Halaman Tidak Ditemukan</h2>
-        <p class="text-gray-200 mb-6">Maaf, halaman yang Anda cari tidak ada.</p>
-        <a href="{{ url('/') }}" class="bg-gradient-to-r bg-white/30 hover:bg-blue-700 text-white font-bold py-3 px-5 rounded-xl">
-            Kembali ke Dashboard
+    <div class="p-8 text-center max-w-md">
+    <h1 class="text-7xl text-white font-bold mb-4">503
+    <h2 class="text-3xl text-white font-semibold mb-4">Layanan Tidak Tersedia</h1>
+        <p class="text-gray-200 mb-6">Sistem sedang dalam pemeliharaan. Silakan coba lagi nanti.</p>
+        <div class="bg-gradient-to-r p-4 rounded mb-4">
+            <p class="text-gray-200 mb-6">Perkiraan waktu selesai: 30 menit</p>
+        </div>
+        <a href="{{ url('/') }}"
+            class="bg-gradient-to-r bg-white/30 hover:bg-blue-700 text-white font-bold py-3 px-5 rounded-xl">
+            Refresh Halaman
         </a>
-    </div>
+        </div>
 </body>
 </html>

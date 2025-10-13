@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -97,21 +98,27 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
-    <div class="bg-white p-8 rounded-lg shadow-md text-center max-w-md">
-        <i class="fa-solid fa-xmark-2xl"></i>
+
+<body class="bg-gradient-animated min-h-screen flex items-center justify-center relative overflow-hidden">
+
+    <!-- Floating background elements -->
+    <div class="floating-element w-64 h-64 bg-white rounded-full top-20 left-30 animate-float"></div>
+    <div class="floating-element w-32 h-32 bg-purple-300 rounded-full top-1/2 right-20 animate-pulse-slow"
+        style="animation-delay: 1s;"></div>
+    <div class="floating-element w-48 h-48 bg-blue-300 rounded-full bottom-20 left-10 animate-bounce-gentle"
+        style="animation-delay: 2s;"></div>
+    <div class="p-15 text-center max-w-md mx-4">
+        <i class="fa-solid fa-xmark fa-2xl" style="color: #ffffff;"></i>
         <br></br>
-        <div class="text-6xl font-bold text-red-600 mb-4">403</div>
-        <h1 class="text-2xl font-semibold mb-4">Akses Ditolak</h1>
-        <p class="text-gray-600 mb-6">Anda tidak memiliki izin untuk mengakses halaman ini.</p>
-        <div class="space-y-3">
-            <a href="{{ url()->previous() }}" class="block bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
-                Kembali
-            </a>
-            <a href="{{ url('/') }}" class="block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                Ke Dashboard
+        <h1 class="text-7xl text-white font-bold mb-4">403</h1>
+        <h2 class="text-3xl text-white font-semibold mb-4">Akses Ditolak</h2>
+        <p class="text-gray-200 mb-6">Anda tidak memiliki izin untuk mengakses halaman ini.</p>
+            <a href="{{ url('/') }}"
+                class="bg-gradient-to-r bg-white/30 hover:bg-blue-700 text-white font-bold py-3 px-5 rounded-xl">
+                Kembali Login
             </a>
         </div>
     </div>
 </body>
+
 </html>
