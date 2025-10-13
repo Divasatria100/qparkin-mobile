@@ -10,8 +10,6 @@ class AuthService {
   
   Future<Map<String, dynamic>> login(String noHp, String password) async {
     try {
-      
-      
       final response = await http.post(
         Uri.parse('$baseUrl/login'),
         headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
@@ -45,6 +43,7 @@ class AuthService {
     await prefs.setString('user', jsonEncode(user));
   }
 
+  // lib/services/auth_service.dart
   Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('token');
