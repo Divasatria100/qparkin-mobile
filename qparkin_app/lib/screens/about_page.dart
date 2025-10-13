@@ -6,19 +6,22 @@ class AboutPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isMobile = screenSize.width < 600;
+    
     return Scaffold(
-      backgroundColor: const Color(0xFF1E3A8A), // Warna biru tua seperti di gambar
+      backgroundColor: const Color(0xFF1E3A8A),
       body: SafeArea(
         child: Column(
           children: [
             // Bagian atas dengan ilustrasi
             Expanded(
-              flex: 6,
+              flex: isMobile ? 5 : 6,
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(32.0),
+                padding: EdgeInsets.all(isMobile ? 16.0 : 32.0),
                 child: Image.asset(
-                  'assets/images/parking_illustration.png', // Ganti dengan path ilustrasi Anda
+                  'assets/images/mobil.png',
                   fit: BoxFit.contain,
                 ),
               ),
@@ -26,7 +29,7 @@ class AboutPage extends StatelessWidget {
             
             // Bagian bawah dengan card putih
             Expanded(
-              flex: 4,
+              flex: isMobile ? 5 : 4,
               child: Container(
                 width: double.infinity,
                 decoration: const BoxDecoration(
@@ -36,7 +39,7 @@ class AboutPage extends StatelessWidget {
                     topRight: Radius.circular(32),
                   ),
                 ),
-                padding: const EdgeInsets.all(32.0),
+                padding: EdgeInsets.all(isMobile ? 20.0 : 32.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -44,41 +47,41 @@ class AboutPage extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const SizedBox(width: 48), // Spacer untuk balance
+                        SizedBox(width: isMobile ? 30 : 48),
                         Container(
-                          width: 80,
-                          height: 80,
+                          width: isMobile ? 60 : 80,
+                          height: isMobile ? 60 : 80,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF4F46E5), // Warna ungu/biru
+                            color: const Color(0xFF4F46E5),
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.local_parking,
                             color: Colors.white,
-                            size: 40,
+                            size: isMobile ? 28 : 40,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: isMobile ? 16 : 24),
                     
                     // Judul
-                    const Text(
+                    Text(
                       'Selamat Datang.',
                       style: TextStyle(
-                        fontSize: 32,
+                        fontSize: isMobile ? 24 : 32,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF94A3B8), // Abu-abu muda
+                        color: const Color(0xFF94A3B8),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: isMobile ? 12 : 16),
                     
                     // Deskripsi
-                    const Text(
+                    Text(
                       'Aplikasi Qparkin dirancang sebagai solusi digital modern untuk menggantikan sistem parkir berbasis tiket kertas yang umum digunakan di pusat perbelanjaan.',
                       style: TextStyle(
-                        fontSize: 16,
-                        color: Color(0xFF94A3B8),
+                        fontSize: isMobile ? 13 : 16,
+                        color: const Color(0xFF94A3B8),
                         height: 1.5,
                       ),
                     ),
@@ -88,29 +91,29 @@ class AboutPage extends StatelessWidget {
                     // Button Mulai
                     SizedBox(
                       width: double.infinity,
+                      height: isMobile ? 48 : 56,
                       child: ElevatedButton(
                         onPressed: () {
                           Navigator.pushReplacementNamed(context, '/login');
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFEF4444), // Merah
-                          padding: const EdgeInsets.symmetric(vertical: 18),
+                          backgroundColor: const Color(0xFFEF4444),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
                           elevation: 0,
                         ),
-                        child: const Text(
+                        child: Text(
                           'Mulai',
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: isMobile ? 16 : 18,
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: isMobile ? 12 : 16),
                   ],
                 ),
               ),
