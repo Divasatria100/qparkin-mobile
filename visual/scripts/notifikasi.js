@@ -360,24 +360,5 @@ document.addEventListener('DOMContentLoaded', function() {
                 <p>Belum ada notifikasi yang tersedia. Notifikasi akan muncul ketika ada aktivitas sistem.</p>
             `;
         } 
-        // Jika ada notifikasi tapi semuanya sudah dibaca
-        else if (unreadNotifications.length === 0) {
-            emptyState.style.display = 'block';
-            notificationsList.style.display = 'none';
-            emptyState.innerHTML = `
-                <div class="empty-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                <h3>Semua Notifikasi Telah Dibaca</h3>
-                <p>Tidak ada notifikasi yang belum dibaca. Anda akan mendapat notifikasi baru ketika ada aktivitas penting.</p>
-            `;
-        } 
-        // Jika ada notifikasi yang belum dibaca
-        else {
-            emptyState.style.display = 'none';
-            notificationsList.style.display = 'block';
-        }
     }
 });
