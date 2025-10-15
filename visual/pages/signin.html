@@ -3,22 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Basic Login Form</title>
-    <link rel="stylesheet" href="{{ asset('css/signin.css') }}">
+    <title>Login | Qparkin</title>
+    <link rel="stylesheet" href="../styles/style.css">
 </head>
 <body>
     <div class="login-container">
         <div class="login-card" id="loginForm">
             <div class="login-header">
-                <h2>Welcome Back</h2>
+                <h2>QPARKIN</h2>
                 <p>Please sign in to your account</p>
             </div>
 
-            <form id="signinForm" method="POST" action="{{ route('login') }}">
-                @csrf
+            <form id="signinForm">
                 <div class="form-group">
                     <div class="input-wrapper">
-                        <input type="text" id="username" name="name" required>
+                        <input type="text" id="username" name="username" required>
                         <label for="username">Username</label>
                         <span class="error-message" id="usernameError">Please enter a valid username</span>
                     </div>
@@ -45,7 +44,7 @@
                             Remember me
                         </label>
                     </div>
-                    <a href="#" class="forgot-password">Forgot password?</a>
+                    <a href="forgot-password.html" class="forgot-password">Forgot password?</a>
                 </div>
 
                 <button type="submit" class="login-btn" id="submitBtn">
@@ -55,7 +54,7 @@
             </form>
 
             <div class="signup-link">
-                <p>Don't have an account? <a href="#">Sign up</a></p>
+                <p>Don't have an account? <a href="signup.html">Sign up</a></p>
             </div>
         </div>
 
@@ -67,7 +66,6 @@
     </div>
 
     <div class="notification" id="notification"></div>
-
-    <script src="{{ asset('js/signin.js') }}"></script>
+    <script src="../scripts/signin.js"></script>
 </body>
 </html>

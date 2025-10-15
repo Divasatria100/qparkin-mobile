@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ubah Keamanan - QPARKIN</title>
+    <link rel="stylesheet" href="../styles/admin-profile.css">
+    <link rel="stylesheet" href="../styles/ubah-keamanan.css">
+</head>
+<body>
+    <div class="admin-container">
+        <header class="admin-header">
+            <div class="header-left">
+                <button id="sidebarToggle" class="menu-toggle" aria-label="Toggle Sidebar">
+                    <svg id="menuIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    <svg id="closeIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <h1 class="logo">QPARKIN</h1>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <span>Admin Mall</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-wrapper">
+            <!-- Sidebar - Fixed -->
+            <aside class="admin-sidebar">
+                <nav class="sidebar-nav">
+                    <ul>
+                        <li class="nav-item">
+                            <a href="dashboard.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                </svg>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item active">
+                            <a href="profile.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                <span>Profile</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="notifikasi.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                                <span>Notifikasi</span>
+                                <span class="notification-badge">5</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="kendaraan.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                                <span>Kendaraan</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="tarif.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>Tarif</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="parkiran.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                <span>Parkiran</span>
+                            </a>
+                        </li>
+                        <li class="nav-item logout">
+                            <a href="../pages/signin.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
+                                <span>Keluar</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </aside>
+
+            <div class="sidebar-overlay"></div>
+
+            <main class="admin-content">
+                <div class="breadcrumb">
+                    <a href="profile.html" class="breadcrumb-link">Profile</a>
+                    <span class="breadcrumb-separator">/</span>
+                    <span>Ubah Keamanan</span>
+                </div>
+
+                <div class="security-container">
+                    <div class="security-header">
+                        <h2>Pengaturan Keamanan Akun</h2>
+                        <p>Kelola kata sandi dan pengaturan keamanan akun Anda</p>
+                    </div>
+
+                    <div class="security-content">
+                        <!-- Ubah Kata Sandi Section -->
+                        <div class="security-section">
+                            <div class="section-header">
+                                <h3>Ubah Kata Sandi</h3>
+                                <span class="section-badge">Direkomendasikan</span>
+                            </div>
+                            <form class="security-form" id="changePasswordForm">
+                                <div class="form-group">
+                                    <label for="currentPassword">Kata Sandi Saat Ini *</label>
+                                    <div class="password-input">
+                                        <input type="password" id="currentPassword" name="currentPassword" required>
+                                        <button type="button" class="toggle-password" data-target="currentPassword">
+                                            <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            <svg class="eye-off-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L6.59 6.59m9.02 9.02l3.83 3.83" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <span class="error-message" id="currentPasswordError"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="newPassword">Kata Sandi Baru *</label>
+                                    <div class="password-input">
+                                        <input type="password" id="newPassword" name="newPassword" required minlength="8">
+                                        <button type="button" class="toggle-password" data-target="newPassword">
+                                            <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            <svg class="eye-off-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L6.59 6.59m9.02 9.02l3.83 3.83" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="password-strength">
+                                        <div class="strength-bar">
+                                            <div class="strength-fill" id="strengthFill"></div>
+                                        </div>
+                                        <span class="strength-text" id="strengthText">Kekuatan kata sandi</span>
+                                    </div>
+                                    <span class="error-message" id="newPasswordError"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="confirmPassword">Konfirmasi Kata Sandi Baru *</label>
+                                    <div class="password-input">
+                                        <input type="password" id="confirmPassword" name="confirmPassword" required>
+                                        <button type="button" class="toggle-password" data-target="confirmPassword">
+                                            <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            <svg class="eye-off-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L6.59 6.59m9.02 9.02l3.83 3.83" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <span class="error-message" id="confirmPasswordError"></span>
+                                </div>
+
+                                <div class="password-requirements">
+                                    <h4>Persyaratan Kata Sandi:</h4>
+                                    <ul>
+                                        <li id="reqLength" class="requirement">Minimal 8 karakter</li>
+                                        <li id="reqUppercase" class="requirement">Minimal 1 huruf besar</li>
+                                        <li id="reqLowercase" class="requirement">Minimal 1 huruf kecil</li>
+                                        <li id="reqNumber" class="requirement">Minimal 1 angka</li>
+                                        <li id="reqSpecial" class="requirement">Minimal 1 karakter spesial</li>
+                                    </ul>
+                                </div>
+
+                                <div class="form-actions">
+                                    <button type="submit" class="btn-primary" id="savePasswordBtn">Ubah Kata Sandi</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Verifikasi 2 Langkah Section -->
+                        <div class="security-section">
+                            <div class="section-header">
+                                <h3>Verifikasi 2 Langkah</h3>
+                                <span class="section-badge inactive">Tidak Aktif</span>
+                            </div>
+                            <div class="two-factor-content">
+                                <div class="two-factor-info">
+                                    <div class="info-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                        </svg>
+                                    </div>
+                                    <div class="info-text">
+                                        <h4>Tingkatkan Keamanan Akun Anda</h4>
+                                        <p>Aktifkan verifikasi 2 langkah untuk perlindungan ekstra. Anda akan memerlukan kode dari aplikasi autentikasi selain kata sandi saat login.</p>
+                                    </div>
+                                </div>
+                                <button class="btn-secondary" id="enable2FABtn">Aktifkan Verifikasi 2 Langkah</button>
+                            </div>
+                        </div>
+
+                        <!-- Sesi Aktif Section -->
+                        <div class="security-section">
+                            <div class="section-header">
+                                <h3>Sesi Aktif</h3>
+                            </div>
+                            <div class="sessions-content">
+                                <div class="session-item current">
+                                    <div class="session-info">
+                                        <div class="session-device">
+                                            <strong>Windows 11 - Chrome</strong>
+                                            <span class="session-badge current">Saat Ini</span>
+                                        </div>
+                                        <div class="session-details">
+                                            <span>Jakarta, Indonesia</span>
+                                            <span>•</span>
+                                            <span>Login: 15 Mar 2024, 09:30</span>
+                                        </div>
+                                    </div>
+                                    <div class="session-actions">
+                                        <button class="btn-logout-session" data-session="current">Keluar</button>
+                                    </div>
+                                </div>
+
+                                <div class="session-item">
+                                    <div class="session-info">
+                                        <div class="session-device">
+                                            <strong>Android - Mobile App</strong>
+                                        </div>
+                                        <div class="session-details">
+                                            <span>Bandung, Indonesia</span>
+                                            <span>•</span>
+                                            <span>Login: 14 Mar 2024, 14:20</span>
+                                        </div>
+                                    </div>
+                                    <div class="session-actions">
+                                        <button class="btn-logout-session" data-session="mobile">Keluar</button>
+                                    </div>
+                                </div>
+
+                                <div class="session-actions-global">
+                                    <button class="btn-secondary" id="logoutAllBtn">Keluar dari Semua Sesi Lain</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Aktivitas Masuk Section -->
+                        <div class="security-section">
+                            <div class="section-header">
+                                <h3>Aktivitas Masuk Terakhir</h3>
+                            </div>
+                            <div class="login-activity">
+                                <div class="activity-item">
+                                    <div class="activity-icon success">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+                                    <div class="activity-info">
+                                        <strong>Login Berhasil</strong>
+                                        <span>Windows 11 - Chrome, Jakarta</span>
+                                    </div>
+                                    <div class="activity-time">
+                                        15 Mar 2024, 09:30
+                                    </div>
+                                </div>
+
+                                <div class="activity-item">
+                                    <div class="activity-icon success">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+                                    <div class="activity-info">
+                                        <strong>Login Berhasil</strong>
+                                        <span>Android - Mobile App, Bandung</span>
+                                    </div>
+                                    <div class="activity-time">
+                                        14 Mar 2024, 14:20
+                                    </div>
+                                </div>
+
+                                <div class="activity-item">
+                                    <div class="activity-icon failed">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </div>
+                                    <div class="activity-info">
+                                        <strong>Percobaan Login Gagal</strong>
+                                        <span>Kata sandi salah</span>
+                                    </div>
+                                    <div class="activity-time">
+                                        14 Mar 2024, 10:15
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <footer class="admin-footer">
+                    <p>&copy; 2025 QPARKIN - Sistem Manajemen Parkir Mall</p>
+                </footer>
+            </main>
+        </div>
+    </div>
+
+    <script src="../scripts/admin-profile.js"></script>
+    <script src="../scripts/ubah-keamanan.js"></script>
+</body>
+</html>

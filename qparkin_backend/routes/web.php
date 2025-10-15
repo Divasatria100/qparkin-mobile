@@ -11,6 +11,9 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+
 // Halaman login
 Route::get('/login', [WebAuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [WebAuthController::class, 'login']);

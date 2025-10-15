@@ -3,23 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Basic Login Form</title>
-    <link rel="stylesheet" href="{{ asset('css/signin.css') }}">
+    <title>Sign Up | Qparkin</title>
+    <link rel="stylesheet" href="../styles/style.css">
 </head>
 <body>
     <div class="login-container">
-        <div class="login-card" id="loginForm">
+        <div class="login-card" id="signupForm">
             <div class="login-header">
-                <h2>Welcome Back</h2>
-                <p>Please sign in to your account</p>
+                <h2>QPARKIN</h2>
+                <p class="info-text">Your request will be sent to the administrator for approval</p>
             </div>
 
-            <form id="signinForm" method="POST" action="{{ route('login') }}">
-                @csrf
+            <form id="signupForm">
                 <div class="form-group">
                     <div class="input-wrapper">
-                        <input type="text" id="username" name="name" required>
-                        <label for="username">Username</label>
+                        <input type="email" id="email" name="email" required>
+                        <label for="email">Email Address</label>
+                        <span class="error-message" id="emailError">Please enter a valid email address</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <input type="text" id="username" name="username" required>
+                        <label for="username">Nama Mall</label>
                         <span class="error-message" id="usernameError">Please enter a valid username</span>
                     </div>
                 </div>
@@ -37,37 +44,35 @@
                     </div>
                 </div>
 
-                <div class="form-options">
-                    <div class="remember-wrapper">
-                        <input type="checkbox" id="remember" name="remember">
-                        <label for="remember" class="checkbox-label">
-                            <span class="checkmark"></span>
-                            Remember me
-                        </label>
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <div class="password-wrapper">
+                            <input type="password" id="confirmPassword" name="confirmPassword" required>
+                            <label for="confirmPassword">Confirm Password</label>
+                        </div>
+                        <span class="error-message" id="confirmPasswordError">Passwords do not match</span>
                     </div>
-                    <a href="#" class="forgot-password">Forgot password?</a>
                 </div>
 
                 <button type="submit" class="login-btn" id="submitBtn">
-                    <span class="btn-text">Sign In</span>
+                    <span class="btn-text">Submit Request</span>
                     <span class="btn-loader"></span>
                 </button>
             </form>
 
             <div class="signup-link">
-                <p>Don't have an account? <a href="#">Sign up</a></p>
+                <p>Already have an account? <a href="signin.html">Sign in</a></p>
             </div>
         </div>
 
         <div class="success-message" id="successMessage">
             <div class="success-icon">✓</div>
-            <h3>Login Successful!</h3>
-            <p>You are being redirected to your dashboard...</p>
+            <h3>Request Submitted!</h3>
+            <p>Your account request has been sent to the administrator. You will receive an email once your account is approved.</p>
         </div>
     </div>
 
     <div class="notification" id="notification"></div>
-
-    <script src="{{ asset('js/signin.js') }}"></script>
+    <script src="../scripts/signup.js"></script>
 </body>
 </html>
