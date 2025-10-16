@@ -446,11 +446,6 @@ body {
     transition: all 0.2s ease;
 }
 
-.data-table tbody tr:hover {
-    background: linear-gradient(135deg, #f8fafc 0%, white 100%);
-    transform: scale(1.01);
-}
-
 /* Footer - At bottom of content */
 .admin-footer {
     background: white;
