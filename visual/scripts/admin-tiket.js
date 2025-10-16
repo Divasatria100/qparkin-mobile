@@ -1,4 +1,4 @@
-// Admin Kendaraan JavaScript
+// Admin Tiket JavaScript
 document.addEventListener('DOMContentLoaded', function() {
     // Elements
     const searchInput = document.getElementById('searchInput');
@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Original data (in a real app, this would come from an API)
     let originalData = [];
     let filteredData = [];
-    let kendaraanToDelete = null;
+    let tiketToDelete = null;
     
     // Set default dates (today)
     function setDefaultDates() {
@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Modal functions
     function showDeleteModal(id, plat) {
-        kendaraanToDelete = id;
+        tiketToDelete = id;
         deleteId.textContent = id;
         deletePlat.textContent = plat;
         deleteModal.style.display = 'block';
@@ -120,24 +120,24 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function hideDeleteModal() {
         deleteModal.style.display = 'none';
-        kendaraanToDelete = null;
+        tiketToDelete = null;
     }
     
     function confirmDelete() {
-        if (kendaraanToDelete) {
+        if (tiketToDelete) {
             // In real app, this would be an API call
-            console.log('Deleting kendaraan:', kendaraanToDelete);
+            console.log('Deleting tiket:', tiketToDelete);
             
             // Remove from UI
-            const rowToDelete = originalData.find(item => item.id === kendaraanToDelete);
+            const rowToDelete = originalData.find(item => item.id === tiketToDelete);
             if (rowToDelete) {
                 rowToDelete.element.remove();
-                originalData = originalData.filter(item => item.id !== kendaraanToDelete);
-                filteredData = filteredData.filter(item => item.id !== kendaraanToDelete);
+                originalData = originalData.filter(item => item.id !== tiketToDelete);
+                filteredData = filteredData.filter(item => item.id !== tiketToDelete);
             }
             
             // Show success message (you could add a toast notification here)
-            alert(`Data kendaraan ${kendaraanToDelete} berhasil dihapus`);
+            alert(`Data tiket ${tiketToDelete} berhasil dihapus`);
             
             hideDeleteModal();
         }
@@ -146,16 +146,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Global functions for buttons
     window.viewDetail = function(id) {
         // Redirect to detail page
-        window.location.href = `detail-kendaraan.html?id=${id}`;
+        window.location.href = `detail-tiket.html?id=${id}`;
     };
     
-    window.editKendaraan = function(id) {
+    window.editTiket = function(id) {
         // In real app, this would open an edit modal or redirect to edit page
-        console.log('Editing kendaraan:', id);
-        alert(`Edit kendaraan ${id} - Fitur akan datang!`);
+        console.log('Editing tiket:', id);
+        alert(`Edit tiket ${id} - Fitur akan datang!`);
     };
     
-    window.hapusKendaraan = function(id) {
+    window.hapusTiket = function(id) {
         const plat = originalData.find(item => item.id === id)?.plat || '';
         showDeleteModal(id, plat);
     };
@@ -207,6 +207,6 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeData();
     
     // Log initialization
-    console.log('Kendaraan page loaded successfully');
+    console.log('Tiket page loaded successfully');
     console.log('Search, filter, and action functionality initialized');
 });

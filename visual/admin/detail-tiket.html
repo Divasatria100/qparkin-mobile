@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detail Kendaraan - QPARKIN</title>
+    <title>Detail Tiket - QPARKIN</title>
     <link rel="stylesheet" href="../styles/admin-dashboard.css">
-    <link rel="stylesheet" href="../styles/admin-detail-kendaraan.css">
+    <link rel="stylesheet" href="../styles/admin-detail-tiket.css">
 </head>
 <body>
     <div class="admin-container">
@@ -61,11 +61,11 @@
                             </a>
                         </li>
                         <li class="nav-item active">
-                            <a href="kendaraan.html" class="nav-link">
+                            <a href="tiket.html" class="nav-link">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                 </svg>
-                                <span>Kendaraan</span>
+                                <span>Tiket</span>
                             </a>
                         </li>
                         <li class="nav-item">
@@ -103,16 +103,16 @@
             <main class="admin-content">
                 <!-- Breadcrumb -->
                 <div class="breadcrumb">
-                    <a href="kendaraan.html" class="breadcrumb-link">Kendaraan</a>
+                    <a href="tiket.html" class="breadcrumb-link">Tiket</a>
                     <span class="breadcrumb-separator">/</span>
-                    <span>Detail Kendaraan</span>
+                    <span>Detail Tiket</span>
                 </div>
 
                 <!-- Header Section -->
                 <div class="detail-header-1">
                     <div class="header-left-1">
-                        <h1>Detail Kendaraan</h1>
-                        <p class="subtitle">Informasi lengkap kendaraan parkir</p>
+                        <h1>Detail Tiket</h1>
+                        <p class="subtitle">Informasi lengkap Tiket parkir</p>
                     </div>
                     <div class="header-actions">
                         <button class="btn-print" onclick="printDetail()">
@@ -290,7 +290,7 @@
                                 </div>
                                 <div class="qr-info">
                                     <h4>ID: <span id="qrId">TRX001245</span></h4>
-                                    <p>Scan QR code untuk verifikasi kendaraan</p>
+                                    <p>Scan QR code untuk verifikasi Tiket</p>
                                     <button class="btn-download-qr" onclick="downloadQRCode()">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -312,6 +312,6 @@
     </div>
 
     <script src="../scripts/admin-dashboard.js"></script>
-    <script src="../scripts/admin-detail-kendaraan.js"></script>
+    <script src="../scripts/admin-detail-tiket.js"></script>
 </body>
 </html>

@@ -1,11 +1,11 @@
-// Admin Detail Kendaraan JavaScript
+// Admin Detail Tiket JavaScript
 document.addEventListener('DOMContentLoaded', function() {
     // Get transaction ID from URL
     const urlParams = new URLSearchParams(window.location.search);
     const transactionId = urlParams.get('id') || 'TRX001245';
     
     // Sample data (in real app, this would come from API)
-    const kendaraanData = {
+    const tiketData = {
         'TRX001245': {
             id: 'TRX001245',
             plat: 'B 1234 ABC',
@@ -105,8 +105,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Load data
-    function loadKendaraanData() {
-        const data = kendaraanData[transactionId] || kendaraanData['TRX001245'];
+    function loadTiketData() {
+        const data = tiketData[transactionId] || tiketData['TRX001245'];
         
         // Update page title
         document.title = `Detail ${data.id} - QPARKIN`;
@@ -214,7 +214,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     
     // Initialize
-    loadKendaraanData();
+    loadTiketData();
     
     console.log('Detail kendaraan page loaded for ID:', transactionId);
 });
