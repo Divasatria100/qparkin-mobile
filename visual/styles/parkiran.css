@@ -1,0 +1,455 @@
+/* Parkiran Styles */
+
+/* Header Section */
+.parkiran-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.parkiran-header h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.subtitle {
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.btn-tambah {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.btn-tambah:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    color: white;
+    text-decoration: none;
+}
+
+/* Parkiran Cards */
+.parkiran-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 24px;
+    margin-bottom: 30px;
+}
+
+.parkiran-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.parkiran-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 24px;
+    background: linear-gradient(135deg, #f8fafc 0%, white 100%);
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.parking-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.card-title {
+    flex: 1;
+}
+
+.card-title h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 4px 0;
+}
+
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-badge.active {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-badge.maintenance {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-badge.closed {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.card-body {
+    padding: 24px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.info-item .label {
+    color: #64748b;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-item .value {
+    color: #1e293b;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.info-item .value.available {
+    color: #059669;
+}
+
+.info-item .value.occupied {
+    color: #dc2626;
+}
+
+.info-item .value.unavailable {
+    color: #6b7280;
+}
+
+.lantai-preview h4 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 12px;
+}
+
+.lantai-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.lantai-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: #f8fafc;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+.lantai-item span:first-child {
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.875rem;
+}
+
+.slot-info {
+    color: #64748b;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.card-footer {
+    padding: 16px 24px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    gap: 12px;
+}
+
+.btn-detail {
+    flex: 1;
+    padding: 10px 16px;
+    background: white;
+    color: #6366f1;
+    border: 1px solid #6366f1;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-detail:hover {
+    background: #6366f1;
+    color: white;
+    transform: translateY(-2px);
+    text-decoration: none;
+}
+
+.btn-edit {
+    flex: 1;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-edit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    color: white;
+    text-decoration: none;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 5% auto;
+    padding: 0;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    background: linear-gradient(135deg, #f8fafc 0%, white 100%);
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.close {
+    color: #64748b;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close:hover {
+    color: #ef4444;
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 20px 24px;
+    border-top: 1px solid #e2e8f0;
+    background: #f8fafc;
+    border-radius: 0 0 12px 12px;
+}
+
+/* Form Styles */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.875rem;
+}
+
+.form-group select,
+.form-group input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+}
+
+.form-group select:focus,
+.form-group input:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* Button Styles */
+.btn-cancel, .btn-save {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel {
+    background: #6b7280;
+    color: white;
+}
+
+.btn-cancel:hover {
+    background: #4b5563;
+}
+
+.btn-save {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .parkiran-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .parkiran-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .header-actions {
+        width: 100%;
+    }
+    
+    .btn-tambah {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .parkiran-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal-content {
+        margin: 10% auto;
+        width: 95%;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .card-footer {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-content {
+        padding: 16px;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+    }
+    
+    .modal-footer {
+        flex-direction: column;
+    }
+    
+    .btn-cancel, .btn-save {
+        width: 100%;
+    }
+}
