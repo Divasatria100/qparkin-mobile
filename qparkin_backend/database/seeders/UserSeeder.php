@@ -15,7 +15,7 @@ class UserSeeder extends Seeder
             'no_hp' => null,
             'email' => null,
             'email_verified_at' => null,
-            'password' => '$2y$10$O.DkqvyLWbPzWpWQTWKko./hjUib7gdCHntOfEy4JvzuFppXcuQYu', // sudah hash bcrypt
+            'password' => bcrypt('superadmin123'), // bcrypt hash
             'provider' => null,
             'provider_id' => null,
             'role' => 'super_admin',
@@ -27,14 +27,33 @@ class UserSeeder extends Seeder
         ]);
 
         DB::table('user')->insert([
+            'id_user' => 2,
             'name' => 'berkat',
             'no_hp' => '082284710929',
             'email' => null,
             'email_verified_at' => null,
-            'password' => '$2y$10$0sSLBbUcAVyYLCCj6FhUROrJZnqx2blRTC8HYCBoVQe3jO2CNhERm', // sudah hash bcrypt
+            'password' => '$2y$10$0sSLBbUcAVyYLCCj6FhUROrJZnqx2blRTC8HYCBoVQe3jO2CNhERm', // bcrypt hash
             'provider' => null,
             'provider_id' => null,
             'role' => 'customer',
+            'saldo_poin' => 0,
+            'status' => 'aktif',
+            'remember_token' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // 🔹 Tambahan akun admin
+        DB::table('user')->insert([
+            'id_user' => 3,
+            'name' => 'admin_mall',
+            'no_hp' => '081234567890',
+            'email' => 'admin@qparkin.com',
+            'email_verified_at' => now(),
+            'password' => bcrypt('admin123'), // password: admin123
+            'provider' => null,
+            'provider_id' => null,
+            'role' => 'admin_mall',
             'saldo_poin' => 0,
             'status' => 'aktif',
             'remember_token' => null,
