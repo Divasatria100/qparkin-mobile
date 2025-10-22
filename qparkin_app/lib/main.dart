@@ -1,16 +1,16 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
-import 'services/auth_service.dart'; // Add this import
+import 'data/services/auth_service.dart'; // Add this import
 // import 'package:get/get.dart';
 
-import 'screens/about_page.dart';
-import 'screens/login_page.dart';
-// import 'screens/signup_page.dart';
-// import 'screens/forgot_password_page.dart';
-// import 'screens/verify_code_page.dart';
-// import 'screens/confirm_pin_page.dart';
-// import 'screens/change_pin_page.dart';
-import 'screens/home_page.dart';
+import 'presentation/screens/about_page.dart';
+import 'presentation/screens/login_page.dart';
+// import 'presentation/screens/signup_page.dart';
+// import 'presentation/screens/forgot_password_page.dart';
+// import 'presentation/screens/verify_code_page.dart';
+// import 'presentation/screens/confirm_pin_page.dart';
+// import 'presentation/screens/change_pin_page.dart';
+import 'presentation/screens/home_page.dart';
 
 void main() {
   runApp(const MyApp());
