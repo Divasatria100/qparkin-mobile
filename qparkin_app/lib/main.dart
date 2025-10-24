@@ -11,6 +11,10 @@ import 'presentation/screens/login_page.dart';
 // import 'presentation/screens/confirm_pin_page.dart';
 // import 'presentation/screens/change_pin_page.dart';
 import 'presentation/screens/home_page.dart';
+import 'pages/notification_screen.dart';
+import 'pages/scan_screen.dart';
+// import 'widgets/bottom_nav_bar.dart';
+import 'pages/point_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -45,7 +49,7 @@ class MyApp extends StatelessWidget {
           return const AboutPage();
         },
       ),
-      initialRoute: '/about',
+      initialRoute: '/notifikasi',
       routes: {
         '/about': (context) => const AboutPage(),
         '/login': (context) => const LoginPage(),
@@ -55,6 +59,10 @@ class MyApp extends StatelessWidget {
         // '/confirm-pin': (context) => const ConfirmPinPage(),
         // '/change-pin': (context) => const ChangePinPage(),
         '/home': (context) => const HomePage(),
+        '/notifikasi': (context) => const NotificationScreen(),
+        '/scan': (context) => const ScanScreen(),
+        '/point': (context) => const PointScreen(),
+
       },
     );
   }
