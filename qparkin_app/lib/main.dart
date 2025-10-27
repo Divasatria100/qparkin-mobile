@@ -13,6 +13,8 @@ import 'presentation/screens/login_page.dart';
 import 'presentation/screens/home_page.dart';
 import 'presentation/screens/map_page.dart';
 import 'presentation/screens/activity_page.dart';
+import 'presentation/screens/scan_page.dart';
+import 'presentation/widgets/bottom_nav.dart';
 
 void main() {
   runApp(const MyApp());
@@ -37,12 +39,12 @@ class MyApp extends StatelessWidget {
               body: Center(child: CircularProgressIndicator()),
             );
           }
-          
-          // JIKA SUDAH LOGIN (ada token) -> langsung ke HomePage
+
+          // JIKA SUDAH LOGIN (ada token) -> langsung ke MainNavigationPage
           if (snapshot.hasData && snapshot.data != null) {
-            return const HomePage();
+            return const MainNavigationPage();
           }
-          
+
           // JIKA BELUM LOGIN -> tampilkan AboutPage pertama kali
           return const AboutPage();
         },
@@ -59,6 +61,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomePage(),
         '/map': (context) => const MapPage(),
         '/activity': (context) => const ActivityPage(),
+        '/scan': (context) => const ScanPage(),
       },
       onGenerateRoute: (settings) {
         switch (settings.name) {
@@ -78,7 +81,7 @@ class MyApp extends StatelessWidget {
                   child: child,
                 );
               },
-              transitionDuration: const Duration(milliseconds: 300),
+              transitionDuration: const Duration(milliseconds: 700),
             );
           case '/activity':
             return PageRouteBuilder(
@@ -98,10 +101,110 @@ class MyApp extends StatelessWidget {
               },
               transitionDuration: const Duration(milliseconds: 300),
             );
+          case '/scan':
+            return PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) => const ScanPage(),
+              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                const begin = Offset(1.0, 0.0);
+                const end = Offset.zero;
+                const curve = Curves.easeInOut;
+
+                var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+                var offsetAnimation = animation.drive(tween);
+
+                return SlideTransition(
+                  position: offsetAnimation,
+                  child: child,
+                );
+              },
+              transitionDuration: const Duration(milliseconds: 300),
+            );
+          case '/map':
+            return PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) => const MapPage(),
+              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                const begin = Offset(1.0, 0.0);
+                const end = Offset.zero;
+                const curve = Curves.easeInOut;
+
+                var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+                var offsetAnimation = animation.drive(tween);
+
+                return SlideTransition(
+                  position: offsetAnimation,
+                  child: child,
+                );
+              },
+              transitionDuration: const Duration(milliseconds: 300),
+            );
           default:
             return null;
         }
       },
+    );
+  }
+}
+
+class MainNavigationPage extends StatefulWidget {
+  const MainNavigationPage({Key? key}) : super(key: key);
+
+  @override
+  State<MainNavigationPage> createState() => _MainNavigationPageState();
+}
+
+class _MainNavigationPageState extends State<MainNavigationPage> {
+  late PageController _pageController;
+  int _currentIndex = 0;
+
+  final List<Widget> _pages = [
+    const HomePage(),
+    const ActivityPage(),
+    const ScanPage(),
+    const MapPage(),
+    // Placeholder for notifications/profile if needed
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: _currentIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _onPageChanged(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
+
+  void _onNavBarTapped(int index) {
+    if (index != _currentIndex) {
+      _pageController.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: _onPageChanged,
+        physics: const NeverScrollableScrollPhysics(), // Disable swipe, only use nav bar
+        children: _pages,
+      ),
+      bottomNavigationBar: CurvedNavigationBar(
+        index: _currentIndex,
+        onTap: _onNavBarTapped,
+      ),
     );
   }
 }

@@ -725,10 +725,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      bottomNavigationBar: CurvedNavigationBar(
-        index: 0,
-        onTap: (index) => NavigationUtils.handleNavigation(context, index, 0),
-      ),
+      // Bottom navigation removed - handled by MainNavigationPage
     );
   }
 

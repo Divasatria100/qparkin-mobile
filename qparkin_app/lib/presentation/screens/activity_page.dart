@@ -326,10 +326,7 @@ class _ActivityPageState extends State<ActivityPage> with TickerProviderStateMix
           ),
         ],
       ),
-      bottomNavigationBar: CurvedNavigationBar(
-        index: 1,
-        onTap: (index) => NavigationUtils.handleNavigation(context, index, 1),
-      ),
+      // Bottom navigation removed - handled by MainNavigationPage
     );
   }
 }

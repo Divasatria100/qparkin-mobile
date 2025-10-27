@@ -272,13 +272,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
           ),
         ],
       ),
-      bottomNavigationBar: CurvedNavigationBar(
-        onTap: (index) {
-          if (index == 1) {
-            Navigator.pushNamed(context, '/activity');
-          }
-        },
-      ),
+      // Bottom navigation removed - handled by MainNavigationPage
     );
   }
 }
