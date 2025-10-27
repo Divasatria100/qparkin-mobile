@@ -1,19 +1,6 @@
-# TODO: Replace Navigation in home_page.dart with CustomAnimatedNavBar
+# TODO: Add Horizontal Slide Transition to Navigation
 
-## Step 1: Update bottom_nav.dart
-- Change navigation items to 3: Beranda (home), Parkir (directions_car), Profil (person)
-- Update color scheme to purple to match app theme
-- Adjust indicator position calculation for 3 items
-- Remove special item handling
-
-## Step 2: Update home_page.dart
-- Remove _activeTab state variable
-- Remove _buildNavItem method
-- Replace Stack with SingleChildScrollView in Scaffold body
-- Remove Positioned bottom navigation
-- Add bottomNavigationBar: CustomAnimatedNavBar()
-- Add import for bottom_nav.dart
-
-## Step 3: Test and Verify
-- Run the app to ensure navigation works
-- Check design cleanliness and responsiveness
+## Tasks
+- [x] Update `navigation_utils.dart` to use `PageRouteBuilder` with `SlideTransition` for horizontal animation
+- [x] Test navigation between pages (Home, Activity, etc.) to ensure smooth transitions
+- [x] Verify that navigation remains managed in existing files and pages stay modular
