@@ -26,6 +26,22 @@ class _LoginPageState extends State<LoginPage> {
         _errorMessage = '';
       });
 
+      // Dummy login check for testing purposes
+      // Username: user123, Password: password123
+      if (_identifierController.text.trim() == 'user123' &&
+          _passwordController.text == 'password123') {
+        // Simulate successful login for dummy data
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+          // Navigate to HomePage on successful login
+          Navigator.pushReplacementNamed(context, '/home');
+        }
+        return;
+      }
+
+      // Proceed with actual auth service if not dummy credentials
       final result = await _authService.login(
         _identifierController.text.trim(),
         _passwordController.text,
@@ -37,10 +53,12 @@ class _LoginPageState extends State<LoginPage> {
         });
 
         if (result['success']) {
+          // Navigate to HomePage on successful login
           Navigator.pushReplacementNamed(context, '/home');
         } else {
+          // Display error message on login failure
           setState(() {
-            _errorMessage = result['message'];
+            _errorMessage = result['message'] ?? 'Login gagal. Silakan coba lagi.';
           });
         }
       }

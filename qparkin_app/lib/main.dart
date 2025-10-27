@@ -11,6 +11,8 @@ import 'presentation/screens/login_page.dart';
 // import 'presentation/screens/confirm_pin_page.dart';
 // import 'presentation/screens/change_pin_page.dart';
 import 'presentation/screens/home_page.dart';
+import 'presentation/screens/map_page.dart';
+import 'presentation/screens/activity_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -55,7 +57,10 @@ class MyApp extends StatelessWidget {
         // '/confirm-pin': (context) => const ConfirmPinPage(),
         // '/change-pin': (context) => const ChangePinPage(),
         '/home': (context) => const HomePage(),
+        '/map': (context) => const MapPage(),
+        '/activity': (context) => const ActivityPage(),
       },
     );
   }
 }
+
