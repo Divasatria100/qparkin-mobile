@@ -17,6 +17,12 @@ class _ActivityPageState extends State<ActivityPage> with TickerProviderStateMix
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      if (args != null && args['initialTab'] == 1) {
+        _tabController.animateTo(1);
+      }
+    });
   }
 
   @override
@@ -60,23 +66,28 @@ class _ActivityPageState extends State<ActivityPage> with TickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Aktivitas & Riwayat',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.pushReplacementNamed(context, '/home');
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            'Aktivitas & Riwayat',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
           ),
+          backgroundColor: Color(0xFF573ED1),
+          elevation: 0,
+          iconTheme: const IconThemeData(color: Colors.white),
         ),
-        backgroundColor: Color(0xFF573ED1),
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      body: Column(
-        children: [
-          Container(
+        body: Column(
+          children: [
+            Container(
             color: Colors.white,
             child: TabBar(
               controller: _tabController,
@@ -330,6 +341,6 @@ class _ActivityPageState extends State<ActivityPage> with TickerProviderStateMix
         index: 1,
         onTap: (index) => NavigationUtils.handleNavigation(context, index, 1),
       ),
-    );
+    ));
   }
 }

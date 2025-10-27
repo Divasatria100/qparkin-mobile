@@ -674,43 +674,48 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               ),
                               const SizedBox(width: 16),
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: Colors.blue.shade200,
-                                    width: 1,
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.pushNamed(context, '/activity', arguments: {'initialTab': 1});
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: Colors.blue.shade200,
+                                      width: 1,
+                                    ),
                                   ),
-                                ),
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Icon(
-                                      Icons.directions_car,
-                                      color: Colors.blue.shade600,
-                                      size: 28,
-                                    ),
-                                    const SizedBox(height: 4),
-                                    const Text(
-                                      'Riwayat Parkir',
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black87,
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Icon(
+                                        Icons.directions_car,
+                                        color: Colors.blue.shade600,
+                                        size: 28,
                                       ),
-                                    ),
-                                    const SizedBox(height: 1),
-                                    Text(
-                                      'Riwayat Parkir Anda',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.grey.shade700,
+                                      const SizedBox(height: 4),
+                                      const Text(
+                                        'Riwayat Parkir',
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black87,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                      const SizedBox(height: 1),
+                                      Text(
+                                        'Riwayat Parkir Anda',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.grey.shade700,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ],
