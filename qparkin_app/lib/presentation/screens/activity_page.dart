@@ -37,6 +37,7 @@ class _ActivityPageState extends State<ActivityPage> with TickerProviderStateMix
       'status': 'Aktif',
       'startTime': '14:30',
       'duration': '2 jam 15 menit',
+      'cost': 'Rp 10.000',
     },
   ];
 
@@ -115,47 +116,41 @@ class _ActivityPageState extends State<ActivityPage> with TickerProviderStateMix
                   ),
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(24, 24, 24, 100),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Parkir Aktif',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Expanded(
-                          child: ListView.builder(
-                            itemCount: activeParking.length,
-                            itemBuilder: (context, index) {
-                              final parking = activeParking[index];
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: GestureDetector(
-                                  onTap: () {
-                                    // Navigate to detail page
-                                  },
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(16),
-                                      border: Border.all(
-                                        color: Colors.grey.shade200,
-                                        width: 1,
-                                      ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.05),
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ],
+                    child: activeParking.isNotEmpty
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Detail Aktivitas Parkir',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              // Card Atas: Informasi Parkir
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: Colors.grey.shade200,
+                                    width: 1,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.05),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
                                     ),
-                                    padding: const EdgeInsets.all(16),
-                                    child: Row(
+                                  ],
+                                ),
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
                                       children: [
                                         Container(
                                           decoration: BoxDecoration(
@@ -175,7 +170,7 @@ class _ActivityPageState extends State<ActivityPage> with TickerProviderStateMix
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                parking['location'],
+                                                activeParking[0]['location'],
                                                 style: const TextStyle(
                                                   fontSize: 16,
                                                   fontWeight: FontWeight.bold,
@@ -184,7 +179,7 @@ class _ActivityPageState extends State<ActivityPage> with TickerProviderStateMix
                                               ),
                                               const SizedBox(height: 4),
                                               Text(
-                                                'Status: ${parking['status']}',
+                                                'Status: ${activeParking[0]['status']}',
                                                 style: TextStyle(
                                                   fontSize: 14,
                                                   color: Colors.grey.shade600,
@@ -192,30 +187,106 @@ class _ActivityPageState extends State<ActivityPage> with TickerProviderStateMix
                                               ),
                                               const SizedBox(height: 4),
                                               Text(
-                                                'Mulai: ${parking['startTime']} (${parking['duration']})',
+                                                'Mulai: ${activeParking[0]['startTime']}',
                                                 style: TextStyle(
                                                   fontSize: 14,
                                                   color: Colors.grey.shade600,
                                                 ),
                                               ),
+                                              const SizedBox(height: 8),
+                                              Text(
+                                                'Biaya: ${activeParking[0]['cost']}',
+                                                style: const TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black87,
+                                                ),
+                                              ),
                                             ],
                                           ),
                                         ),
-                                        Icon(
-                                          Icons.arrow_forward_ios,
-                                          color: Colors.grey.shade400,
-                                          size: 16,
-                                        ),
                                       ],
                                     ),
-                                  ),
+                                    const SizedBox(height: 16),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          // Action to show QR exit
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: const Color(0xFF573ED1),
+                                          padding: const EdgeInsets.symmetric(vertical: 12),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          'Tunjukkan QR Keluar',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              );
-                            },
+                              ),
+                              const SizedBox(height: 16),
+                              // Card Bawah: Durasi
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: Colors.grey.shade200,
+                                    width: 1,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.05),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    const Text(
+                                      'Waktu yang berlangsung',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    const Text(
+                                      '02 J : 15 M : 00 D',
+                                      style: TextStyle(
+                                        fontSize: 32,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF573ED1),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          )
+                        : const Center(
+                            child: Text(
+                              'Tidak ada parkir aktif',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey,
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
                   ),
                 ),
                 // Riwayat Tab
