@@ -1,5 +1,6 @@
 // lib/screens/about_page.dart
 import 'package:flutter/material.dart';
+import 'login_screen.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
@@ -94,7 +95,7 @@ class AboutPage extends StatelessWidget {
                       height: isMobile ? 48 : 56,
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.pushReplacementNamed(context, '/login');
+                          Navigator.pushReplacementNamed(context, LoginScreen.routeName);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFEF4444),

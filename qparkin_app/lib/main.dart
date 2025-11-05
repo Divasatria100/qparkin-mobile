@@ -4,8 +4,8 @@ import 'data/services/auth_service.dart'; // Add this import
 // import 'package:get/get.dart';
 
 import 'presentation/screens/about_page.dart';
-import 'presentation/screens/login_page.dart';
-// import 'presentation/screens/signup_page.dart';
+import 'presentation/screens/login_screen.dart';
+import 'presentation/screens/signup_screen.dart';
 // import 'presentation/screens/forgot_password_page.dart';
 // import 'presentation/screens/verify_code_page.dart';
 // import 'presentation/screens/confirm_pin_page.dart';
@@ -50,8 +50,8 @@ class MyApp extends StatelessWidget {
       initialRoute: '/about',
       routes: {
         '/about': (context) => const AboutPage(),
-        '/login': (context) => const LoginPage(),
-        // '/signup': (context) => const SignupPage(),
+        LoginScreen.routeName: (context) => const LoginScreen(),
+        SignUpScreen.routeName: (context) => const SignUpScreen(),
         // '/forgot-password': (context) => const ForgotPasswordPage(),
         // '/verify-code': (context) => const VerifyCodePage(),
         // '/confirm-pin': (context) => const ConfirmPinPage(),
