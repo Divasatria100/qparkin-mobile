@@ -22,49 +22,53 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool _remember = false;
   bool _obscure = true;
-  bool _submitted = false; // samakan perilaku validasi seperti SignUp
+  bool _submitted = false;
 
   final _auth = AuthService();
 
   final BorderRadius _radius = BorderRadius.circular(12);
 
-  // Warna konsisten (match SignUp)
+  // Warna konsisten dengan Home
+  static const primaryPurple = Color(0xFF573ED1);
   static const labelBlue = Color(0xFF1E3A8A);
-  static const borderGrey = Color(0xFFC6C6C6);
+  static const borderGrey = Color(0xFFD0D5DD);
   static const hintGrey = Color(0xFF949191);
+  static const focusBlue = Color.fromARGB(255, 69, 17, 173);
 
-  // Konstanta layout (match SignUp)
-  static const double headerHeight = 400;
-  static const double overlap = 116; // card "menggantung" ±16px lebih tinggi
-  double get _topPaddingForScroll => headerHeight - overlap; // 284
+  // Layout constants
+  static const double headerHeight = 360;
+  static const double overlap = 80;
+  double get _topPaddingForScroll => headerHeight - overlap;
 
   InputDecoration _pinDecoration() {
-    return const InputDecoration(
+    return InputDecoration(
       labelText: 'PIN',
       hintText: 'Masukkan 6 digit PIN',
       counterText: '',
       floatingLabelBehavior: FloatingLabelBehavior.always,
-    ).copyWith(
-      // rapetin jarak error & samakan border
       isDense: true,
-      labelStyle: const TextStyle(color: labelBlue),
-      hintStyle: const TextStyle(color: hintGrey),
+      labelStyle: const TextStyle(
+        color: labelBlue,
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+      ),
+      hintStyle: const TextStyle(color: hintGrey, fontSize: 14),
       border: OutlineInputBorder(borderRadius: _radius),
-      disabledBorder: const OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(12)),
-        borderSide: BorderSide(color: Color(0xFFD0D5DD), width: 2.0,),
+      disabledBorder: OutlineInputBorder(
+        borderRadius: _radius,
+        borderSide: const BorderSide(color: borderGrey, width: 1.5),
       ),
-      enabledBorder: const OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(12)),
-        borderSide: BorderSide(color: Color(0xFFD0D5DD), width: 2.0),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: _radius,
+        borderSide: const BorderSide(color: borderGrey, width: 1.5),
       ),
-      focusedBorder: const OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(12)),
-        borderSide: BorderSide(color: Color(0xFF39BCF4), width: 2.0),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: _radius,
+        borderSide: const BorderSide(color: focusBlue, width: 2.0),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: _radius,
-        borderSide: const BorderSide(color: Colors.red, width: 2.0),
+        borderSide: const BorderSide(color: Colors.red, width: 1.5),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: _radius,
@@ -75,7 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
         fontSize: 12,
         height: 0.9,
       ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       errorMaxLines: 2,
     );
   }
@@ -102,11 +106,11 @@ class _LoginScreenState extends State<LoginScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey.shade50,
       resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
-          // ===== HEADER GRADIENT (background) =====
+          // ===== HEADER WITH GRADIENT =====
           Positioned(
             top: 0,
             left: 0,
@@ -114,127 +118,147 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Container(
               width: double.infinity,
               height: headerHeight,
-              clipBehavior: Clip.antiAlias,
               decoration: const BoxDecoration(
+                color: primaryPurple,
                 borderRadius: BorderRadius.vertical(bottom: Radius.circular(40)),
-                gradient: AppTheme.heroGradient,
               ),
               child: SafeArea(
                 bottom: false,
-                child: Align(
-                  alignment: Alignment.topCenter,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(40, 79, 40, 0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Image.asset(
-                          'assets/images/qparkin.png',
-                          height: 68,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 40, 24, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Logo
+                      Image.asset(
+                        'assets/images/qparkin.png',
+                        height: 78,
+                      ),
+                      const SizedBox(height: 24),
+                      const Text(
+                        'Hai!',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 32,
+                          fontWeight: FontWeight.w700,
                         ),
-                        const SizedBox(height: 24),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Hai!', style: theme.textTheme.headlineMedium),
-                              const SizedBox(height: 6),
-                              const Text(
-                                'Senang bertemu kembali!',
-                                style: TextStyle(color: Colors.white70),
-                              ),
-                            ],
-                          ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Senang bertemu kembali!',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.8),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w400,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
           ),
 
-          // ===== KONTEN SCROLL (di atas header, tidak ketutupan) =====
+          // ===== SCROLLABLE CONTENT =====
           Positioned.fill(
             child: SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(20, _topPaddingForScroll, 20, 20),
               child: Column(
                 children: [
-                  // === CARD FORM (mirror SignUp) ===
+                  // === FORM CARD ===
                   Container(
-                    padding: const EdgeInsets.fromLTRB(16, 28, 16, 16),
+                    padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(32),
-                      border: Border.all(color: const Color(0xFFE8E8E8)),
-                      boxShadow: const [
+                      borderRadius: BorderRadius.circular(28),
+                      boxShadow: [
                         BoxShadow(
-                          color: Color(0x26000000),
-                          blurRadius: 20,
-                          offset: Offset(0, 10),
+                          color: primaryPurple.withOpacity(0.1),
+                          blurRadius: 30,
+                          offset: const Offset(0, 10),
                         ),
                       ],
                     ),
                     child: Form(
                       key: _formKey,
-                      autovalidateMode:
-                          _submitted ? AutovalidateMode.always : AutovalidateMode.disabled,
+                      autovalidateMode: _submitted 
+                          ? AutovalidateMode.always 
+                          : AutovalidateMode.disabled,
                       child: Column(
                         children: [
-                          // === Nomor HP (pakai Theme lokal seperti SignUp) ===
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 20),
-                            child: Material(
-                              color: Colors.transparent,
-                              child: Theme(
-                                data: theme.copyWith(
-                                  inputDecorationTheme:
-                                      theme.inputDecorationTheme.copyWith(
-                                    isDense: true,
-                                    labelStyle: const TextStyle(color: labelBlue),
-                                    hintStyle: const TextStyle(color: hintGrey),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: const BorderSide(
-                                          color: borderGrey, width: 1.4),
+                          // === Nomor HP ===
+                          Material(
+                            color: Colors.transparent,
+                            child: Theme(
+                              data: theme.copyWith(
+                                inputDecorationTheme:
+                                    theme.inputDecorationTheme.copyWith(
+                                  isDense: true,
+                                  labelStyle: const TextStyle(
+                                    color: labelBlue,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  hintStyle: const TextStyle(
+                                    color: hintGrey,
+                                    fontSize: 14,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(
+                                      color: borderGrey,
+                                      width: 1.5,
                                     ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: const BorderSide(
-                                          color: borderGrey, width: 1.4),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(
+                                      color: borderGrey,
+                                      width: 1.5,
                                     ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: const BorderSide(
-                                          color: borderGrey, width: 1.8),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(
+                                      color: focusBlue,
+                                      width: 2.0,
                                     ),
-                                    errorBorder: const OutlineInputBorder(
-                                      borderRadius: BorderRadius.all(Radius.circular(12)),
-                                      borderSide: BorderSide(color: Colors.red, width: 1.4),
-                                    ),
-                                    focusedErrorBorder: const OutlineInputBorder(
-                                      borderRadius: BorderRadius.all(Radius.circular(12)),
-                                      borderSide: BorderSide(color: Colors.red, width: 1.4),
-                                    ),
-                                    errorStyle: const TextStyle(
+                                  ),
+                                  errorBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(
                                       color: Colors.red,
-                                      fontSize: 12,
-                                      height: 0.9,
+                                      width: 1.5,
                                     ),
-                                    errorMaxLines: 2,
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 14),
+                                  ),
+                                  focusedErrorBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(
+                                      color: Colors.red,
+                                      width: 2.0,
+                                    ),
+                                  ),
+                                  errorStyle: const TextStyle(
+                                    color: Colors.red,
+                                    fontSize: 12,
+                                    height: 0.9,
+                                  ),
+                                  errorMaxLines: 2,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 16,
                                   ),
                                 ),
-                                child: PhoneField(
-                                  phoneCtrl: _phoneCtrl,
-                                  validator: Validators.phone,
-                                ),
+                              ),
+                              child: PhoneField(
+                                phoneCtrl: _phoneCtrl,
+                                validator: Validators.phone,
                               ),
                             ),
                           ),
+
+                          const SizedBox(height: 20),
 
                           // === PIN ===
                           TextFormField(
@@ -246,91 +270,138 @@ class _LoginScreenState extends State<LoginScreen> {
                               FilteringTextInputFormatter.digitsOnly,
                             ],
                             decoration: _pinDecoration().copyWith(
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: const BorderRadius.all(Radius.circular(12)),
-                                borderSide: BorderSide(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  width: 1.8,
-                                ),
-                              ),
                               suffixIcon: IconButton(
-                                onPressed: () =>
-                                    setState(() => _obscure = !_obscure),
+                                onPressed: () => setState(() => _obscure = !_obscure),
                                 icon: Icon(
-                                  _obscure ? Icons.visibility : Icons.visibility_off,
+                                  _obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                                  color: Colors.grey.shade600,
                                 ),
                               ),
                             ),
                             validator: Validators.pin6,
                           ),
 
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 12),
 
                           // === Ingat saya + Lupa PIN ===
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Expanded(
-                                child: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: GestureDetector(
-                                    onTap: () => setState(() => _remember = !_remember),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Checkbox(
-                                          value: _remember,
-                                          onChanged: (v) =>
-                                              setState(() => _remember = (v ?? false)),
-                                          visualDensity: const VisualDensity(
-                                            horizontal: -4, vertical: -4),
-                                          materialTapTargetSize:
-                                              MaterialTapTargetSize.shrinkWrap,
+                              GestureDetector(
+                                onTap: () => setState(() => _remember = !_remember),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      width: 20,
+                                      height: 20,
+                                      decoration: BoxDecoration(
+                                        color: _remember ? primaryPurple : Colors.transparent,
+                                        border: Border.all(
+                                          color: _remember ? primaryPurple : borderGrey,
+                                          width: 2,
                                         ),
-                                        const SizedBox(width: 4),
-                                        const Text('Ingat saya'),
-                                      ],
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: _remember
+                                          ? const Icon(
+                                              Icons.check,
+                                              size: 14,
+                                              color: Colors.white,
+                                            )
+                                          : null,
                                     ),
-                                  ),
+                                    const SizedBox(width: 8),
+                                    const Text(
+                                      'Ingat saya',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                               TextButton(
-                                // ⬇️ ganti pushNamed -> buka bottom sheet
                                 onPressed: () => _openForgotPinSheet(context),
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                  minimumSize: const Size(0, 0),
+                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                ),
                                 child: const Text(
                                   'Lupa PIN',
-                                  style: TextStyle(color: Color(0xFFE32935)),
+                                  style: TextStyle(
+                                    color: Color(0xFFE32935),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
 
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 24),
 
                           // === Tombol Login ===
-                          PrimaryButton(
-                            text: 'Login',
-                            color: const Color(0xFF1E3A8A),
-                            onPressed: () {
-                              setState(() => _submitted = true);
-                              if (_formKey.currentState!.validate()) {
-                                _auth.login(context, _phoneCtrl.text, _pinCtrl.text);
-                              }
-                            },
+                          SizedBox(
+                            width: double.infinity,
+                            height: 52,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                setState(() => _submitted = true);
+                                if (_formKey.currentState!.validate()) {
+                                  _auth.login(context, _phoneCtrl.text, _pinCtrl.text);
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color.fromARGB(255, 69, 17, 173),
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: const Text(
+                                'Login',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
                           ),
 
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 20),
 
                           // === Tidak punya akun? Sign Up ===
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text('Tidak punya akun?'),
+                              const Text(
+                                'Tidak punya akun? ',
+                                style: TextStyle(
+                                  color: Colors.black87,
+                                  fontSize: 14,
+                                ),
+                              ),
                               TextButton(
                                 onPressed: () => Navigator.pushReplacementNamed(
-                                  context, SignUpScreen.routeName),
+                                  context,
+                                  SignUpScreen.routeName,
+                                ),
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                  minimumSize: const Size(0, 0),
+                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                ),
                                 child: const Text(
                                   'Sign Up',
-                                  style: TextStyle(color: labelBlue),
+                                  style: TextStyle(
+                                    color: primaryPurple,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
                             ],
@@ -340,76 +411,77 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 32),
 
-                  // ===== Lanjutkan dengan + Google (mirror SignUp) =====
-                  const Row(
+                  // ===== Divider dengan "Atau lanjutkan dengan" =====
+                  Row(
                     children: [
                       Expanded(
                         child: Divider(
-                          color: Color(0x80BDBDBD),
-                          thickness: 0.6,
+                          color: Colors.grey.shade300,
+                          thickness: 1,
                         ),
                       ),
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Text(
-                          'Lanjutkan dengan',
-                          style: TextStyle(color: hintGrey),
+                          'Atau lanjutkan dengan',
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 13,
+                          ),
                         ),
                       ),
                       Expanded(
                         child: Divider(
-                          color: Color(0x80BDBDBD),
-                          thickness: 0.6),
+                          color: Colors.grey.shade300,
+                          thickness: 1,
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
 
-                  // ==== Google button custom ====
-                  Container(
-                    margin: const EdgeInsets.fromLTRB(15, 16, 15, 16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFE0E0E0)),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color.fromRGBO(0, 0, 0, 0.15),
-                          offset: Offset(0, 4),
-                          blurRadius: 6,
-                        ),
-                      ],
-                    ),
-                    child: GestureDetector(
-                      onTap: () {
-                        // TODO: panggil login Google di sini
-                        // _auth.signInWithGoogle(context);
+                  const SizedBox(height: 24),
+
+                  // ==== Google Button - Modern Design ====
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: OutlinedButton(
+                      onPressed: () {
+                        // TODO: Google sign in
                       },
-                      child: const SizedBox(
-                        height: 48,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image(
-                              image: AssetImage('assets/images/g-logo.png'),
-                              height: 20,
-                              width: 20),
-                            SizedBox(width: 8),
-                            Text(
-                              'Google',
-                              style: TextStyle(
-                                color: Colors.black87,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black87,
+                        side: BorderSide(color: Colors.grey.shade300, width: 1.5),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            'assets/images/g-logo.png',
+                            height: 24,
+                            width: 24,
+                          ),
+                          const SizedBox(width: 12),
+                          const Text(
+                            'Google',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
+
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
@@ -446,7 +518,7 @@ class _ForgotPinSheetState extends State<ForgotPinSheet> {
       curve: Curves.easeOut,
       padding: EdgeInsets.only(bottom: viewInsets.bottom),
       child: FractionallySizedBox(
-        heightFactor: 0.77,                 // ⬅️ bikin bg putih lebih panjang
+        heightFactor: 0.77,
         alignment: Alignment.bottomCenter,
         child: Container(
           decoration: const BoxDecoration(
@@ -463,28 +535,26 @@ class _ForgotPinSheetState extends State<ForgotPinSheet> {
           child: SafeArea(
             top: false,
             child: Padding(
-              // handle tetap menempel atas; spasi diatur via margin handle
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
               child: Column(
-                mainAxisSize: MainAxisSize.max,  // isi mengikuti tinggi sheet
+                mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Center(
                     child: Container(
                       width: 42,
                       height: 4,
-                      margin: const EdgeInsets.only(bottom: 12), // << setara 12px
+                      margin: const EdgeInsets.only(bottom: 12),
                       decoration: BoxDecoration(
                         color: Colors.black.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(99),
                       ),
                     ),
                   ),
-                  // === Tombol Back (ditambahkan, setelan sama) ===
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Padding(
-                      padding: const EdgeInsets.only(left: 4), // tanpa bottom padding
+                      padding: const EdgeInsets.only(left: 4),
                       child: IconButton(
                         icon: const Icon(Icons.arrow_back),
                         onPressed: () => Navigator.of(context).pop(),
@@ -509,7 +579,6 @@ class _ForgotPinSheetState extends State<ForgotPinSheet> {
                     style: TextStyle(color: Colors.black54),
                   ),
                   const SizedBox(height: 20),
-
                   Form(
                     key: _formKey,
                     child: Theme(
@@ -526,14 +595,16 @@ class _ForgotPinSheetState extends State<ForgotPinSheet> {
                           ),
                           focusedBorder: const OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(12)),
-                            borderSide: BorderSide(color:  Color(0xFF39BCF4), width: 2),
+                            borderSide: BorderSide(color: Color.fromARGB(255, 69, 17, 173), width: 2),
                           ),
                           errorBorder: const OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(12)),
-                            borderSide: BorderSide(color: Colors.red),),
+                            borderSide: BorderSide(color: Colors.red),
+                          ),
                           focusedErrorBorder: const OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(12)),
-                            borderSide: BorderSide(color: Colors.red),),
+                            borderSide: BorderSide(color: Colors.red),
+                          ),
                           contentPadding:
                               const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                           errorStyle: const TextStyle(fontSize: 12, height: 0.9),
@@ -548,13 +619,11 @@ class _ForgotPinSheetState extends State<ForgotPinSheet> {
                             validator: Validators.phone,
                           ),
                           const SizedBox(height: 30),
-
                           PrimaryButton(
                             text: 'Kirim Kode',
                             color: const Color(0xFF1E3A8A),
                             onPressed: () {
                               if (_formKey.currentState!.validate()) {
-                                // FIX: ambil navigator + pakai rootCtx setelah pop
                                 final nav = Navigator.of(context, rootNavigator: true);
                                 final rootCtx = nav.context;
                                 nav.pop();
@@ -662,7 +731,7 @@ class _OtpVerifySheetState extends State<OtpVerifySheet> {
                     child: Container(
                       width: 42,
                       height: 4,
-                      margin: const EdgeInsets.only(bottom: 12), // << setara 12px
+                      margin: const EdgeInsets.only(bottom: 12),
                       decoration: BoxDecoration(
                         color: Colors.black.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(99),
@@ -674,12 +743,10 @@ class _OtpVerifySheetState extends State<OtpVerifySheet> {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Padding(
-                      // tanpa bottom padding agar handle→back = 12px
                       padding: const EdgeInsets.only(left: 4),
                       child: IconButton(
                         icon: const Icon(Icons.arrow_back),
                         onPressed: () {
-                          // FIX: pop → buka ForgotPinSheet pakai root navigator context
                           final nav = Navigator.of(context, rootNavigator: true);
                           final rootCtx = nav.context;
                           nav.pop();
@@ -745,7 +812,7 @@ class _OtpVerifySheetState extends State<OtpVerifySheet> {
                             ),
                             focusedBorder: const OutlineInputBorder(
                               borderRadius: BorderRadius.all(Radius.circular(12)),
-                              borderSide: BorderSide(color: Color(0xFF39BCF4), width: 2),
+                              borderSide: BorderSide(color: Color.fromARGB(255, 69, 17, 173), width: 2),
                             ),
                           ),
                           onChanged: (v) => _onChanged(i, v),
@@ -760,9 +827,7 @@ class _OtpVerifySheetState extends State<OtpVerifySheet> {
                     text: 'Verifikasi Kode',
                     color: const Color(0xFF1E3A8A),
                     onPressed: () {
-                      // FRONTEND ONLY: kalau 5 digit terisi, buka sheet konfirmasi
                       if (_code.length == _len) {
-                        // FIX: pop → buka ConfirmPinUpdateSheet pakai root navigator context
                         final nav = Navigator.of(context, rootNavigator: true);
                         final rootCtx = nav.context;
                         nav.pop();
@@ -793,7 +858,6 @@ class _OtpVerifySheetState extends State<OtpVerifySheet> {
                         const Text('Tidak mendapatkan kode? '),
                         GestureDetector(
                           onTap: () {
-                            // FRONTEND ONLY: snackbar dummy
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(content: Text('Kirim ulang (dummy).')),
                             );
@@ -858,7 +922,7 @@ class ConfirmPinUpdateSheet extends StatelessWidget {
                     child: Container(
                       width: 42,
                       height: 4,
-                      margin: const EdgeInsets.only(bottom: 12), // << setara 12px
+                      margin: const EdgeInsets.only(bottom: 12),
                       decoration: BoxDecoration(
                         color: Colors.black.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(99),
@@ -870,12 +934,10 @@ class ConfirmPinUpdateSheet extends StatelessWidget {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Padding(
-                      // tanpa bottom padding agar handle→back = 12px
                       padding: const EdgeInsets.only(left: 4),
                       child: IconButton(
                         icon: const Icon(Icons.arrow_back),
                         onPressed: () {
-                          // FIX: pop → buka OtpVerifySheet pakai root navigator context
                           final nav = Navigator.of(context, rootNavigator: true);
                           final rootCtx = nav.context;
                           nav.pop();
@@ -916,7 +978,6 @@ class ConfirmPinUpdateSheet extends StatelessWidget {
                     text: 'Konfirmasi',
                     color: const Color(0xFF1E3A8A),
                     onPressed: () {
-                      // FIX: pop → buka NewPinSheet pakai root navigator context
                       final nav = Navigator.of(context, rootNavigator: true);
                       final rootCtx = nav.context;
                       nav.pop();
@@ -957,7 +1018,6 @@ class _NewPinSheetState extends State<NewPinSheet> {
   bool _ob1 = true;
   bool _ob2 = true;
 
-  // Samakan warna & radius seperti di LoginScreen
   static const labelBlue = Color(0xFF1E3A8A);
   static const hintGrey = Color(0xFF949191);
   final BorderRadius _radius = BorderRadius.circular(12);
@@ -969,7 +1029,6 @@ class _NewPinSheetState extends State<NewPinSheet> {
     super.dispose();
   }
 
-  // === Dekorasi PIN yang identik dengan _pinDecoration() di LoginScreen ===
   InputDecoration _pinDecoration(String label, String hint) {
     return InputDecoration(
       labelText: label,
@@ -1050,7 +1109,7 @@ class _NewPinSheetState extends State<NewPinSheet> {
                     child: Container(
                       width: 42,
                       height: 4,
-                      margin: const EdgeInsets.only(bottom: 12), // << setara 12px
+                      margin: const EdgeInsets.only(bottom: 12),
                       decoration: BoxDecoration(
                         color: Colors.black.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(99),
@@ -1062,12 +1121,10 @@ class _NewPinSheetState extends State<NewPinSheet> {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Padding(
-                      // tanpa bottom padding agar handle→back = 12px
                       padding: const EdgeInsets.only(left: 4),
                       child: IconButton(
                         icon: const Icon(Icons.arrow_back),
                         onPressed: () {
-                          // FIX: pop → buka ConfirmPinUpdateSheet pakai root navigator context
                           final nav = Navigator.of(context, rootNavigator: true);
                           final rootCtx = nav.context;
                           nav.pop();
@@ -1121,7 +1178,6 @@ class _NewPinSheetState extends State<NewPinSheet> {
                             'Masukkan 6 digit PIN',
                           ).copyWith(
                             counterText: '',
-                            // Samakan override fokus seperti di LoginScreen
                             focusedBorder: OutlineInputBorder(
                               borderRadius: const BorderRadius.all(Radius.circular(12)),
                               borderSide: BorderSide(
@@ -1174,8 +1230,7 @@ class _NewPinSheetState extends State<NewPinSheet> {
                           color: const Color(0xFF1E3A8A),
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
-                              // FRONTEND ONLY
-                              Navigator.of(context).pop(); // tutup sheet ini
+                              Navigator.of(context).pop();
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text('PIN baru disimpan.')),
                               );

@@ -34,8 +34,187 @@ class _HomePageState extends State<HomePage> {
     },
   ];
 
+
+
   @override
   Widget build(BuildContext context) {
+    final List<Widget> quickActions = [
+      Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Color(0xFF573ED1),
+            width: 1,
+          ),
+        ),
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            FaIcon(
+              FontAwesomeIcons.squareParking,
+              color: Color(0xFF573ED1),
+              size: 32,
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Booking',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              'Pesan Tempat Parkir',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ],
+        ),
+      ),
+      GestureDetector(
+        onTap: () {
+          Navigator.pushNamed(context, '/map');
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Color(0xFF3B82F6),
+              width: 1,
+            ),
+          ),
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              FaIcon(
+                FontAwesomeIcons.mapLocationDot,
+                color: Color(0xFF3B82F6),
+                size: 32,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Peta Lokasi',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                'Lihat Peta Lokasi',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Color(0xFFFB923C),
+            width: 1,
+          ),
+        ),
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.star,
+              color: Color(0xFFFB923C),
+              size: 32,
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Tukar Poin',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              'Tukar Rewards Anda',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ],
+        ),
+      ),
+      GestureDetector(
+        onTap: () {
+          Navigator.pushNamed(context, '/activity', arguments: {'initialTab': 1});
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Colors.blue.shade200,
+              width: 1,
+            ),
+          ),
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.directions_car,
+                color: Colors.blue.shade600,
+                size: 32,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Riwayat Parkir',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                'Riwayat Parkir Anda',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ];
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -406,7 +585,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 12),
 
                     // Nearby Locations List
                     ...nearbyLocations.map((location) => Padding(
@@ -544,182 +723,15 @@ class _HomePageState extends State<HomePage> {
                             color: Colors.black87,
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: Color(0xFF573ED1),
-                                    width: 1,
-                                  ),
-                                ),
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    FaIcon(
-                                      FontAwesomeIcons.squareParking,
-                                      color: Color(0xFF573ED1),
-                                      size: 28,
-                                    ),
-                                    const SizedBox(height: 4),
-                                    const Text(
-                                      'Booking',
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black87,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 1),
-                                    Text(
-                                      'Pesan Tempat Parkir',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.grey.shade700,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.pushNamed(context, '/map');
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(
-                                      color: Color(0xFF3B82F6),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      FaIcon(
-                                        FontAwesomeIcons.mapLocationDot,
-                                        color: Color(0xFF3B82F6),
-                                        size: 28,
-                                      ),
-                                      const SizedBox(height: 4),
-                                      const Text(
-                                        'Peta Lokasi',
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black87,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 1),
-                                      Text(
-                                        'Lihat Peta Lokasi',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.grey.shade700,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: Color(0xFFFB923C),
-                                    width: 1,
-                                  ),
-                                ),
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Icon(
-                                      Icons.star,
-                                      color: Color(0xFFFB923C),
-                                      size: 28,
-                                    ),
-                                    const SizedBox(height: 4),
-                                    const Text(
-                                      'Tukar Poin',
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black87,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 1),
-                                    Text(
-                                      'Tukar Rewards Anda',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.grey.shade700,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.pushNamed(context, '/activity', arguments: {'initialTab': 1});
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(
-                                      color: Colors.blue.shade200,
-                                      width: 1,
-                                    ),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Icon(
-                                        Icons.directions_car,
-                                        color: Colors.blue.shade600,
-                                        size: 28,
-                                      ),
-                                      const SizedBox(height: 4),
-                                      const Text(
-                                        'Riwayat Parkir',
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black87,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 1),
-                                      Text(
-                                        'Riwayat Parkir Anda',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.grey.shade700,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                        const SizedBox(height: 12),
+                        GridView.count(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                          childAspectRatio: 1.15,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          children: quickActions,
                         ),
                       ],
                     ),

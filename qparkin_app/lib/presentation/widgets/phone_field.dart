@@ -89,7 +89,7 @@ class _PhoneFieldState extends State<PhoneField> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: _radius,
-          borderSide: BorderSide(color: Color(0xFF39BCF4), width: 2.0,),
+          borderSide: BorderSide(color: Color.fromARGB(255, 69, 17, 173), width: 2.0,),
         ),
 
         errorBorder: OutlineInputBorder(
