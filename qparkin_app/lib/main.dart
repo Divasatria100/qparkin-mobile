@@ -1,16 +1,19 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
-import 'services/auth_service.dart'; // Add this import
-// import 'package:get/get.dart';
 
-import 'screens/about_page.dart';
-import 'screens/login_page.dart';
-// import 'screens/signup_page.dart';
-// import 'screens/forgot_password_page.dart';
-// import 'screens/verify_code_page.dart';
-// import 'screens/confirm_pin_page.dart';
-// import 'screens/change_pin_page.dart';
-import 'screens/home_page.dart';
+// ✅ ubah path sesuai struktur project kamu
+import 'data/services/auth_service.dart';
+
+// ✅ folder UI sekarang di presentation/screens/
+import 'presentation/screens/about_page.dart';
+import 'presentation/screens/login_page.dart';
+// import 'presentation/screens/signup_page.dart';
+// import 'presentation/screens/forgot_password_page.dart';
+// import 'presentation/screens/verify_code_page.dart';
+// import 'presentation/screens/confirm_pin_page.dart';
+// import 'presentation/screens/change_pin_page.dart';
+import 'presentation/screens/home_page.dart';
+import 'presentation/screens/profile_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -23,6 +26,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'QParkin Mobile',
+      debugShowCheckedModeBanner: false, // biar gak ada label debug merah
       theme: ThemeData(
         primarySwatch: Colors.blue,
         useMaterial3: true,
@@ -35,17 +39,16 @@ class MyApp extends StatelessWidget {
               body: Center(child: CircularProgressIndicator()),
             );
           }
-          
-          // JIKA SUDAH LOGIN (ada token) -> langsung ke HomePage
+
+          // ✅ JIKA SUDAH LOGIN (ada token) -> langsung ke HomePage
           if (snapshot.hasData && snapshot.data != null) {
-            return const HomePage();
+            return const ProfilePage();
           }
-          
-          // JIKA BELUM LOGIN -> tampilkan AboutPage pertama kali
+
+          // ✅ JIKA BELUM LOGIN -> tampilkan AboutPage pertama kali
           return const AboutPage();
         },
       ),
-      initialRoute: '/about',
       routes: {
         '/about': (context) => const AboutPage(),
         '/login': (context) => const LoginPage(),
@@ -55,6 +58,7 @@ class MyApp extends StatelessWidget {
         // '/confirm-pin': (context) => const ConfirmPinPage(),
         // '/change-pin': (context) => const ChangePinPage(),
         '/home': (context) => const HomePage(),
+        '/profile': (context) => const ProfilePage(),
       },
     );
   }

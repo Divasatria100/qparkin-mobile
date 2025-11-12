@@ -1,6 +1,7 @@
 // lib/pages/login_page.dart
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
+import '../../data/services/auth_service.dart';
+
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -37,7 +38,7 @@ class _LoginPageState extends State<LoginPage> {
         });
 
         if (result['success']) {
-          Navigator.pushReplacementNamed(context, '/home');
+          Navigator.pushReplacementNamed(context, '/profile');
         } else {
           setState(() {
             _errorMessage = result['message'];
