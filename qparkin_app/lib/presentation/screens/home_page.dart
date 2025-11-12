@@ -34,8 +34,6 @@ class _HomePageState extends State<HomePage> {
     },
   ];
 
-
-
   @override
   Widget build(BuildContext context) {
     final List<Widget> quickActions = [
@@ -214,7 +212,6 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     ];
-
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
