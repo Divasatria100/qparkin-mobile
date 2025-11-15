@@ -1069,11 +1069,7 @@ class _NewPinSheetState extends State<NewPinSheet> {
     );
   }
 
-  String? _vPin(String? v) {
-    if ((v ?? '').isEmpty) return 'Wajib diisi';
-    if (v!.length < 6) return 'Minimal 6 digit';
-    return null;
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -1190,7 +1186,7 @@ class _NewPinSheetState extends State<NewPinSheet> {
                               icon: Icon(_ob1 ? Icons.visibility : Icons.visibility_off),
                             ),
                           ),
-                          validator: _vPin,
+                          validator: Validators.pin6,
                         ),
                         const SizedBox(height: 16),
                         const SizedBox(height: 8),
@@ -1218,7 +1214,7 @@ class _NewPinSheetState extends State<NewPinSheet> {
                             ),
                           ),
                           validator: (v) {
-                            final e = _vPin(v);
+                            final e = Validators.pin6(v);
                             if (e != null) return e;
                             if (v != _pin1.text) return 'PIN tidak sama';
                             return null;
