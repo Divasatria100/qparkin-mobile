@@ -130,19 +130,13 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                 ),
                 // List View
                 Container(
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(24),
-                      topRight: Radius.circular(24),
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 24, 24, 100),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
+                  color: Colors.white,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+                        child: const Text(
                           'Lokasi Terdekat',
                           style: TextStyle(
                             fontSize: 18,
@@ -150,121 +144,121 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                             color: Colors.black87,
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        Expanded(
-                          child: ListView.builder(
-                            itemCount: nearbyLocations.length,
-                            itemBuilder: (context, index) {
-                              final location = nearbyLocations[index];
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(
-                                      color: Colors.grey.shade200,
-                                      width: 1,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.05),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
+                      ),
+                      Expanded(
+                        child: ListView.builder(
+                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 100),
+                          itemCount: nearbyLocations.length,
+                          itemBuilder: (context, index) {
+                            final location = nearbyLocations[index];
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: Colors.grey.shade200,
+                                    width: 1,
                                   ),
-                                  padding: const EdgeInsets.all(16),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          color: Color(0xFF573ED1),
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        padding: const EdgeInsets.all(12),
-                                        child: Icon(
-                                          Icons.local_parking,
-                                          color: Colors.white,
-                                          size: 20,
-                                        ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.05),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                padding: const EdgeInsets.all(16),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: Color(0xFF573ED1),
+                                        borderRadius: BorderRadius.circular(12),
                                       ),
-                                      const SizedBox(width: 16),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              location['name'],
-                                              style: const TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black87,
-                                              ),
+                                      padding: const EdgeInsets.all(12),
+                                      child: Icon(
+                                        Icons.local_parking,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            location['name'],
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black87,
                                             ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              location['address'],
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                color: Colors.grey.shade600,
-                                              ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            location['address'],
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.grey.shade600,
                                             ),
-                                            const SizedBox(height: 8),
-                                            Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    Icon(
-                                                      Icons.location_on,
-                                                      size: 16,
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.location_on,
+                                                    size: 16,
+                                                    color: Colors.grey.shade600,
+                                                  ),
+                                                  const SizedBox(width: 4),
+                                                  Text(
+                                                    location['distance'],
+                                                    style: TextStyle(
+                                                      fontSize: 14,
                                                       color: Colors.grey.shade600,
                                                     ),
-                                                    const SizedBox(width: 4),
-                                                    Text(
-                                                      location['distance'],
-                                                      style: TextStyle(
-                                                        fontSize: 14,
-                                                        color: Colors.grey.shade600,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                ElevatedButton.icon(
-                                                  onPressed: () {},
-                                                  icon: const Icon(
-                                                    Icons.navigation,
-                                                    size: 16,
                                                   ),
-                                                  label: const Text('Lihat Rute'),
-                                                  style: ElevatedButton.styleFrom(
-                                                    backgroundColor: Color(0xFF573ED1),
-                                                    foregroundColor: Colors.white,
-                                                    elevation: 0,
-                                                    padding: const EdgeInsets.symmetric(
-                                                      horizontal: 12,
-                                                      vertical: 8,
-                                                    ),
-                                                    shape: RoundedRectangleBorder(
-                                                      borderRadius: BorderRadius.circular(12),
-                                                    ),
+                                                ],
+                                              ),
+                                              ElevatedButton.icon(
+                                                onPressed: () {},
+                                                icon: const Icon(
+                                                  Icons.navigation,
+                                                  size: 16,
+                                                ),
+                                                label: const Text('Lihat Rute'),
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: Color(0xFF573ED1),
+                                                  foregroundColor: Colors.white,
+                                                  elevation: 0,
+                                                  padding: const EdgeInsets.symmetric(
+                                                    horizontal: 12,
+                                                    vertical: 8,
+                                                  ),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(12),
                                                   ),
                                                 ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
-                              );
-                            },
-                          ),
+                              ),
+                            );
+                          },
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ],
