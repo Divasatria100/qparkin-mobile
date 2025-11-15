@@ -382,7 +382,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               onPressed: () {
                                 setState(() => _submitted = true);
                                 if (_formKey.currentState!.validate()) {
-                                  _auth.signup(context);
+                                  _auth.signup(context, _nameCtrl.text, _phoneCtrl.text, _pinCtrl.text);
                                 }
                               },
                               style: ElevatedButton.styleFrom(
