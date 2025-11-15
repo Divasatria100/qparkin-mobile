@@ -32,10 +32,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   final BorderRadius _radius = BorderRadius.circular(12);
 
-  // Warna konsisten
+  // Warna konsisten dengan Home
+  static const primaryPurple = Color(0xFF573ED1);
   static const labelBlue = Color(0xFF1E3A8A);
-  static const borderGrey = Color(0xFFC6C6C6);
+  static const borderGrey = Color(0xFFD0D5DD);
   static const hintGrey = Color(0xFF949191);
+  static const focusBlue = Color.fromARGB(255, 69, 17, 173);
+
+  // Layout constants
+  static const double headerHeight = 360;
+  static const double overlap = 80;
+  double get _topPaddingForScroll => headerHeight - overlap;
 
   InputDecoration _pinDecoration() {
     return const InputDecoration(
@@ -97,10 +104,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
         borderRadius: BorderRadius.all(Radius.circular(12)),
         borderSide: BorderSide(color: borderGrey, width: 2.0),
       ),
-      // ⬇️ PERBAIKAN: fokus jadi biru (sama seperti PhoneField)
       focusedBorder: const OutlineInputBorder(
         borderRadius: BorderRadius.all(Radius.circular(12)),
-        borderSide: BorderSide(color: Color(0xFF39BCF4), width: 2.0),
+        borderSide: BorderSide(color: Color(0xFF1E3A8A), width: 2.0),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: _radius,
@@ -133,17 +139,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    // Konstanta layout agar overlap 100px seperti login
-    const double headerHeight = 400;
-    const double overlap = 116; // ⬅️ dinaikkan agar card naik ±16px
-    final double topPaddingForScroll = headerHeight - overlap; // 284
-
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey.shade50,
       resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
-          // ===== HEADER GRADIENT (background) =====
+          // ===== HEADER WITH GRADIENT =====
           Positioned(
             top: 0,
             left: 0,
@@ -151,59 +152,65 @@ class _SignUpScreenState extends State<SignUpScreen> {
             child: Container(
               width: double.infinity,
               height: headerHeight,
-              clipBehavior: Clip.antiAlias,
               decoration: const BoxDecoration(
+                color: primaryPurple,
                 borderRadius: BorderRadius.vertical(bottom: Radius.circular(40)),
-                gradient: AppTheme.heroGradient,
               ),
               child: SafeArea(
                 bottom: false,
-                child: Align(
-                  alignment: Alignment.topCenter,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(40, 79, 40, 0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Image.asset(
-                          'assets/images/qparkin.png',
-                          height: 68,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 40, 24, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Logo
+                      Image.asset(
+                        'assets/images/qparkin.png',
+                        height: 78,
+                      ),
+                      const SizedBox(height: 24),
+                      const Text(
+                        'Buat akun baru',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 32,
+                          fontWeight: FontWeight.w700,
                         ),
-                        const SizedBox(height: 38),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'Buat akun baru!',
-                            style: theme.textTheme.headlineMedium,
-                          ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Senang bertemu dengan anda!',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.8),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w400,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
           ),
 
-          // ===== KONTEN SCROLL (di atas header, tidak ketutupan) =====
+          // ===== SCROLLABLE CONTENT =====
           Positioned.fill(
             child: SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(20, topPaddingForScroll, 20, 20),
+              padding: EdgeInsets.fromLTRB(20, _topPaddingForScroll, 20, 20),
               child: Column(
                 children: [
-                  // === CARD FORM (posisi mirror login: overlap) ===
+                  // === FORM CARD ===
                   Container(
-                    padding: const EdgeInsets.fromLTRB(16, 28, 16, 16),
+                    padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(32),
-                      border: Border.all(color: const Color(0xFFE8E8E8)),
-                      boxShadow: const [
+                      borderRadius: BorderRadius.circular(28),
+                      boxShadow: [
                         BoxShadow(
-                          color: Color(0x26000000),
-                          blurRadius: 20,
-                          offset: Offset(0, 10),
+                          color: primaryPurple.withOpacity(0.1),
+                          blurRadius: 30,
+                          offset: const Offset(0, 10),
                         ),
                       ],
                     ),
@@ -323,52 +330,80 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                           const SizedBox(height: 10),
 
-                          // === Ingat saya ===
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: GestureDetector(
-                                    onTap: () =>
-                                        setState(() => _remember = !_remember),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Checkbox(
-                                          value: _remember,
-                                          onChanged: (v) => setState(
-                                              () => _remember = (v ?? false)),
-                                          visualDensity: const VisualDensity(
-                                              horizontal: -4, vertical: -4),
-                                          materialTapTargetSize:
-                                              MaterialTapTargetSize.shrinkWrap,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        const Text('Ingat saya'),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-
                           const SizedBox(height: 12),
 
-                          // === Tombol Sign Up ===
-                          PrimaryButton(
-                            text: 'Sign Up',
-                            color: const Color(0xFF1E3A8A),
-                            onPressed: () {
-                              setState(() => _submitted = true);
-                              if (_formKey.currentState!.validate()) {
-                                _auth.signup(context);
-                              }
-                            },
+                          // === Ingat saya ===
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: GestureDetector(
+                              onTap: () => setState(() => _remember = !_remember),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 20,
+                                    height: 20,
+                                    decoration: BoxDecoration(
+                                      color: _remember ? primaryPurple : Colors.transparent,
+                                      border: Border.all(
+                                        color: _remember ? primaryPurple : borderGrey,
+                                        width: 2,
+                                      ),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: _remember
+                                        ? const Icon(
+                                            Icons.check,
+                                            size: 14,
+                                            color: Colors.white,
+                                          )
+                                        : null,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  const Text(
+                                    'Ingat saya',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
 
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 24),
+
+                          // === Tombol Sign Up ===
+                          SizedBox(
+                            width: double.infinity,
+                            height: 52,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                setState(() => _submitted = true);
+                                if (_formKey.currentState!.validate()) {
+                                  _auth.signup(context);
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color.fromARGB(255, 69, 17, 173),
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: const Text(
+                                'Sign Up',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
 
                           // === Punya akun? Login ===
                           Row(
@@ -393,7 +428,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   // === Spacer agar posisi “Lanjutkan dengan” sama seperti login ===
                   const SizedBox(height: 24),
 
-                  // ===== Lanjutkan dengan + Google (tanpa translate, tidak numpuk di card) =====
+                  // ===== Atau lanjutkan dengan =====
                   const Row(
                     children: [
                       Expanded(
@@ -405,7 +440,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 8),
                         child: Text(
-                          'Lanjutkan dengan',
+                          'Atau lanjutkan dengan',
                           style: TextStyle(color: hintGrey),
                         ),
                       ),
@@ -419,48 +454,40 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: 12),
 
-                  // ==== Google button custom ====
-                  Container(
-                    // ⬇️ Tambah jarak atas & bawah (vertikal), kiri/kanan tetap
-                    margin: const EdgeInsets.fromLTRB(15, 16, 15, 16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFE0E0E0)),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color.fromRGBO(0, 0, 0, 0.15),
-                          offset: Offset(0, 4),
-                          blurRadius: 6,
-                        ),
-                      ],
-                    ),
-                    child: GestureDetector(
-                      onTap: () {
+                  // ==== Google button ====
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: OutlinedButton(
+                      onPressed: () {
                         // TODO: panggil signup via Google di sini
                         // _auth.signInWithGoogle(context);
                       },
-                      child: const SizedBox(
-                        height: 48,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image(
-                              image: AssetImage('assets/images/g-logo.png'),
-                              height: 20,
-                              width: 20,
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              'Google',
-                              style: TextStyle(
-                                color: Colors.black87,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: borderGrey, width: 1),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black87,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            'assets/images/g-logo.png',
+                            height: 20,
+                            width: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Google',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
