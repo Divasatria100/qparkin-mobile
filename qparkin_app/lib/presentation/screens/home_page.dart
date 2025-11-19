@@ -11,8 +11,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  bool hasActiveParking = true;
-
   final List<Map<String, dynamic>> nearbyLocations = [
     {
       'name': 'Mega Mall Batam Centre',
@@ -179,7 +177,14 @@ class _HomePageState extends State<HomePage> {
             // Header Section with Gradient
             Container(
               decoration: BoxDecoration(
-                color: Color(0xFF573ED1),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFF7C5ED1), // Lighter purple
+                    Color(0xFF573ED1), // Original purple
+                  ],
+                ),
               ),
               child: SafeArea(
                 bottom: false,
@@ -202,7 +207,7 @@ class _HomePageState extends State<HomePage> {
                               Text(
                                 'Selamat Datang, Diva Satria',
                                 style: TextStyle(
-                                  color: Color(0xFF573ED1),
+                                  color: Colors.white,
                                   fontSize: 14,
                                 ),
                               ),
@@ -299,181 +304,6 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
 
-            // Active Parking Card - Conditional
-            if (hasActiveParking)
-              Padding(
-                padding: const EdgeInsets.all(24),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Color(0xFFFB923C),
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.orange.withOpacity(0.3),
-                        blurRadius: 15,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                decoration: const BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                ),
-                                padding: const EdgeInsets.all(12),
-                                child: const Icon(
-                                  Icons.directions_car,
-                                  color: Color(0xFFFB923C),
-                                  size: 24,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              const Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Parkir Aktif',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Suzuki',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: const Text(
-                              'Aktif',
-                              style: TextStyle(
-                                color: Color(0xFFFB923C),
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: const [
-                                Icon(
-                                  Icons.location_on,
-                                  color: Colors.white,
-                                  size: 16,
-                                ),
-                                SizedBox(width: 8),
-                                Text(
-                                  'Politeknik Negeri Batam',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.access_time,
-                                  color: Colors.white.withOpacity(0.9),
-                                  size: 16,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  '2 jam 15 menit',
-                                  style: TextStyle(
-                                    color: Colors.white.withOpacity(0.9),
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () {},
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor: const Color(0xFFFB923C),
-                                elevation: 0,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: const Text(
-                                'Perpanjang',
-                                style: TextStyle(fontWeight: FontWeight.w600),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () {},
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white.withOpacity(0.2),
-                                foregroundColor: Colors.white,
-                                elevation: 0,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: const Text(
-                                'Lihat Detail',
-                                style: TextStyle(fontWeight: FontWeight.w600),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
             // rntent - White Background
             Container(
               decoration: const BoxDecoration(
@@ -521,12 +351,19 @@ class _HomePageState extends State<HomePage> {
                           padding: const EdgeInsets.only(bottom: 16),
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Color(0xFF573ED1),
+                              color: Color(0xFFF5F5F5),
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: Color(0xFF573ED1),
+                                color: Color(0xFFE0E0E0),
                                 width: 1,
                               ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
                             ),
                             padding: const EdgeInsets.all(20),
                             child: Row(
@@ -559,16 +396,16 @@ class _HomePageState extends State<HomePage> {
                                               style: const TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.bold,
-                                                color: Colors.white,
+                                                color: Color(0xFF333333),
                                               ),
                                             ),
                                           ),
                                           Text(
                                             location['distance'],
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               fontSize: 14,
                                               fontWeight: FontWeight.w600,
-                                              color: Colors.white,
+                                              color: Color(0xFF666666),
                                             ),
                                           ),
                                         ],
@@ -578,7 +415,7 @@ class _HomePageState extends State<HomePage> {
                                         location['address'],
                                         style: const TextStyle(
                                           fontSize: 14,
-                                          color: Colors.white70,
+                                          color: Color(0xFF757575),
                                         ),
                                       ),
                                       const SizedBox(height: 12),
@@ -592,7 +429,7 @@ class _HomePageState extends State<HomePage> {
                                                 width: 8,
                                                 height: 8,
                                                 decoration: const BoxDecoration(
-                                                  color: Colors.green,
+                                                  color: Color(0xFF388E3C),
                                                   shape: BoxShape.circle,
                                                 ),
                                               ),
@@ -600,8 +437,9 @@ class _HomePageState extends State<HomePage> {
                                               Text(
                                                 '${location['available']} slot tersedia',
                                                 style: const TextStyle(
-                                                  fontSize: 14,
-                                                  color: Colors.white70,
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Color(0xFF388E3C),
                                                 ),
                                               ),
                                             ],
