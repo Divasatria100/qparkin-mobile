@@ -14,23 +14,23 @@ class ApiAuthController extends Controller
     {
         // Validasi input
         $request->validate([
-            'no_hp' => 'required|string',
-            'password' => 'required'
+            'nomor_hp' => 'required|string',
+            'pin' => 'required|string|size:6'
         ]);
 
-        // Cari user by no_hp
-        $user = User::where('no_hp', $request->no_hp)->first();
+        // Cari user by nomor_hp
+        $user = User::where('nomor_hp', $request->nomor_hp)->first();
 
-        // Cek user dan password
+        // Cek user dan pin
         if (!$user) {
             return response()->json([
                 'message' => 'Nomor HP tidak terdaftar.'
             ], 401);
         }
 
-        if (!Hash::check($request->password, $user->password)) {
+        if (!Hash::check($request->pin, $user->pin)) {
             return response()->json([
-                'message' => 'Password salah.'
+                'message' => 'PIN salah.'
             ], 401);
         }
 
@@ -52,13 +52,13 @@ class ApiAuthController extends Controller
                     'id_user' => $user->id_user,
                     'name' => $user->name,
                     'email' => $user->email,
-                    'no_hp' => $user->no_hp,
+                    'nomor_hp' => $user->nomor_hp,
                     'role' => $user->role,
                     'saldo_poin' => $user->saldo_poin,
                 ],
                 'token' => $token
             ], 200);
-            
+
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error creating token: ' . $e->getMessage()
@@ -76,7 +76,7 @@ class ApiAuthController extends Controller
                 'success' => true,
                 'message' => 'Logout berhasil'
             ], 200);
-            
+
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error during logout: ' . $e->getMessage()
@@ -158,7 +158,7 @@ class ApiAuthController extends Controller
                     'id_user' => $user->id_user,
                     'name' => $user->name,
                     'email' => $user->email,
-                    'no_hp' => $user->no_hp,
+                    'nomor_hp' => $user->nomor_hp,
                     'role' => $user->role,
                     'saldo_poin' => $user->saldo_poin,
                 ],
