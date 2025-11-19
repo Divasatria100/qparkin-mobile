@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '/utils/security_utils.dart';
 
 class AuthService {
   static bool isLoggedIn = false;
@@ -23,7 +24,17 @@ class AuthService {
     }
   }
 
-  Future<void> signup(BuildContext context) async {
+  Future<void> signup(BuildContext context, String name, String phone, String pin) async {
+    // Simulate security measures for demonstration
+    SecurityUtils.ensureHttpsConnection();
+
+    // Hash the PIN before "storing" (for demo purposes, just log the hash)
+    String hashedPin = SecurityUtils.hashPin(pin);
+    print('Hashed PIN for user $name: $hashedPin');
+
+    // Log the action
+    SecurityUtils.logSensitiveDataHandling('User registration', 'PIN');
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Sign Up sukses (mock)')),
     );

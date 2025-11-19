@@ -13,6 +13,7 @@ import 'presentation/screens/signup_screen.dart';
 import 'presentation/screens/home_page.dart';
 import 'presentation/screens/map_page.dart';
 import 'presentation/screens/activity_page.dart';
+import 'presentation/screens/detail_history.dart';
 
 void main() {
   runApp(const MyApp());
