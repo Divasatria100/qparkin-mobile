@@ -40,7 +40,7 @@ class CurvedNavigationBar extends StatefulWidget {
     this.index = 0,
     this.color = Colors.white,
     this.buttonBackgroundColor = const Color(0xFFFB923C),
-    this.backgroundColor = const Color(0xFF573ED1),
+    this.backgroundColor = const Color.fromARGB(0, 106, 99, 142),
     this.onTap,
     _LetIndexPage? letIndexChange,
     this.animationCurve = Curves.easeOut,
@@ -128,31 +128,40 @@ class CurvedNavigationBarState extends State<CurvedNavigationBar>
                 ? Alignment.bottomLeft
                 : Alignment.bottomRight,
             child: Container(
-              color: widget.backgroundColor,
               width: maxWidth,
-              child: ClipRect(
-                clipper: NavCustomClipper(
-                  deviceHeight: MediaQuery.sizeOf(context).height,
+              decoration: BoxDecoration(
+                color: widget.backgroundColor,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
                 ),
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  alignment: Alignment.bottomCenter,
-                  children: <Widget>[
-                    Positioned(
-                      bottom: -40 - (75.0 - widget.height),
-                      left: textDirection == TextDirection.rtl
-                          ? null
-                          : _pos * maxWidth,
-                      right: textDirection == TextDirection.rtl
-                          ? _pos * maxWidth
-                          : null,
-                      width: maxWidth / _length,
-                      child: Center(
-                        child: Transform.translate(
-                          offset: Offset(
-                            0,
-                            -(1 - _buttonHide) * 80,
-                          ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 10,
+                    offset: Offset(0, -5),
+                  ),
+                ],
+              ),
+              child: Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.bottomCenter,
+                children: <Widget>[
+                  Positioned(
+                    bottom: -40 - (75.0 - widget.height),
+                    left: textDirection == TextDirection.rtl
+                        ? null
+                        : _pos * maxWidth,
+                    right: textDirection == TextDirection.rtl
+                        ? _pos * maxWidth
+                        : null,
+                    width: maxWidth / _length,
+                    child: Center(
+                      child: Transform.translate(
+                        offset: Offset(
+                          0,
+                          -(1 - _buttonHide) * 80,
+                        ),
                           child: Material(
                             color: widget.buttonBackgroundColor ?? widget.color,
                             type: MaterialType.circle,
@@ -161,49 +170,48 @@ class CurvedNavigationBarState extends State<CurvedNavigationBar>
                               child: _icon,
                             ),
                           ),
-                        ),
                       ),
                     ),
-                    Positioned(
-                      left: 0,
-                      right: 0,
-                      bottom: 0 - (75.0 - widget.height),
-                      child: CustomPaint(
-                        painter: NavCustomPainter(
-                            _pos, _length, widget.color, textDirection),
-                        child: Container(
-                          height: 75.0,
-                        ),
+                  ),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0 - (75.0 - widget.height),
+                    child: CustomPaint(
+                      painter: NavCustomPainter(
+                          _pos, _length, widget.color, textDirection),
+                      child: Container(
+                        height: 75.0,
                       ),
                     ),
-                    Positioned(
-                      left: 0,
-                      right: 0,
-                      bottom: 0 - (75.0 - widget.height),
-                      child: SizedBox(
-                          height: 100.0,
-                          child: Row(
-                              children: List.generate(widget.icons.length, (index) {
-                            final isActive = index == widget.index;
-                            final item = Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(widget.icons[index], size: 24, color: isActive ? Colors.white : Colors.black),
-                                const SizedBox(height: 4),
-                                Text(widget.labels[index], style: TextStyle(fontSize: 10, color: isActive ? Colors.white : Colors.black)),
-                              ],
-                            );
-                            return NavButton(
-                              onTap: _buttonTap,
-                              position: _pos,
-                              length: _length,
-                              index: index,
-                              child: Center(child: item),
-                            );
-                          }))),
-                    ),
-                  ],
-                ),
+                  ),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0 - (75.0 - widget.height),
+                    child: SizedBox(
+                        height: 100.0,
+                        child: Row(
+                            children: List.generate(widget.icons.length, (index) {
+                          final isActive = index == widget.index;
+                          final item = Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(widget.icons[index], size: 24, color: isActive ? Colors.white : Colors.black),
+                              const SizedBox(height: 4),
+                              Text(widget.labels[index], style: TextStyle(fontSize: 10, color: isActive ? Colors.white : Colors.black)),
+                            ],
+                          );
+                          return NavButton(
+                            onTap: _buttonTap,
+                            position: _pos,
+                            length: _length,
+                            index: index,
+                            child: Center(child: item),
+                          );
+                        }))),
+                  ),
+                ],
               ),
             ),
           );
