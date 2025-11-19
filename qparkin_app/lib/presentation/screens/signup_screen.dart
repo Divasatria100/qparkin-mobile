@@ -28,6 +28,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   // FLAG: memicu autovalidasi setelah tombol ditekan
   bool _submitted = false;
 
+  // Loading state
+  bool _isLoading = false;
+
   final _auth = AuthService();
 
   final BorderRadius _radius = BorderRadius.circular(12);
@@ -133,6 +136,57 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _phoneCtrl.dispose();
     _pinCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleSignUp() async {
+    setState(() => _submitted = true);
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      final result = await _auth.register(
+        nama: _nameCtrl.text.trim(),
+        nomorHp: _phoneCtrl.text.trim(),
+        pin: _pinCtrl.text.trim(),
+      );
+
+      if (result['success'] == true) {
+        // Registrasi berhasil, navigasi ke login
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result['message'] ?? 'Registrasi berhasil'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pushReplacementNamed(context, LoginScreen.routeName);
+        }
+      } else {
+        // Registrasi gagal, tampilkan error
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result['message'] ?? 'Registrasi gagal'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Terjadi kesalahan. Silakan coba lagi.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -379,12 +433,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             width: double.infinity,
                             height: 52,
                             child: ElevatedButton(
-                              onPressed: () {
-                                setState(() => _submitted = true);
-                                if (_formKey.currentState!.validate()) {
-                                  _auth.signup(context, _nameCtrl.text, _phoneCtrl.text, _pinCtrl.text);
-                                }
-                              },
+                              onPressed: _isLoading ? null : _handleSignUp,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color.fromARGB(255, 69, 17, 173),
                                 foregroundColor: Colors.white,
@@ -393,13 +442,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-                              child: const Text(
-                                'Sign Up',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                      ),
+                                    )
+                                  : const Text(
+                                      'Sign Up',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
                             ),
                           ),
 

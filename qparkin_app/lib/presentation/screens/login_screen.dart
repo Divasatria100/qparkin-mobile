@@ -23,6 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _remember = false;
   bool _obscure = true;
   bool _submitted = false;
+  bool _isLoading = false;
 
   final _auth = AuthService();
 
@@ -99,6 +100,64 @@ class _LoginScreenState extends State<LoginScreen> {
       barrierColor: Colors.black.withValues(alpha: 0.35),
       builder: (ctx) => const ForgotPinSheet(),
     );
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Login Gagal'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _handleLogin() async {
+    setState(() => _submitted = true);
+    
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final phone = _phoneCtrl.text.trim();
+      final pin = _pinCtrl.text.trim();
+
+      // Panggil API login
+      final result = await _auth.login(
+        phone: phone,
+        pin: pin,
+        rememberMe: _remember,
+      );
+
+      if (!mounted) return;
+
+      if (result['success']) {
+        // Login berhasil, navigate ke home
+        if (mounted) {
+          Navigator.of(context).pushReplacementNamed('/home');
+        }
+      } else {
+        // Tampilkan error message
+        _showErrorDialog(result['message'] ?? 'Login gagal. Silakan coba lagi.');
+      }
+    } catch (e) {
+      if (mounted) {
+        _showErrorDialog('Terjadi kesalahan: $e');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -348,27 +407,31 @@ class _LoginScreenState extends State<LoginScreen> {
                             width: double.infinity,
                             height: 52,
                             child: ElevatedButton(
-                              onPressed: () {
-                                setState(() => _submitted = true);
-                                if (_formKey.currentState!.validate()) {
-                                  _auth.login(context, _phoneCtrl.text, _pinCtrl.text);
-                                }
-                              },
+                              onPressed: _isLoading ? null : _handleLogin,
                               style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color.fromARGB(255, 69, 17, 173),
+                                backgroundColor: const Color.fromARGB(255, 69, 17, 173),
                                 foregroundColor: Colors.white,
                                 elevation: 0,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-                              child: const Text(
-                                'Login',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      height: 24,
+                                      width: 24,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                      ),
+                                    )
+                                  : const Text(
+                                      'Login',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
                             ),
                           ),
 
@@ -1068,8 +1131,6 @@ class _NewPinSheetState extends State<NewPinSheet> {
       errorMaxLines: 2,
     );
   }
-
-
 
   @override
   Widget build(BuildContext context) {

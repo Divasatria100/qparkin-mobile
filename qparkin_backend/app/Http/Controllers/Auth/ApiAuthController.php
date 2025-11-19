@@ -28,7 +28,7 @@ class ApiAuthController extends Controller
             ], 401);
         }
 
-        if (!Hash::check($request->pin, $user->pin)) {
+        if (!Hash::check($request->pin, $user->password)) {
             return response()->json([
                 'message' => 'PIN salah.'
             ], 401);
@@ -91,6 +91,46 @@ class ApiAuthController extends Controller
             'success' => true,
             'user' => $request->user()
         ]);
+    }
+
+    public function register(Request $request)
+    {
+        // Validasi input
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'nomor_hp' => 'required|string|unique:user,nomor_hp',
+            'pin' => 'required|string|size:6'
+        ]);
+
+        try {
+            // Cek apakah nomor_hp sudah terdaftar
+            $existingUser = User::where('nomor_hp', $request->nomor_hp)->first();
+            if ($existingUser) {
+                return response()->json([
+                    'message' => 'Nomor HP sudah terdaftar.'
+                ], 409);
+            }
+
+            // Buat user baru
+            $user = User::create([
+                'name' => $request->nama,
+                'nomor_hp' => $request->nomor_hp,
+                'password' => Hash::make($request->pin),
+                'role' => 'customer',
+                'status' => 'aktif',
+                'saldo_poin' => 0,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Registrasi berhasil'
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error during registration: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function googleLogin(Request $request)
