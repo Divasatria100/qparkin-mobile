@@ -34,14 +34,14 @@ class CurvedNavigationBar extends StatefulWidget {
     this.backgroundColor = Colors.white,
     this.onTap,
     _LetIndexPage? letIndexChange,
-    this.height = 75.0,
+    this.height = 90.0,
     this.maxWidth,
   })  : letIndexChange = letIndexChange ?? ((_) => true),
         assert(icons.isNotEmpty),
         assert(labels.isNotEmpty),
         assert(icons.length == labels.length),
         assert(0 <= index && index < icons.length),
-        assert(0 <= height && height <= 75.0),
+        assert(0 <= height && height <= 90.0),
         assert(maxWidth == null || 0 <= maxWidth),
         super(key: key);
 
