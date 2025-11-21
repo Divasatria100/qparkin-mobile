@@ -58,131 +58,144 @@ class CurvedNavigationBarState extends State<CurvedNavigationBar> {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          BottomAppBar(
-            shape: const CircularNotchedRectangle(),
-            notchMargin: 8,
-            color: widget.backgroundColor,
-            padding: EdgeInsets.zero,
-            child: Row(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => _buttonTap(0),
-                    child: Container(
-                      color: Colors.transparent,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            widget.icons[0],
-                            size: 24,
-                            color: 0 == widget.index ? widget.buttonBackgroundColor : Colors.black,
-                          ),
-                          const SizedBox(height: 4),
-                          Flexible(
-                            child: Text(
-                              widget.labels[0],
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: 0 == widget.index ? widget.buttonBackgroundColor : Colors.black,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => _buttonTap(1),
-                    child: Container(
-                      color: Colors.transparent,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            widget.icons[1],
-                            size: 24,
-                            color: 1 == widget.index ? widget.buttonBackgroundColor : Colors.black,
-                          ),
-                          const SizedBox(height: 4),
-                          Flexible(
-                            child: Text(
-                              widget.labels[1],
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: 1 == widget.index ? widget.buttonBackgroundColor : Colors.black,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 60),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => _buttonTap(2),
-                    child: Container(
-                      color: Colors.transparent,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            widget.icons[2],
-                            size: 24,
-                            color: 2 == widget.index ? widget.buttonBackgroundColor : Colors.black,
-                          ),
-                          const SizedBox(height: 4),
-                          Flexible(
-                            child: Text(
-                              widget.labels[2],
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: 2 == widget.index ? widget.buttonBackgroundColor : Colors.black,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => _buttonTap(3),
-                    child: Container(
-                      color: Colors.transparent,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            widget.icons[3],
-                            size: 24,
-                            color: 3 == widget.index ? widget.buttonBackgroundColor : Colors.black,
-                          ),
-                          const SizedBox(height: 4),
-                          Flexible(
-                            child: Text(
-                              widget.labels[3],
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: 3 == widget.index ? widget.buttonBackgroundColor : Colors.black,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+          Container(
+            decoration: BoxDecoration(
+              color: widget.backgroundColor,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: Offset(0, -5),
                 ),
               ],
+            ),
+            child: BottomAppBar(
+              shape: const CircularNotchedRectangle(),
+              notchMargin: 8,
+              color: Colors.transparent,
+              padding: EdgeInsets.zero,
+              elevation: 0,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => _buttonTap(0),
+                      child: Container(
+                        color: Colors.transparent,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              widget.icons[0],
+                              size: 24,
+                              color: 0 == widget.index ? widget.buttonBackgroundColor : Colors.black,
+                            ),
+                            const SizedBox(height: 4),
+                            Flexible(
+                              child: Text(
+                                widget.labels[0],
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: 0 == widget.index ? widget.buttonBackgroundColor : Colors.black,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => _buttonTap(1),
+                      child: Container(
+                        color: Colors.transparent,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              widget.icons[1],
+                              size: 24,
+                              color: 1 == widget.index ? widget.buttonBackgroundColor : Colors.black,
+                            ),
+                            const SizedBox(height: 4),
+                            Flexible(
+                              child: Text(
+                                widget.labels[1],
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: 1 == widget.index ? widget.buttonBackgroundColor : Colors.black,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 60),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => _buttonTap(2),
+                      child: Container(
+                        color: Colors.transparent,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              widget.icons[2],
+                              size: 24,
+                              color: 2 == widget.index ? widget.buttonBackgroundColor : Colors.black,
+                            ),
+                            const SizedBox(height: 4),
+                            Flexible(
+                              child: Text(
+                                widget.labels[2],
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: 2 == widget.index ? widget.buttonBackgroundColor : Colors.black,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => _buttonTap(3),
+                      child: Container(
+                        color: Colors.transparent,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              widget.icons[3],
+                              size: 24,
+                              color: 3 == widget.index ? widget.buttonBackgroundColor : Colors.black,
+                            ),
+                            const SizedBox(height: 4),
+                            Flexible(
+                              child: Text(
+                                widget.labels[3],
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: 3 == widget.index ? widget.buttonBackgroundColor : Colors.black,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           Positioned(
