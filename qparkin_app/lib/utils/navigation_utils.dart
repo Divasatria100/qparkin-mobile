@@ -4,7 +4,7 @@ class NavigationUtils {
   static const Map<int, String> routes = {
     0: '/home',
     1: '/activity',
-    // 2: '/scan', // TODO: Add scan page route when implemented
+    2: '/map',
     // 3: '/notifications', // TODO: Add notifications page route when implemented
     // 4: '/profile', // TODO: Add profile page route when implemented
   };

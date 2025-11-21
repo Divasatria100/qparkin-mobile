@@ -407,19 +407,22 @@ class _HomePageState extends State<HomePage> {
                             color: Colors.black87,
                           ),
                         ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/map', arguments: {'initialTab': 1});
-                          },
-                          child: Text(
-                            'Lihat Semua',
-                            style: TextStyle(
-                              color: Color(0xFF573ED1),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/map', arguments: {'initialTab': 1}).then((_) {
+                                // Reset to home index when returning from map
+                                setState(() {});
+                              });
+                            },
+                            child: Text(
+                              'Lihat Semua',
+                              style: TextStyle(
+                                color: Color(0xFF573ED1),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
-                        ),
                       ],
                     ),
                     const SizedBox(height: 12),
@@ -523,7 +526,9 @@ class _HomePageState extends State<HomePage> {
                                             ],
                                           ),
                                           ElevatedButton.icon(
-                                            onPressed: () {},
+                                            onPressed: () {
+                                              Navigator.pushNamed(context, '/map');
+                                            },
                                             icon: const Icon(
                                               Icons.navigation,
                                               size: 16,

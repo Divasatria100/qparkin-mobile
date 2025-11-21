@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../widgets/bottom_nav.dart';
+import '/utils/navigation_utils.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({Key? key}) : super(key: key);
@@ -267,11 +268,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         ],
       ),
       bottomNavigationBar: CurvedNavigationBar(
-        onTap: (index) {
-          if (index == 1) {
-            Navigator.pushNamed(context, '/activity');
-          }
-        },
+        index: 2,
+        onTap: (index) => NavigationUtils.handleNavigation(context, index, 2),
       ),
     );
   }

@@ -25,7 +25,7 @@ class CurvedNavigationBar extends StatefulWidget {
     this.labels = const [
       'Beranda',
       'Aktivitas',
-      'Notifikasi',
+      'Peta',
       'Profil',
     ],
     this.index = 0,
