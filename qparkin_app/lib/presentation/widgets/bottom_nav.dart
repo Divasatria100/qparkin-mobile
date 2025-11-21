@@ -99,7 +99,7 @@ class CurvedNavigationBarState extends State<CurvedNavigationBar> {
                               child: Text(
                                 widget.labels[0],
                                 style: TextStyle(
-                                  fontSize: 10,
+                                  fontSize: 12,
                                   color: 0 == widget.index ? widget.buttonBackgroundColor : Colors.black,
                                 ),
                                 overflow: TextOverflow.ellipsis,
@@ -128,7 +128,7 @@ class CurvedNavigationBarState extends State<CurvedNavigationBar> {
                               child: Text(
                                 widget.labels[1],
                                 style: TextStyle(
-                                  fontSize: 10,
+                                  fontSize: 12,
                                   color: 1 == widget.index ? widget.buttonBackgroundColor : Colors.black,
                                 ),
                                 overflow: TextOverflow.ellipsis,
@@ -158,7 +158,7 @@ class CurvedNavigationBarState extends State<CurvedNavigationBar> {
                               child: Text(
                                 widget.labels[2],
                                 style: TextStyle(
-                                  fontSize: 10,
+                                  fontSize: 12,
                                   color: 2 == widget.index ? widget.buttonBackgroundColor : Colors.black,
                                 ),
                                 overflow: TextOverflow.ellipsis,
@@ -187,7 +187,7 @@ class CurvedNavigationBarState extends State<CurvedNavigationBar> {
                               child: Text(
                                 widget.labels[3],
                                 style: TextStyle(
-                                  fontSize: 10,
+                                  fontSize: 12,
                                   color: 3 == widget.index ? widget.buttonBackgroundColor : Colors.black,
                                 ),
                                 overflow: TextOverflow.ellipsis,
