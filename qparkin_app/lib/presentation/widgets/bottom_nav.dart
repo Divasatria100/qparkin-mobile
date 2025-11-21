@@ -61,6 +61,10 @@ class CurvedNavigationBarState extends State<CurvedNavigationBar> {
           Container(
             decoration: BoxDecoration(
               color: widget.backgroundColor,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(30),
+                topRight: Radius.circular(30),
+              ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.1),
