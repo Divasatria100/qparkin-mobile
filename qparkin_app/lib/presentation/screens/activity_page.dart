@@ -147,6 +147,7 @@ class _ActivityPageState extends State<ActivityPage> with TickerProviderStateMix
           backgroundColor: Color(0xFF573ED1),
           elevation: 0,
           iconTheme: const IconThemeData(color: Colors.white),
+          automaticallyImplyLeading: false,
         ),
         body: Column(
           children: [
