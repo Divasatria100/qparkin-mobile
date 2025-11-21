@@ -175,21 +175,9 @@ class _ActivityPageState extends State<ActivityPage> with TickerProviderStateMix
                       ? Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-                              child: const Text(
-                                'Pantau aktivitas parkir Anda saat ini',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                            ),
                             Expanded(
                               child: SingleChildScrollView(
-                                padding: const EdgeInsets.fromLTRB(24, 0, 24, 100),
+                                padding: const EdgeInsets.fromLTRB(24, 24, 24, 100),
                                 child: Column(
                                   children: [
                                     // Main Parking Card
