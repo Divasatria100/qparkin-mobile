@@ -214,7 +214,7 @@ class CurvedNavigationBarState extends State<CurvedNavigationBar> {
                   );
                 },
                 backgroundColor: widget.buttonBackgroundColor,
-                child: const Icon(Icons.qr_code_scanner, color: Colors.white),
+                child: const Icon(Icons.qr_code_scanner, color: Colors.white, size: 32),
                 elevation: 6,
               ),
             ),
@@ -258,7 +258,7 @@ class BottomNavWithFab extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: onFabPressed,
         backgroundColor: const Color(0xFFFB923C),
-        child: const Icon(Icons.qr_code_scanner, color: Colors.white),
+        child: const Icon(Icons.qr_code_scanner, color: Colors.white, size: 32),
         elevation: 6,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
