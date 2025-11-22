@@ -19,7 +19,7 @@ class CurvedNavigationBar extends StatefulWidget {
     this.icons = const [
       Icons.home,
       Icons.history,
-      Icons.notifications,
+      Icons.map,
       Icons.person,
     ],
     this.labels = const [
