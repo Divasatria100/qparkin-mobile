@@ -214,7 +214,7 @@ class CurvedNavigationBarState extends State<CurvedNavigationBar> {
                   );
                 },
                 backgroundColor: widget.buttonBackgroundColor,
-                child: const Icon(Icons.qr_code_scanner, color: Colors.white, size: 32),
+                child: const Icon(Icons.qr_code_scanner, color: Colors.white, size: 36),
                 elevation: 6,
               ),
             ),
