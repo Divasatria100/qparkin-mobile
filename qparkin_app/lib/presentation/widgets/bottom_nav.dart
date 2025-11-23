@@ -209,8 +209,10 @@ class CurvedNavigationBarState extends State<CurvedNavigationBar> {
             child: Center(
               child: FloatingActionButton(
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Scan QR Code')),
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const QrScanScreen(),
+                    ),
                   );
                 },
                 backgroundColor: widget.buttonBackgroundColor,
