@@ -1,17 +1,6 @@
-# TODO: Implement Google Login in Flutter App
+# TODO: Add Horizontal Slide Transition to Navigation
 
-## Backend Changes
-- [x] Install Laravel Socialite for Google OAuth
-- [x] Add Google login route in routes/api.php
-- [x] Implement googleLogin method in ApiAuthController.php
-- [x] Configure Google OAuth credentials in config/services.php
-
-## Frontend Changes
-- [x] Update AuthService.dart to include Google login method
-- [x] Update login_page.dart to call Google login and handle response
-
-## Testing
-- [ ] Configure Google OAuth credentials in .env
-- [ ] Test Google login flow
-- [ ] Verify user creation/linking
-- [ ] Check token storage and navigation
+## Tasks
+- [ ] Update `navigation_utils.dart` to use `PageRouteBuilder` with `SlideTransition` for horizontal animation
+- [ ] Test navigation between pages (Home, Activity, etc.) to ensure smooth transitions
+- [ ] Verify that navigation remains managed in existing files and pages stay modular

@@ -14,23 +14,23 @@ class ApiAuthController extends Controller
     {
         // Validasi input
         $request->validate([
-            'no_hp' => 'required|string',
-            'password' => 'required'
+            'nomor_hp' => 'required|string',
+            'pin' => 'required|string|size:6'
         ]);
 
-        // Cari user by no_hp
-        $user = User::where('no_hp', $request->no_hp)->first();
+        // Cari user by nomor_hp
+        $user = User::where('nomor_hp', $request->nomor_hp)->first();
 
-        // Cek user dan password
+        // Cek user dan pin
         if (!$user) {
             return response()->json([
                 'message' => 'Nomor HP tidak terdaftar.'
             ], 401);
         }
 
-        if (!Hash::check($request->password, $user->password)) {
+        if (!Hash::check($request->pin, $user->password)) {
             return response()->json([
-                'message' => 'Password salah.'
+                'message' => 'PIN salah.'
             ], 401);
         }
 
@@ -52,13 +52,13 @@ class ApiAuthController extends Controller
                     'id_user' => $user->id_user,
                     'name' => $user->name,
                     'email' => $user->email,
-                    'no_hp' => $user->no_hp,
+                    'nomor_hp' => $user->nomor_hp,
                     'role' => $user->role,
                     'saldo_poin' => $user->saldo_poin,
                 ],
                 'token' => $token
             ], 200);
-            
+
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error creating token: ' . $e->getMessage()
@@ -76,7 +76,7 @@ class ApiAuthController extends Controller
                 'success' => true,
                 'message' => 'Logout berhasil'
             ], 200);
-            
+
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error during logout: ' . $e->getMessage()
@@ -91,6 +91,46 @@ class ApiAuthController extends Controller
             'success' => true,
             'user' => $request->user()
         ]);
+    }
+
+    public function register(Request $request)
+    {
+        // Validasi input
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'nomor_hp' => 'required|string|unique:user,nomor_hp',
+            'pin' => 'required|string|size:6'
+        ]);
+
+        try {
+            // Cek apakah nomor_hp sudah terdaftar
+            $existingUser = User::where('nomor_hp', $request->nomor_hp)->first();
+            if ($existingUser) {
+                return response()->json([
+                    'message' => 'Nomor HP sudah terdaftar.'
+                ], 409);
+            }
+
+            // Buat user baru
+            $user = User::create([
+                'name' => $request->nama,
+                'nomor_hp' => $request->nomor_hp,
+                'password' => Hash::make($request->pin),
+                'role' => 'customer',
+                'status' => 'aktif',
+                'saldo_poin' => 0,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Registrasi berhasil'
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error during registration: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function googleLogin(Request $request)
@@ -158,7 +198,7 @@ class ApiAuthController extends Controller
                     'id_user' => $user->id_user,
                     'name' => $user->name,
                     'email' => $user->email,
-                    'no_hp' => $user->no_hp,
+                    'nomor_hp' => $user->nomor_hp,
                     'role' => $user->role,
                     'saldo_poin' => $user->saldo_poin,
                 ],

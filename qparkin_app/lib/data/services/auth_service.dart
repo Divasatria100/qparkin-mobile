@@ -1,119 +1,289 @@
-// lib/services/auth_service.dart
-import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'dart:convert';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AuthService {
-  static const String baseUrl = 'http://127.0.0.1:8000/api';
-  static const bool useDemoMode = true; // Set false setelah API fix
-  
-  Future<Map<String, dynamic>> login(String noHp, String password) async {
+static const String baseUrl = String.fromEnvironment('API_URL');
+  static const String loginEndpoint = '/api/login';
+
+  final _secureStorage = const FlutterSecureStorage();
+
+  /// Login menggunakan nomor HP dan PIN
+  /// Returns: {'success': bool, 'message': string, 'user': Map?, 'token': string?}
+  Future<Map<String, dynamic>> login({
+    required String phone,
+    required String pin,
+    required bool rememberMe,
+  }) async {
     try {
+      final url = Uri.parse('$baseUrl$loginEndpoint');
+
+      // Persiapan request body
+      final body = {
+        'nomor_hp': phone,
+        'pin': pin,
+      };
+
+      // Lakukan HTTP POST request
       final response = await http.post(
-        Uri.parse('$baseUrl/login'),
-        headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
-        body: jsonEncode({
-          'no_hp': noHp,
-          'password': password,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        await _saveToken(data['token']);
-        await _saveUserData(data['user']);
-        return {'success': true, 'data': data};
-      } else {
-        final error = jsonDecode(response.body);
-        return {'success': false, 'message': error['message'] ?? 'Login failed'};
-      }
-    } catch (e) {
-      return {'success': false, 'message': 'Error: $e'};
-    }
-  }
-
-  Future<void> _saveToken(String token) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('token', token);
-  }
-
-  Future<void> _saveUserData(Map<String, dynamic> user) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('user', jsonEncode(user));
-  }
-
-  // lib/services/auth_service.dart
-  Future<String?> getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('token');
-  }
-
-  Future<Map<String, dynamic>?> getUser() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userString = prefs.getString('user');
-    if (userString != null) {
-      return jsonDecode(userString);
-    }
-    return null;
-  }
-
-  Future<Map<String, dynamic>> googleLogin() async {
-    try {
-      final GoogleSignIn googleSignIn = GoogleSignIn();
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-
-      if (googleUser == null) {
-        return {'success': false, 'message': 'Google sign in cancelled'};
-      }
-
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      final String? idToken = googleAuth.idToken;
-
-      if (idToken == null) {
-        return {'success': false, 'message': 'Failed to get Google ID token'};
-      }
-
-      final response = await http.post(
-        Uri.parse('$baseUrl/google-login'),
-        headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
-        body: jsonEncode({
-          'id_token': idToken,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        await _saveToken(data['token']);
-        await _saveUserData(data['user']);
-        return {'success': true, 'data': data};
-      } else {
-        final error = jsonDecode(response.body);
-        return {'success': false, 'message': error['message'] ?? 'Google login failed'};
-      }
-    } catch (e) {
-      return {'success': false, 'message': 'Error: $e'};
-    }
-  }
-
-  Future<bool> logout() async {
-    try {
-      final token = await getToken();
-
-      await http.post(
-        Uri.parse('$baseUrl/logout'),
+        url,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
         },
+        body: jsonEncode(body),
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () => throw TimeoutException('Koneksi timeout. Silakan coba lagi.'),
       );
 
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('token');
-      await prefs.remove('user');
-      return true;
+      // Parsing response
+      final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+
+      // Status 200 - Login berhasil
+      if (response.statusCode == 200) {
+        final token = responseData['token'] as String?;
+        final user = responseData['user'] as Map<String, dynamic>?;
+
+        if (token != null && token.isNotEmpty) {
+          // Simpan token ke secure storage
+          await _secureStorage.write(key: 'auth_token', value: token);
+
+          // Simpan user data
+          if (user != null) {
+            await _secureStorage.write(
+              key: 'user_data',
+              value: jsonEncode(user),
+            );
+          }
+
+          // Jika rememberMe aktif, simpan nomor HP
+          if (rememberMe) {
+            await _secureStorage.write(key: 'saved_phone', value: phone);
+          } else {
+            await _secureStorage.delete(key: 'saved_phone');
+          }
+
+          return {
+            'success': true,
+            'message': 'Login berhasil',
+            'user': user,
+            'token': token,
+          };
+        } else {
+          return {
+            'success': false,
+            'message': 'Token tidak ditemukan dalam response',
+          };
+        }
+      }
+
+      // Status 401 - Unauthorized (nomor HP tidak ditemukan atau PIN salah)
+      else if (response.statusCode == 401) {
+        final message = responseData['message'] ?? 'Login gagal. Nomor HP atau PIN salah.';
+        return {
+          'success': false,
+          'message': message,
+        };
+      }
+
+      // Status 403 - Forbidden (akun tidak aktif)
+      else if (response.statusCode == 403) {
+        final message = responseData['message'] ?? 'Akun tidak aktif.';
+        return {
+          'success': false,
+          'message': message,
+        };
+      }
+
+      // Status 500 - Server error
+      else if (response.statusCode == 500) {
+        final message = responseData['message'] ?? 'Terjadi kesalahan pada server.';
+        return {
+          'success': false,
+          'message': message,
+        };
+      }
+
+      // Status code lainnya
+      else {
+        return {
+          'success': false,
+          'message': 'Terjadi kesalahan. Status code: ${response.statusCode}',
+        };
+      }
+    } on TimeoutException catch (e) {
+      return {
+        'success': false,
+        'message': e.message,
+      };
     } catch (e) {
-      return false;
+      return {
+        'success': false,
+        'message': 'Error: ${e.toString()}',
+      };
     }
   }
+
+  /// Ambil token yang tersimpan
+  Future<String?> getToken() async {
+    try {
+      return await _secureStorage.read(key: 'auth_token');
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Ambil data user yang tersimpan
+  Future<Map<String, dynamic>?> getUserData() async {
+    try {
+      final userJson = await _secureStorage.read(key: 'user_data');
+      if (userJson != null) {
+        return jsonDecode(userJson) as Map<String, dynamic>;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Ambil nomor HP yang tersimpan (jika rememberMe aktif)
+  Future<String?> getSavedPhone() async {
+    try {
+      return await _secureStorage.read(key: 'saved_phone');
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Registrasi menggunakan nama, nomor HP, dan PIN
+  /// Returns: {'success': bool, 'message': string}
+  Future<Map<String, dynamic>> register({
+    required String nama,
+    required String nomorHp,
+    required String pin,
+  }) async {
+    try {
+      final url = Uri.parse('$baseUrl/api/register');
+
+      // Persiapan request body
+      final body = {
+        'nama': nama,
+        'nomor_hp': nomorHp,
+        'pin': pin,
+      };
+
+      // Lakukan HTTP POST request
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode(body),
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () => throw TimeoutException('Koneksi timeout. Silakan coba lagi.'),
+      );
+
+      // Parsing response
+      final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+
+      // Status 201 - Registrasi berhasil (Created)
+      if (response.statusCode == 201) {
+        return {
+          'success': true,
+          'message': responseData['message'] ?? 'Registrasi berhasil',
+        };
+      }
+
+      // Status 200 - OK (jika backend menggunakan 200)
+      else if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': responseData['message'] ?? 'Registrasi berhasil',
+        };
+      }
+
+      // Status 400 - Bad Request (validasi gagal)
+      else if (response.statusCode == 400) {
+        final message = responseData['message'] ?? 'Data tidak valid.';
+        return {
+          'success': false,
+          'message': message,
+        };
+      }
+
+      // Status 409 - Conflict (nomor HP sudah terdaftar)
+      else if (response.statusCode == 409) {
+        final message = responseData['message'] ?? 'Nomor HP sudah terdaftar.';
+        return {
+          'success': false,
+          'message': message,
+        };
+      }
+
+      // Status 500 - Server error
+      else if (response.statusCode == 500) {
+        final message = responseData['message'] ?? 'Terjadi kesalahan pada server.';
+        return {
+          'success': false,
+          'message': message,
+        };
+      }
+
+      // Status code lainnya
+      else {
+        return {
+          'success': false,
+          'message': 'Terjadi kesalahan. Status code: ${response.statusCode}',
+        };
+      }
+    } on TimeoutException catch (e) {
+      return {
+        'success': false,
+        'message': e.message,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Error: ${e.toString()}',
+      };
+    }
+  }
+
+  /// Cek apakah user sudah login
+  Future<bool> isLoggedIn() async {
+    final token = await getToken();
+    return token != null && token.isNotEmpty;
+  }
+
+  /// Logout - hapus semua data tersimpan
+  Future<void> logout() async {
+    try {
+      await _secureStorage.delete(key: 'auth_token');
+      await _secureStorage.delete(key: 'user_data');
+      await _secureStorage.delete(key: 'saved_phone');
+    } catch (e) {
+      throw Exception('Error logging out: $e');
+    }
+  }
+
+  /// Buat header dengan Bearer token untuk request autentikasi
+  Future<Map<String, String>> getAuthHeaders() async {
+    final token = await getToken();
+    return {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      if (token != null) 'Authorization': 'Bearer $token',
+    };
+  }
+}
+
+class TimeoutException implements Exception {
+  final String message;
+  TimeoutException(this.message);
+
+  @override
+  String toString() => message;
 }

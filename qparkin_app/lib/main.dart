@@ -4,13 +4,16 @@ import 'data/services/auth_service.dart'; // Add this import
 // import 'package:get/get.dart';
 
 import 'presentation/screens/about_page.dart';
-import 'presentation/screens/login_page.dart';
-// import 'presentation/screens/signup_page.dart';
+import 'presentation/screens/login_screen.dart';
+import 'presentation/screens/signup_screen.dart';
 // import 'presentation/screens/forgot_password_page.dart';
 // import 'presentation/screens/verify_code_page.dart';
 // import 'presentation/screens/confirm_pin_page.dart';
 // import 'presentation/screens/change_pin_page.dart';
 import 'presentation/screens/home_page.dart';
+import 'presentation/screens/map_page.dart';
+import 'presentation/screens/activity_page.dart';
+import 'presentation/screens/detail_history.dart';
 import 'pages/notification_screen.dart';
 import 'pages/scan_screen.dart';
 // import 'widgets/bottom_nav_bar.dart';
@@ -26,6 +29,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner : false,
       title: 'QParkin Mobile',
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -52,18 +56,21 @@ class MyApp extends StatelessWidget {
       initialRoute: '/notifikasi',
       routes: {
         '/about': (context) => const AboutPage(),
-        '/login': (context) => const LoginPage(),
-        // '/signup': (context) => const SignupPage(),
+        LoginScreen.routeName: (context) => const LoginScreen(),
+        SignUpScreen.routeName: (context) => const SignUpScreen(),
         // '/forgot-password': (context) => const ForgotPasswordPage(),
         // '/verify-code': (context) => const VerifyCodePage(),
         // '/confirm-pin': (context) => const ConfirmPinPage(),
         // '/change-pin': (context) => const ChangePinPage(),
         '/home': (context) => const HomePage(),
+        '/map': (context) => const MapPage(),
+        '/activity': (context) => const ActivityPage(),
         '/notifikasi': (context) => const NotificationScreen(),
         '/scan': (context) => const ScanScreen(),
         '/point': (context) => const PointScreen(),
-
+ main
       },
     );
   }
 }
+
