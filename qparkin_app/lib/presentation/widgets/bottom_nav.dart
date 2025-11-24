@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../screens/qr_scan_screen.dart';
 
 typedef _LetIndexPage = bool Function(int value);
 
@@ -211,7 +212,7 @@ class CurvedNavigationBarState extends State<CurvedNavigationBar> {
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (context) => const QrScanScreen(),
+                      builder: (context) => QrScanScreen(),
                     ),
                   );
                 },
