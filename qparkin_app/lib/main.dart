@@ -68,7 +68,6 @@ class MyApp extends StatelessWidget {
         '/notifikasi': (context) => const NotificationScreen(),
         '/scan': (context) => const ScanScreen(),
         '/point': (context) => const PointScreen(),
- main
       },
     );
   }
