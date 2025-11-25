@@ -91,9 +91,9 @@ class ActivityPageShimmer extends StatelessWidget {
               borderRadius: BorderRadius.circular(120),
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Detail card shimmer
           Container(
             decoration: BoxDecoration(
@@ -120,9 +120,9 @@ class ActivityPageShimmer extends StatelessWidget {
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Button shimmer
           ShimmerLoading(
             width: double.infinity,
@@ -162,6 +162,110 @@ class ActivityPageShimmer extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Shimmer loading skeleton for home page parking location cards
+class HomePageLocationShimmer extends StatelessWidget {
+  const HomePageLocationShimmer({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: List.generate(
+        3,
+        (index) => Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Container(
+            height: 140,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Colors.grey.shade200,
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Icon container shimmer
+                ShimmerLoading(
+                  width: 44,
+                  height: 44,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Name + Distance badge row
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: ShimmerLoading(
+                              width: double.infinity,
+                              height: 16,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          ShimmerLoading(
+                            width: 60,
+                            height: 24,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      // Address shimmer
+                      ShimmerLoading(
+                        width: double.infinity,
+                        height: 14,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      const SizedBox(height: 4),
+                      ShimmerLoading(
+                        width: 180,
+                        height: 14,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      const SizedBox(height: 8),
+                      // Available slots badge shimmer
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          ShimmerLoading(
+                            width: 120,
+                            height: 24,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          ShimmerLoading(
+                            width: 16,
+                            height: 16,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
