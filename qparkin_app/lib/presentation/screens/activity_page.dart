@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
 import '../widgets/bottom_nav.dart';
+import '../widgets/circular_timer_widget.dart';
+import '../widgets/booking_detail_card.dart';
+import '../widgets/qr_exit_button.dart';
+import '../widgets/shimmer_loading.dart';
 import '/utils/navigation_utils.dart';
+import '/logic/providers/active_parking_provider.dart';
 import 'detail_history.dart';
 
 class ActivityPage extends StatefulWidget {
@@ -13,6 +18,7 @@ class ActivityPage extends StatefulWidget {
 
 class _ActivityPageState extends State<ActivityPage> with TickerProviderStateMixin {
   late TabController _tabController;
+  String? _lastErrorShown;
 
   @override
   void initState() {
@@ -23,6 +29,8 @@ class _ActivityPageState extends State<ActivityPage> with TickerProviderStateMix
       if (args != null && args['initialTab'] == 1) {
         _tabController.animateTo(1);
       }
+      // Fetch active parking data
+      _fetchActiveParkingWithErrorHandling();
     });
   }
 
@@ -32,76 +40,81 @@ class _ActivityPageState extends State<ActivityPage> with TickerProviderStateMix
     super.dispose();
   }
 
-  Widget _buildActivityDetailCard({
-    required IconData icon,
-    required String title,
-    required String value,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.grey.shade200,
-          width: 1,
+  /// Fetch active parking and show snackbar on error
+  Future<void> _fetchActiveParkingWithErrorHandling() async {
+    final provider = Provider.of<ActiveParkingProvider>(context, listen: false);
+    await provider.fetchActiveParking();
+    
+    // Show snackbar if there's an error
+    if (mounted && provider.errorMessage != null && provider.errorMessage != _lastErrorShown) {
+      _lastErrorShown = provider.errorMessage;
+      _showErrorSnackbar(provider.errorMessage!);
+    }
+  }
+
+  /// Show error snackbar with retry action
+  void _showErrorSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline, color: Colors.white),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              icon,
-              color: color,
-              size: 20,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey.shade600,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
+        backgroundColor: const Color(0xFFF44336),
+        duration: const Duration(seconds: 4),
+        action: SnackBarAction(
+          label: 'Coba Lagi',
+          textColor: Colors.white,
+          onPressed: () {
+            _lastErrorShown = null;
+            _fetchActiveParkingWithErrorHandling();
+          },
+        ),
       ),
     );
   }
 
-  final List<Map<String, dynamic>> activeParking = [
-    {
-      'location': 'Politeknik Negeri Batam',
-      'status': 'Aktif',
-      'startTime': '14:30',
-      'duration': '2 jam 15 menit',
-      'cost': 'Rp 10.000',
-    },
-  ];
+  /// Show success snackbar
+  void _showSuccessSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle_outline, color: Colors.white),
+            const SizedBox(width: 12),
+            Text(
+              message,
+              style: const TextStyle(color: Colors.white),
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFF4CAF50),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  /// Format last sync time as relative time
+  String _formatLastSync(DateTime lastSync) {
+    final now = DateTime.now();
+    final difference = now.difference(lastSync);
+    
+    if (difference.inSeconds < 60) {
+      return 'Baru saja';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes} menit yang lalu';
+    } else {
+      return '${difference.inHours} jam yang lalu';
+    }
+  }
 
   final List<Map<String, dynamic>> parkingHistory = [
     {
@@ -169,305 +182,248 @@ class _ActivityPageState extends State<ActivityPage> with TickerProviderStateMix
             child: TabBarView(
               controller: _tabController,
               children: [
-                // Aktivitas Tab
-                Container(
-                  color: Colors.white,
-                  child: activeParking.isNotEmpty
-                      ? Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: SingleChildScrollView(
-                                padding: const EdgeInsets.fromLTRB(24, 24, 24, 100),
-                                child: Column(
-                                  children: [
-                                    // Main Parking Card
-                                    Container(
-                                      padding: const EdgeInsets.all(20),
+                // Aktivitas Tab - ENHANCED with Provider
+                Consumer<ActiveParkingProvider>(
+                  builder: (context, provider, child) {
+                    // Show shimmer loading on initial load
+                    if (provider.isLoading && provider.activeParking == null) {
+                      return const ActivityPageShimmer();
+                    }
+
+                    // Show error state with retry button
+                    if (provider.errorMessage != null && provider.activeParking == null) {
+                      return Container(
+                        color: Colors.white,
+                        child: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Semantics(
+                              label: 'Terjadi kesalahan: ${provider.errorMessage}',
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Semantics(
+                                    label: 'Ikon kesalahan',
+                                    child: Container(
+                                      padding: const EdgeInsets.all(24),
                                       decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          colors: [Colors.green.shade400, Colors.green.shade600],
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                        ),
-                                        borderRadius: BorderRadius.circular(20),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.green.withOpacity(0.3),
-                                            blurRadius: 15,
-                                            offset: const Offset(0, 8),
-                                          ),
-                                        ],
+                                        color: const Color(0xFFF44336).withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(50),
                                       ),
-                                      child: Column(
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                  color: Colors.white.withOpacity(0.2),
-                                                  borderRadius: BorderRadius.circular(16),
-                                                ),
-                                                padding: const EdgeInsets.all(16),
-                                                child: const Icon(
-                                                  Icons.directions_car,
-                                                  color: Colors.white,
-                                                  size: 32,
-                                                ),
-                                              ),
-                                              const SizedBox(width: 16),
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      activeParking[0]['location'],
-                                                      style: const TextStyle(
-                                                        fontSize: 18,
-                                                        fontWeight: FontWeight.bold,
-                                                        color: Colors.white,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(height: 4),
-                                                    Container(
-                                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                                                      decoration: BoxDecoration(
-                                                        color: Colors.white.withOpacity(0.2),
-                                                        borderRadius: BorderRadius.circular(12),
-                                                      ),
-                                                      child: const Text(
-                                                        'Sedang Parkir',
-                                                        style: TextStyle(
-                                                          fontSize: 12,
-                                                          fontWeight: FontWeight.bold,
-                                                          color: Colors.white,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 20),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                            decoration: BoxDecoration(
-                                              color: Colors.white.withOpacity(0.2),
-                                              borderRadius: BorderRadius.circular(25),
-                                            ),
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: [
-                                                const Icon(
-                                                  Icons.attach_money,
-                                                  color: Colors.white,
-                                                  size: 20,
-                                                ),
-                                                const SizedBox(width: 8),
-                                                Text(
-                                                  activeParking[0]['cost'],
-                                                  style: const TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.white,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
+                                      child: const Icon(
+                                        Icons.error_outline,
+                                        size: 48,
+                                        color: Color(0xFFF44336),
                                       ),
                                     ),
-
-                                    const SizedBox(height: 24),
-
-                                    // Detail Cards Grid
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: _buildActivityDetailCard(
-                                            icon: Icons.access_time,
-                                            title: 'Waktu Mulai',
-                                            value: activeParking[0]['startTime'],
-                                            color: Colors.blue,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: _buildActivityDetailCard(
-                                            icon: Icons.timer,
-                                            title: 'Durasi',
-                                            value: activeParking[0]['duration'],
-                                            color: Colors.orange,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-
-                                    const SizedBox(height: 24),
-
-                                    // Live Duration Counter
-                                    Container(
-                                      padding: const EdgeInsets.all(20),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(16),
-                                        border: Border.all(
-                                          color: Colors.grey.shade200,
-                                          width: 1,
-                                        ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withOpacity(0.05),
-                                            blurRadius: 8,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ],
+                                  ),
+                                  const SizedBox(height: 16),
+                                  ExcludeSemantics(
+                                    child: const Text(
+                                      'Terjadi Kesalahan',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black87,
                                       ),
-                                      child: Column(
-                                        children: [
-                                          const Text(
-                                            'Waktu Parkir Berjalan',
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  ExcludeSemantics(
+                                    child: Text(
+                                      provider.errorMessage!,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 24),
+                                  Semantics(
+                                    label: 'Tombol coba lagi. Ketuk untuk memuat ulang data parkir',
+                                    button: true,
+                                    child: SizedBox(
+                                      height: 56, // Meets minimum 48dp touch target
+                                      child: ElevatedButton.icon(
+                                        onPressed: () {
+                                          _lastErrorShown = null;
+                                          _fetchActiveParkingWithErrorHandling();
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: const Color(0xFF573ED1),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 32,
+                                            vertical: 16,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                        ),
+                                        icon: const Icon(Icons.refresh, color: Colors.white, semanticLabel: 'Ikon refresh'),
+                                        label: ExcludeSemantics(
+                                          child: const Text(
+                                            'Coba Lagi',
                                             style: TextStyle(
+                                              color: Colors.white,
                                               fontSize: 16,
                                               fontWeight: FontWeight.bold,
-                                              color: Colors.black87,
                                             ),
                                           ),
-                                          const SizedBox(height: 16),
-                                          Container(
-                                            padding: const EdgeInsets.all(20),
-                                            decoration: BoxDecoration(
-                                              gradient: LinearGradient(
-                                                colors: [Color(0xFF573ED1), Color(0xFF7C3AED)],
-                                              ),
-                                              borderRadius: BorderRadius.circular(16),
-                                            ),
-                                            child: const Column(
-                                              children: [
-                                                Text(
-                                                  '02:15:30',
-                                                  style: TextStyle(
-                                                    fontSize: 36,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.white,
-                                                  ),
-                                                ),
-                                                SizedBox(height: 4),
-                                                Text(
-                                                  'Jam : Menit : Detik',
-                                                  style: TextStyle(
-                                                    fontSize: 12,
-                                                    color: Colors.white70,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
+                                        ),
                                       ),
                                     ),
-
-                                    const SizedBox(height: 24),
-
-                                    // Action Buttons
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: ElevatedButton.icon(
-                                            onPressed: () {
-                                              // Action to extend parking
-                                            },
-                                            icon: const Icon(Icons.add, color: Colors.white),
-                                            label: const Text(
-                                              'Perpanjang',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.orange,
-                                              padding: const EdgeInsets.symmetric(vertical: 12),
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(12),
-                                              ),
-                                              elevation: 2,
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: ElevatedButton.icon(
-                                            onPressed: () {
-                                              // Action to show QR exit
-                                            },
-                                            icon: const Icon(Icons.qr_code, color: Colors.white),
-                                            label: const Text(
-                                              'QR Keluar',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: Color(0xFF573ED1),
-                                              padding: const EdgeInsets.symmetric(vertical: 12),
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(12),
-                                              ),
-                                              elevation: 4,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-                        )
-                      : Center(
+                          ),
+                        ),
+                      );
+                    }
+
+                    if (provider.activeParking == null) {
+                      // Empty State
+                      return Container(
+                        color: Colors.white,
+                        child: Center(
+                          child: Semantics(
+                            label: 'Tidak ada parkir aktif. Mulai parkir untuk melihat aktivitas Anda',
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Semantics(
+                                  label: 'Ikon mobil',
+                                  child: Container(
+                                    padding: const EdgeInsets.all(24),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade100,
+                                      borderRadius: BorderRadius.circular(50),
+                                    ),
+                                    child: Icon(
+                                      Icons.directions_car,
+                                      size: 48,
+                                      color: Colors.grey.shade400,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                ExcludeSemantics(
+                                  child: const Text(
+                                    'Tidak ada parkir aktif',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                ExcludeSemantics(
+                                  child: Text(
+                                    'Mulai parkir untuk melihat aktivitas Anda',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+
+                    // Active Parking Display
+                    final parking = provider.activeParking!;
+                    
+                    // Show warning snackbar if booking expired
+                    if (parking.isPenaltyApplicable() && mounted) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Row(
+                                children: const [
+                                  Icon(Icons.warning, color: Colors.white),
+                                  SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      'Waktu booking telah habis. Penalty akan dikenakan.',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              backgroundColor: const Color(0xFFFF9800),
+                              duration: const Duration(seconds: 3),
+                            ),
+                          );
+                        }
+                      });
+                    }
+                    
+                    return Container(
+                      color: Colors.white,
+                      child: RefreshIndicator(
+                        onRefresh: () async {
+                          await _fetchActiveParkingWithErrorHandling();
+                          if (mounted && provider.errorMessage == null) {
+                            _showSuccessSnackbar('Data berhasil diperbarui');
+                          }
+                        },
+                        color: const Color(0xFF573ED1),
+                        child: SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                           child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Container(
-                                padding: const EdgeInsets.all(24),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade100,
-                                  borderRadius: BorderRadius.circular(50),
-                                ),
-                                child: Icon(
-                                  Icons.directions_car,
-                                  size: 48,
-                                  color: Colors.grey.shade400,
-                                ),
+                              // CircularTimerWidget at top as focal point
+                              CircularTimerWidget(
+                                startTime: parking.waktuMasuk,
+                                endTime: parking.waktuSelesaiEstimas,
+                                isBooking: parking.isBooking,
+                                onTimerUpdate: (duration) {
+                                  // Timer update callback handled by provider
+                                },
                               ),
-                              const SizedBox(height: 16),
-                              const Text(
-                                'Tidak ada parkir aktif',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
-                                ),
+                              
+                              const SizedBox(height: 24),
+                              
+                              // BookingDetailCard below timer
+                              BookingDetailCard(
+                                activeParking: parking,
                               ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Mulai parkir untuk melihat aktivitas Anda',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey.shade600,
-                                ),
-                                textAlign: TextAlign.center,
+                              
+                              const SizedBox(height: 24),
+                              
+                              // QRExitButton at bottom
+                              QRExitButton(
+                                qrCode: parking.qrCode,
+                                isEnabled: true,
+                                mallName: parking.namaMall,
+                                slotCode: parking.kodeSlot,
                               ),
+                              
+                              // Last sync indicator
+                              if (provider.lastSyncTime != null) ...[
+                                const SizedBox(height: 16),
+                                Text(
+                                  'Terakhir diperbarui: ${_formatLastSync(provider.lastSyncTime!)}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey.shade500,
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                         ),
+                      ),
+                    );
+                  },
                 ),
                 // Riwayat Tab
                 Container(
