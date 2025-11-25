@@ -136,6 +136,7 @@ class _ActivityPageState extends State<ActivityPage> with TickerProviderStateMix
       },
       child: Scaffold(
         appBar: AppBar(
+          centerTitle: true,
           title: const Text(
             'Aktivitas & Riwayat',
             style: TextStyle(

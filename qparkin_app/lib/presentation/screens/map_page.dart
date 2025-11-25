@@ -67,6 +67,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        centerTitle: true,
         title: const Text(
           'Peta Lokasi Parkir',
           style: TextStyle(
