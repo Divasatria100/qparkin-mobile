@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/bottom_nav.dart';
 import '/utils/navigation_utils.dart';
+import 'booking_page.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({Key? key}) : super(key: key);
@@ -48,11 +49,31 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
 
   void _navigateToBooking() {
     if (_selectedMall != null) {
-      // TODO: Navigate to booking page with selected mall data
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Booking untuk ${_selectedMall!['name']}'),
-          backgroundColor: const Color(0xFF573ED1),
+      // Navigate to BookingPage with selected mall data and page transition animation
+      Navigator.push(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => BookingPage(
+            mall: _selectedMall!,
+          ),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            // Slide transition from right to left
+            const begin = Offset(1.0, 0.0);
+            const end = Offset.zero;
+            const curve = Curves.easeInOut;
+
+            var tween = Tween(begin: begin, end: end).chain(
+              CurveTween(curve: curve),
+            );
+
+            var offsetAnimation = animation.drive(tween);
+
+            return SlideTransition(
+              position: offsetAnimation,
+              child: child,
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 300),
         ),
       );
     }
