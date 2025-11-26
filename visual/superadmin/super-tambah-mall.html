@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tambah Mall Baru - QPARKIN</title>
+    <!-- Tailwind CDN 4 -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@4.5.0/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../styles/super-dashboard.css">
+    <link rel="stylesheet" href="../styles/super-tambah-mall.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Header - Fixed -->
+        <header class="admin-header">
+            <div class="header-left">
+                <button id="sidebarToggle" class="menu-toggle" aria-label="Toggle Sidebar">
+                    <svg id="menuIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    <svg id="closeIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <h1 class="logo">QPARKIN </h1>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <span>Super Admin</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Wrapper -->
+        <div class="main-wrapper">
+            <!-- Sidebar - Fixed -->
+            <aside class="admin-sidebar">
+                <nav class="sidebar-nav">
+                    <ul>
+                        <li class="nav-item">
+                            <a href="super-dashboard.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                </svg>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="super-profile.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                <span>Profile</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="super-manajemen-mall.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                <span>Manajemen Mall</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="super-pengajuan-akun.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                                </svg>
+                                <span>Pengajuan Akun</span>
+                                <span class="notification-badge">12</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="super-laporan.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                                <span>Laporan & Analitik</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="super-konfigurasi.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span>Konfigurasi Sistem</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="super-notifikasi.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                                <span>Notifikasi</span>
+                                <span class="notification-badge">3</span>
+                            </a>
+                        </li>
+                        <li class="nav-item logout">
+                            <a href="../pages/signin.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
+                                <span>Keluar</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </aside>
+
+            <!-- Sidebar Overlay -->
+            <div class="sidebar-overlay"></div>
+
+            <!-- Main Content - Scrollable -->
+            <main class="admin-content">
+                <!-- Breadcrumb -->
+                <div class="breadcrumb">
+                    <a href="super-manajemen-mall.html" class="breadcrumb-link">Manajemen Mall</a>
+                    <span class="breadcrumb-separator">/</span>
+                    <span>Tambah Mall Baru</span>
+                </div>
+
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div class="header-content">
+                        <h1>Tambah Mall Baru</h1>
+                        <p>Tambahkan mall baru ke dalam sistem QPARKIN</p>
+                    </div>
+                    <div class="header-actions">
+                        <a href="super-manajemen-mall.html" class="btn-secondary">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            Kembali
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Add Mall Form -->
+                <div class="form-container">
+                    <form id="addMallForm" class="mall-form">
+                        <!-- Informasi Dasar Mall -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <h2>Informasi Dasar Mall</h2>
+                                <p>Data utama dan identitas mall</p>
+                            </div>
+                            <div class="form-grid">
+                                <div class="form-group full-width">
+                                    <label for="mallName" class="form-label">
+                                        Nama Mall *
+                                        <span class="label-helper">Nama resmi mall sesuai izin usaha</span>
+                                    </label>
+                                    <input type="text" id="mallName" name="mallName" class="form-input" required placeholder="Contoh: Grand Indonesia Shopping Town">
+                                    <div class="form-error" id="mallNameError"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="mallCode" class="form-label">
+                                        Kode Mall *
+                                        <span class="label-helper">Kode unik untuk identifikasi sistem</span>
+                                    </label>
+                                    <input type="text" id="mallCode" name="mallCode" class="form-input" required placeholder="Contoh: GI">
+                                    <div class="form-error" id="mallCodeError"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="mallCategory" class="form-label">Kategori Mall *</label>
+                                    <select id="mallCategory" name="mallCategory" class="form-select" required>
+                                        <option value="">Pilih Kategori</option>
+                                        <option value="super">Super Mall</option>
+                                        <option value="premium">Premium Mall</option>
+                                        <option value="standard">Standard Mall</option>
+                                        <option value="community">Community Mall</option>
+                                    </select>
+                                    <div class="form-error" id="mallCategoryError"></div>
+                                </div>
+
+                                <div class="form-group full-width">
+                                    <label for="mallDescription" class="form-label">Deskripsi Mall</label>
+                                    <textarea id="mallDescription" name="mallDescription" class="form-textarea" rows="3" placeholder="Deskripsi singkat tentang mall..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lokasi & Kontak -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <h2>Lokasi & Kontak</h2>
+                                <p>Informasi lokasi dan kontak mall</p>
+                            </div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="province" class="form-label">Provinsi *</label>
+                                    <select id="province" name="province" class="form-select" required>
+                                        <option value="">Pilih Provinsi</option>
+                                        <option value="jakarta">DKI Jakarta</option>
+                                        <option value="jawa-barat">Jawa Barat</option>
+                                        <option value="jawa-tengah">Jawa Tengah</option>
+                                        <option value="jawa-timur">Jawa Timur</option>
+                                        <option value="banten">Banten</option>
+                                    </select>
+                                    <div class="form-error" id="provinceError"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="city" class="form-label">Kota *</label>
+                                    <select id="city" name="city" class="form-select" required>
+                                        <option value="">Pilih Kota</option>
+                                        <option value="jakarta-pusat">Jakarta Pusat</option>
+                                        <option value="jakarta-selatan">Jakarta Selatan</option>
+                                        <option value="jakarta-barat">Jakarta Barat</option>
+                                        <option value="jakarta-timur">Jakarta Timur</option>
+                                        <option value="jakarta-utara">Jakarta Utara</option>
+                                    </select>
+                                    <div class="form-error" id="cityError"></div>
+                                </div>
+
+                                <div class="form-group full-width">
+                                    <label for="fullAddress" class="form-label">Alamat Lengkap *</label>
+                                    <textarea id="fullAddress" name="fullAddress" class="form-textarea" rows="2" required placeholder="Jl. MH Thamrin No. 1, Kelurahan..."></textarea>
+                                    <div class="form-error" id="fullAddressError"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="postalCode" class="form-label">Kode Pos</label>
+                                    <input type="text" id="postalCode" name="postalCode" class="form-input" placeholder="10110">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="phone" class="form-label">Telepon</label>
+                                    <input type="tel" id="phone" name="phone" class="form-input" placeholder="(021) 1234567">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="email" class="form-label">Email</label>
+                                    <input type="email" id="email" name="email" class="form-input" placeholder="info@mall.com">
+                                </div>
+
+                                <div class="form-group full-width">
+                                    <label for="website" class="form-label">Website</label>
+                                    <input type="url" id="website" name="website" class="form-input" placeholder="https://www.mall.com">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Konfigurasi Parkir -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <h2>Konfigurasi Parkir</h2>
+                                <p>Pengaturan kapasitas dan tarif parkir</p>
+                            </div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="totalSlots" class="form-label">
+                                        Total Slot Parkir *
+                                        <span class="label-helper">Jumlah total kendaraan yang dapat ditampung</span>
+                                    </label>
+                                    <input type="number" id="totalSlots" name="totalSlots" class="form-input" required min="1" placeholder="1000">
+                                    <div class="form-error" id="totalSlotsError"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="carSlots" class="form-label">Slot Mobil</label>
+                                    <input type="number" id="carSlots" name="carSlots" class="form-input" min="0" placeholder="800">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="motorcycleSlots" class="form-label">Slot Motor</label>
+                                    <input type="number" id="motorcycleSlots" name="motorcycleSlots" class="form-input" min="0" placeholder="200">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="disabledSlots" class="form-label">Slot Disabilitas</label>
+                                    <input type="number" id="disabledSlots" name="disabledSlots" class="form-input" min="0" placeholder="10">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="firstHourRate" class="form-label">
+                                        Tarif Jam Pertama (Mobil) *
+                                        <span class="label-helper">Dalam Rupiah</span>
+                                    </label>
+                                    <div class="input-with-prefix">
+                                        <span class="input-prefix">Rp</span>
+                                        <input type="number" id="firstHourRate" name="firstHourRate" class="form-input" required min="0" placeholder="10000">
+                                    </div>
+                                    <div class="form-error" id="firstHourRateError"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="nextHourRate" class="form-label">
+                                        Tarif Jam Berikutnya (Mobil) *
+                                        <span class="label-helper">Dalam Rupiah</span>
+                                    </label>
+                                    <div class="input-with-prefix">
+                                        <span class="input-prefix">Rp</span>
+                                        <input type="number" id="nextHourRate" name="nextHourRate" class="form-input" required min="0" placeholder="5000">
+                                    </div>
+                                    <div class="form-error" id="nextHourRateError"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="motorcycleRate" class="form-label">
+                                        Tarif Motor (per jam) *
+                                        <span class="label-helper">Dalam Rupiah</span>
+                                    </label>
+                                    <div class="input-with-prefix">
+                                        <span class="input-prefix">Rp</span>
+                                        <input type="number" id="motorcycleRate" name="motorcycleRate" class="form-input" required min="0" placeholder="2000">
+                                    </div>
+                                    <div class="form-error" id="motorcycleRateError"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="maxDailyRate" class="form-label">
+                                        Tarif Maksimal Harian
+                                        <span class="label-helper">Dalam Rupiah</span>
+                                    </label>
+                                    <div class="input-with-prefix">
+                                        <span class="input-prefix">Rp</span>
+                                        <input type="number" id="maxDailyRate" name="maxDailyRate" class="form-input" min="0" placeholder="50000">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Admin Mall -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <h2>Admin Mall</h2>
+                                <p>Penanggung jawab operasional mall</p>
+                            </div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="adminType" class="form-label">Tipe Admin *</label>
+                                    <select id="adminType" name="adminType" class="form-select" required>
+                                        <option value="">Pilih Tipe</option>
+                                        <option value="existing">Gunakan Admin Existing</option>
+                                        <option value="new">Buat Admin Baru</option>
+                                    </select>
+                                    <div class="form-error" id="adminTypeError"></div>
+                                </div>
+
+                                <div class="form-group" id="existingAdminGroup" style="display: none;">
+                                    <label for="existingAdmin" class="form-label">Pilih Admin</label>
+                                    <select id="existingAdmin" name="existingAdmin" class="form-select">
+                                        <option value="">Pilih Admin</option>
+                                        <option value="admin1">Budi Santoso</option>
+                                        <option value="admin2">Sari Dewi</option>
+                                        <option value="admin3">Ahmad Fauzi</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group full-width" id="newAdminGroup" style="display: none;">
+                                    <div class="admin-form-grid">
+                                        <div class="form-group">
+                                            <label for="adminName" class="form-label">Nama Admin *</label>
+                                            <input type="text" id="adminName" name="adminName" class="form-input" placeholder="Nama lengkap admin">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="adminEmail" class="form-label">Email *</label>
+                                            <input type="email" id="adminEmail" name="adminEmail" class="form-input" placeholder="admin@mall.com">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="adminPhone" class="form-label">Telepon *</label>
+                                            <input type="tel" id="adminPhone" name="adminPhone" class="form-input" placeholder="08123456789">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pengaturan Tambahan -->
+                        <div class="form-section">
+                            <div class="section-header">
+                                <h2>Pengaturan Tambahan</h2>
+                                <p>Konfigurasi opsional untuk mall</p>
+                            </div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label">Fasilitas Parkir</label>
+                                    <div class="checkbox-group">
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="facilities" value="cctv">
+                                            <span class="checkmark"></span>
+                                            CCTV
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="facilities" value="security">
+                                            <span class="checkmark"></span>
+                                            Security 24 Jam
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="facilities" value="ev_charging">
+                                            <span class="checkmark"></span>
+                                            Charging Station EV
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="facilities" value="valet">
+                                            <span class="checkmark"></span>
+                                            Valet Parking
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="facilities" value="car_wash">
+                                            <span class="checkmark"></span>
+                                            Car Wash
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="operationalHours" class="form-label">Jam Operasional</label>
+                                    <select id="operationalHours" name="operationalHours" class="form-select">
+                                        <option value="24jam">24 Jam</option>
+                                        <option value="06-22">06:00 - 22:00</option>
+                                        <option value="08-24">08:00 - 24:00</option>
+                                        <option value="10-22">10:00 - 22:00</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="status" class="form-label">Status Mall *</label>
+                                    <select id="status" name="status" class="form-select" required>
+                                        <option value="active">Aktif</option>
+                                        <option value="inactive">Nonaktif</option>
+                                        <option value="maintenance">Maintenance</option>
+                                    </select>
+                                    <div class="form-error" id="statusError"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="form-actions">
+                            <button type="button" class="btn-secondary" id="cancelBtn">
+                                Batal
+                            </button>
+                            <button type="button" class="btn-secondary" id="saveDraftBtn">
+                                Simpan Draft
+                            </button>
+                            <button type="submit" class="btn-primary" id="submitBtn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                Tambah Mall
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Footer -->
+                <footer class="admin-footer">
+                    <p>&copy; 2025 QPARKIN - Sistem Manajemen Parkir Mall | Super Admin Dashboard</p>
+                </footer>
+            </main>
+        </div>
+    </div>
+
+    <script src="../scripts/super-dashboard.js"></script>
+    <script src="../scripts/super-tambah-mall.js"></script>
+</body>
+</html>

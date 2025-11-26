@@ -13,10 +13,13 @@ class _QrScanScreenState extends State<QrScanScreen> {
 
   bool _isScanning = true;
 
-  void _onDetect(Barcode barcode, MobileScannerArguments? args) {
+  void _onDetect(BarcodeCapture barcode) {
     if (!_isScanning) return;
 
-    final String? code = barcode.rawValue;
+    final List<Barcode> barcodes = barcode.barcodes;
+    if (barcodes.isEmpty) return;
+
+    final String? code = barcodes.first.rawValue;
     if (code == null) return;
 
     _isScanning = false;
@@ -49,8 +52,7 @@ class _QrScanScreenState extends State<QrScanScreen> {
       ),
       body: MobileScanner(
         controller: cameraController,
-        allowDuplicates: false,
-        onDetect: (barcode, args) => _onDetect(barcode, args),
+        onDetect: _onDetect,
       ),
     );
   }
