@@ -188,9 +188,9 @@
 @endsection
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/super-dashboard.css') }}">
+<link rel="stylesheet" href="{{ asset_version('css/super-dashboard.css') }}">
 @endpush
 
 @push('scripts')
-<script src="{{ asset('js/super-dashboard.js') }}"></script>
+<script src="{{ asset_version('js/super-dashboard.js') }}"></script>
 @endpush

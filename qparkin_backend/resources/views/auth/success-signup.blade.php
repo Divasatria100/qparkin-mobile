@@ -42,9 +42,9 @@
         </div>
         
         <div class="success-actions">
-            <a href="{{ route('login') }}" class="login-btn">
+            <a href="{{ route('signin') }}" class="login-btn">
                 <i class="fas fa-sign-in-alt"></i>
-                Back to Login
+                Back to Sign In
             </a>
         </div>
     </div>

@@ -10,11 +10,18 @@
             <p>Please sign in to your account</p>
         </div>
 
-        <form id="signinForm" method="POST" action="{{ route('login') }}">
+        <form id="signinForm" method="POST" action="{{ route('signin') }}">
             @csrf
+            
+            @if ($errors->any())
+                <div class="alert alert-error">
+                    {{ $errors->first() }}
+                </div>
+            @endif
+
             <div class="form-group">
                 <div class="input-wrapper">
-                    <input type="text" id="username" name="username" value="{{ old('username') }}" required>
+                    <input type="text" id="username" name="name" value="{{ old('name') }}" required>
                     <label for="username">Username</label>
                     <span class="error-message" id="usernameError">Please enter a valid username</span>
                 </div>

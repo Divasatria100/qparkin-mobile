@@ -27,7 +27,7 @@
         </form>
 
         <div class="signup-link">
-            <p>Remember your password? <a href="{{ route('login') }}">Sign in</a></p>
+            <p>Remember your password? <a href="{{ route('signin') }}">Sign in</a></p>
         </div>
     </div>
 </div>

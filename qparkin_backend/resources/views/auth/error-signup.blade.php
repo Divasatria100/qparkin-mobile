@@ -22,9 +22,9 @@
                 <i class="fas fa-redo"></i>
                 Try Again
             </a>
-            <a href="{{ route('login') }}" class="login-btn secondary">
+            <a href="{{ route('signin') }}" class="login-btn secondary">
                 <i class="fas fa-sign-in-alt"></i>
-                Back to Login
+                Back to Sign In
             </a>
         </div>
     </div>

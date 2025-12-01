@@ -6,15 +6,15 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\AdminController;
 
-// Redirect root to login
+// Redirect root to signin
 Route::get('/', function () {
-    return redirect()->route('login');
+    return redirect()->route('signin');
 });
 
 // Auth Routes
 Route::middleware('guest')->group(function () {
-    Route::get('/login', [WebAuthController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [WebAuthController::class, 'login']);
+    Route::get('/signin', [WebAuthController::class, 'showLoginForm'])->name('signin');
+    Route::post('/signin', [WebAuthController::class, 'login']);
     Route::get('/register', function () { return view('auth.signup'); })->name('register');
     Route::post('/register', [RegisteredUserController::class, 'store']);
     Route::get('/forgot-password', function () { return view('auth.forgot-password'); })->name('password.request');

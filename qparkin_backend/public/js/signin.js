@@ -11,21 +11,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const successMessage = document.getElementById('successMessage');
     const notification = document.getElementById('notification');
 
-    // Data dummy untuk login
-    const dummyUsers = [
-        {
-            username: 'qparkin',
-            password: '123456',
-            role: 'superadmin',
-            redirectUrl: '../superadmin/dashboard.html'
-        },
-        {
-            username: 'panbil',
-            password: '123456',
-            role: 'admin',
-            redirectUrl: '../admin/dashboard.html'
-        }
-    ];
+    // Laravel will handle authentication via form submission
+    // No dummy users needed - backend handles this
 
     // Password visibility toggle
     passwordToggle.addEventListener('click', function() {
@@ -43,65 +30,22 @@ document.addEventListener('DOMContentLoaded', function() {
         validatePassword();
     });
 
-    // Form submission
-    signinForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const isUsernameValid = validateUsername();
-        const isPasswordValid = validatePassword();
-        
-        if (isUsernameValid && isPasswordValid) {
-            // Show loading state
-            submitBtn.classList.add('loading');
+    // Form submission - Let Laravel handle it naturally
+    // Just add loading state for better UX
+    if (signinForm) {
+        signinForm.addEventListener('submit', function(e) {
+            const isUsernameValid = validateUsername();
+            const isPasswordValid = validatePassword();
             
-            // Simulate API call dengan validasi data dummy
-            setTimeout(() => {
-                submitBtn.classList.remove('loading');
-                
-                const username = usernameInput.value.trim();
-                const password = passwordInput.value;
-                
-                // Cari user yang sesuai
-                const user = dummyUsers.find(u => u.username === username && u.password === password);
-                
-                if (user) {
-                    // Login berhasil
-                    showNotification('Login successful!', 'success');
-                    
-                    // Show success message
-                    loginForm.style.display = 'none';
-                    successMessage.classList.add('show');
-                    
-                    // Redirect ke halaman yang sesuai setelah delay
-                    setTimeout(() => {
-                        window.location.href = user.redirectUrl;
-                    }, 2000);
-                    
-                    // Simpan data login ke localStorage (opsional)
-                    localStorage.setItem('currentUser', JSON.stringify({
-                        username: user.username,
-                        role: user.role,
-                        loginTime: new Date().toISOString()
-                    }));
-                    
-                } else {
-                    // Login gagal
-                    showNotification('Invalid username or password', 'error');
-                    
-                    // Reset form
-                    usernameInput.value = '';
-                    passwordInput.value = '';
-                    usernameInput.classList.remove('has-value');
-                    passwordInput.classList.remove('has-value');
-                    
-                    // Focus ke username input
-                    usernameInput.focus();
-                }
-            }, 1500);
-        } else {
-            showNotification('Please fix the errors before submitting', 'error');
-        }
-    });
+            if (isUsernameValid && isPasswordValid) {
+                submitBtn.classList.add('loading');
+                // Form will submit naturally to Laravel backend
+            } else {
+                e.preventDefault();
+                showNotification('Please fix the errors before submitting', 'error');
+            }
+        });
+    }
 
     // Validation functions
     function validateUsername() {
