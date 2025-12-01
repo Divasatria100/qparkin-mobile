@@ -1,6 +1,6 @@
-@extends('layouts.admin')
+@extends('layouts.superadmin')
 
-@section('title', 'Profile')
+@section('title', 'Profile Super Admin')
 
 @section('breadcrumb')
 <span>Profile</span>
@@ -16,25 +16,25 @@
             <div class="profile-info">
                 <h2>{{ auth()->user()->name }}</h2>
                 <p>{{ auth()->user()->email }}</p>
-                <span class="badge">Admin Mall</span>
+                <span class="badge badge-primary">Super Admin</span>
             </div>
         </div>
 
         <div class="profile-actions">
-            <a href="{{ route('admin.profile.edit') }}" class="btn btn-primary">Edit Informasi</a>
-            <a href="{{ route('admin.profile.photo') }}" class="btn btn-secondary">Ubah Foto</a>
-            <a href="{{ route('admin.profile.security') }}" class="btn btn-secondary">Ubah Keamanan</a>
+            <a href="{{ route('superadmin.profile.edit') }}" class="btn btn-primary">Edit Informasi</a>
+            <a href="{{ route('superadmin.profile.photo') }}" class="btn btn-secondary">Ubah Foto</a>
+            <a href="{{ route('superadmin.profile.security') }}" class="btn btn-secondary">Ubah Keamanan</a>
         </div>
 
         <div class="profile-details">
-            <h3>Informasi Mall</h3>
+            <h3>Informasi Akun</h3>
             <div class="detail-row">
-                <span class="label">Nama Mall:</span>
-                <span class="value">{{ auth()->user()->mall->name ?? '-' }}</span>
+                <span class="label">Role:</span>
+                <span class="value">Super Administrator</span>
             </div>
             <div class="detail-row">
-                <span class="label">Lokasi:</span>
-                <span class="value">{{ auth()->user()->mall->location ?? '-' }}</span>
+                <span class="label">Bergabung:</span>
+                <span class="value">{{ auth()->user()->created_at->format('d F Y') }}</span>
             </div>
             <div class="detail-row">
                 <span class="label">Status:</span>
@@ -46,9 +46,9 @@
 @endsection
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/admin-profile.css') }}">
+<link rel="stylesheet" href="{{ asset('css/super-profile.css') }}">
 @endpush
 
 @push('scripts')
-<script src="{{ asset('js/admin-profile.js') }}"></script>
+<script src="{{ asset('js/super-profile.js') }}"></script>
 @endpush
