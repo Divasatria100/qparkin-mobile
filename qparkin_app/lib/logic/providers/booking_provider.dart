@@ -3,6 +3,9 @@ import 'package:flutter/widgets.dart';
 import '../../data/models/booking_model.dart';
 import '../../data/models/booking_request.dart';
 import '../../data/models/booking_response.dart';
+import '../../data/models/parking_floor_model.dart';
+import '../../data/models/parking_slot_model.dart';
+import '../../data/models/slot_reservation_model.dart';
 import '../../data/services/booking_service.dart';
 import '../../utils/cost_calculator.dart';
 import '../../utils/booking_validator.dart';
@@ -43,8 +46,21 @@ class BookingProvider extends ChangeNotifier {
   // State properties - Booking result
   BookingModel? _createdBooking;
 
+  // NEW: State properties - Slot reservation
+  List<ParkingFloorModel> _floors = [];
+  ParkingFloorModel? _selectedFloor;
+  List<ParkingSlotModel> _slotsVisualization = [];
+  SlotReservationModel? _reservedSlot;
+  bool _isLoadingFloors = false;
+  bool _isLoadingSlots = false;
+  bool _isReservingSlot = false;
+
   // Timer for periodic availability checks
   Timer? _availabilityTimer;
+
+  // NEW: Timers for slot refresh and reservation timeout
+  Timer? _slotRefreshTimer;
+  Timer? _reservationTimer;
 
   // Debounce timers for user inputs
   Timer? _costCalculationDebounce;
@@ -80,6 +96,16 @@ class BookingProvider extends ChangeNotifier {
   double get firstHourRate => _firstHourRate;
   double get additionalHourRate => _additionalHourRate;
 
+  // NEW: Slot reservation getters
+  List<ParkingFloorModel> get floors => _floors;
+  ParkingFloorModel? get selectedFloor => _selectedFloor;
+  List<ParkingSlotModel> get slotsVisualization => _slotsVisualization;
+  SlotReservationModel? get reservedSlot => _reservedSlot;
+  bool get isLoadingFloors => _isLoadingFloors;
+  bool get isLoadingSlots => _isLoadingSlots;
+  bool get isReservingSlot => _isReservingSlot;
+  bool get hasReservedSlot => _reservedSlot != null && !_reservedSlot!.isExpired;
+
   // Computed properties
   DateTime? get calculatedEndTime {
     if (_startTime == null || _bookingDuration == null) return null;
@@ -96,6 +122,8 @@ class BookingProvider extends ChangeNotifier {
         _availableSlots > 0 &&
         !hasValidationErrors &&
         !_isLoading;
+    // Note: Slot reservation is optional for backward compatibility
+    // If hasReservedSlot is true, it will be included in booking
   }
 
   BookingProvider({BookingService? bookingService})
@@ -436,6 +464,14 @@ class BookingProvider extends ChangeNotifier {
       }
     }
 
+    // Validate slot reservation if present
+    if (_reservedSlot != null && _reservedSlot!.isExpired) {
+      _errorMessage = 'Reservasi slot telah berakhir. Silakan reservasi ulang.';
+      debugPrint('[BookingProvider] Reservation expired - cannot confirm booking');
+      notifyListeners();
+      return false;
+    }
+
     // Set loading state
     _isLoading = true;
     _errorMessage = null;
@@ -453,6 +489,9 @@ class BookingProvider extends ChangeNotifier {
         waktuMulai: _startTime!,
         durasiJam: durationHours,
         notes: null,
+        // Include reserved slot ID and reservation ID if available
+        idSlot: _reservedSlot?.slotId,
+        reservationId: _reservedSlot?.reservationId,
       );
 
       debugPrint(
@@ -475,8 +514,10 @@ class BookingProvider extends ChangeNotifier {
         debugPrint(
             '[BookingProvider] Booking created successfully: ${response.booking!.idBooking}');
 
-        // Stop availability timer since booking is complete
+        // Stop all timers since booking is complete
         _stopAvailabilityTimer();
+        stopSlotRefreshTimer();
+        stopReservationTimer();
 
         notifyListeners();
 
@@ -699,6 +740,506 @@ class BookingProvider extends ChangeNotifier {
     await checkAvailability(token: token);
   }
 
+  /// Fetch parking floors for the selected mall
+  ///
+  /// Queries the API for available floors with caching strategy.
+  /// Updates floors state and handles errors gracefully.
+  ///
+  /// Parameters:
+  /// - [token]: Authentication token for API call
+  ///
+  /// Requirements: 12.1-12.11, 15.1-15.10
+  Future<void> fetchFloors({required String token}) async {
+    if (_selectedMall == null) {
+      debugPrint('[BookingProvider] ERROR: Cannot fetch floors - no mall selected');
+      debugPrint('[BookingProvider] Stack trace: ${StackTrace.current}');
+      _errorMessage = 'Mall tidak dipilih';
+      notifyListeners();
+      return;
+    }
+
+    final mallId = _selectedMall!['id_mall']?.toString() ??
+        _selectedMall!['id']?.toString() ??
+        '';
+
+    if (mallId.isEmpty) {
+      debugPrint('[BookingProvider] ERROR: Cannot fetch floors - invalid mall ID');
+      debugPrint('[BookingProvider] Mall data: $_selectedMall');
+      debugPrint('[BookingProvider] Stack trace: ${StackTrace.current}');
+      _errorMessage = 'ID mall tidak valid';
+      notifyListeners();
+      return;
+    }
+
+    _isLoadingFloors = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      debugPrint('[BookingProvider] Fetching floors for mall: $mallId');
+      debugPrint('[BookingProvider] Request timestamp: ${DateTime.now().toIso8601String()}');
+
+      final floors = await _bookingService.getFloorsWithRetry(
+        mallId: mallId,
+        token: token,
+        maxRetries: 2,
+      );
+
+      _floors = floors;
+      _isLoadingFloors = false;
+
+      if (floors.isEmpty) {
+        _errorMessage = 'Tidak ada data lantai parkir tersedia';
+        debugPrint('[BookingProvider] WARNING: No floors available for mall: $mallId');
+        debugPrint('[BookingProvider] Response timestamp: ${DateTime.now().toIso8601String()}');
+      } else {
+        debugPrint('[BookingProvider] SUCCESS: Loaded ${floors.length} floors');
+        debugPrint('[BookingProvider] Floor IDs: ${floors.map((f) => f.idFloor).join(", ")}');
+        debugPrint('[BookingProvider] Response timestamp: ${DateTime.now().toIso8601String()}');
+      }
+
+      notifyListeners();
+    } catch (e, stackTrace) {
+      _isLoadingFloors = false;
+
+      // Log detailed error information for debugging
+      debugPrint('[BookingProvider] ERROR: Failed to fetch floors');
+      debugPrint('[BookingProvider] Mall ID: $mallId');
+      debugPrint('[BookingProvider] Error type: ${e.runtimeType}');
+      debugPrint('[BookingProvider] Error message: $e');
+      debugPrint('[BookingProvider] Stack trace: $stackTrace');
+      debugPrint('[BookingProvider] Timestamp: ${DateTime.now().toIso8601String()}');
+
+      // Provide user-friendly error messages based on error type
+      if (e.toString().contains('Unauthorized') || e.toString().contains('401')) {
+        _errorMessage = 'Sesi Anda telah berakhir. Silakan login kembali.';
+        debugPrint('[BookingProvider] ERROR_CODE: AUTH_ERROR');
+      } else if (e.toString().contains('Timeout') || e.toString().contains('timeout')) {
+        _errorMessage = 'Permintaan timeout. Periksa koneksi internet Anda dan coba lagi.';
+        debugPrint('[BookingProvider] ERROR_CODE: TIMEOUT_ERROR');
+      } else if (e.toString().contains('Network') || e.toString().contains('network')) {
+        _errorMessage = 'Gagal memuat data lantai. Periksa koneksi internet Anda.';
+        debugPrint('[BookingProvider] ERROR_CODE: NETWORK_ERROR');
+      } else if (e.toString().contains('SocketException')) {
+        _errorMessage = 'Gagal memuat data lantai. Periksa koneksi internet Anda.';
+        debugPrint('[BookingProvider] ERROR_CODE: SOCKET_ERROR');
+      } else if (e.toString().contains('FormatException')) {
+        _errorMessage = 'Gagal memuat data lantai. Format data tidak valid.';
+        debugPrint('[BookingProvider] ERROR_CODE: FORMAT_ERROR');
+      } else if (e.toString().contains('404') || e.toString().contains('Not Found')) {
+        _errorMessage = 'Gagal memuat data lantai. Data tidak ditemukan.';
+        debugPrint('[BookingProvider] ERROR_CODE: NOT_FOUND');
+      } else if (e.toString().contains('500') || e.toString().contains('Server Error')) {
+        _errorMessage = 'Gagal memuat data lantai. Terjadi kesalahan server.';
+        debugPrint('[BookingProvider] ERROR_CODE: SERVER_ERROR');
+      } else {
+        _errorMessage = 'Gagal memuat data lantai. Silakan coba lagi.';
+        debugPrint('[BookingProvider] ERROR_CODE: UNKNOWN_ERROR');
+      }
+
+      notifyListeners();
+    }
+  }
+
+  /// Retry fetching floors after error
+  ///
+  /// Convenience method for retry button in UI
+  ///
+  /// Requirements: 15.1-15.10
+  Future<void> retryFetchFloors({required String token}) async {
+    debugPrint('[BookingProvider] Retrying floor fetch');
+    await fetchFloors(token: token);
+  }
+
+  /// Select a parking floor
+  ///
+  /// Validates floor selection and clears any existing reservation.
+  /// Automatically fetches slot visualization for the selected floor.
+  ///
+  /// Parameters:
+  /// - [floor]: The floor to select
+  /// - [token]: Authentication token for fetching slots
+  ///
+  /// Requirements: 12.1-12.11
+  void selectFloor(ParkingFloorModel floor, {String? token}) {
+    debugPrint('[BookingProvider] Selecting floor: ${floor.floorName}');
+
+    // Validate floor has available slots
+    if (!floor.hasAvailableSlots) {
+      _errorMessage = 'Lantai ${floor.floorName} tidak memiliki slot tersedia';
+      debugPrint('[BookingProvider] Floor has no available slots');
+      notifyListeners();
+      return;
+    }
+
+    _selectedFloor = floor;
+    
+    // Clear previous reservation when floor changes
+    if (_reservedSlot != null) {
+      debugPrint('[BookingProvider] Clearing previous reservation due to floor change');
+      clearReservation();
+    }
+
+    // Clear previous slot visualization
+    _slotsVisualization = [];
+    
+    notifyListeners();
+
+    // Fetch slots for visualization if token provided
+    if (token != null) {
+      fetchSlotsForVisualization(token: token);
+    }
+  }
+
+  /// Fetch slots for visualization on the selected floor
+  ///
+  /// Queries the API for slot data to display (non-interactive).
+  /// Supports vehicle type filtering and implements caching.
+  /// Handles network timeouts and provides detailed error messages.
+  ///
+  /// Parameters:
+  /// - [token]: Authentication token for API call
+  ///
+  /// Requirements: 12.1-12.11, 15.1-15.10
+  Future<void> fetchSlotsForVisualization({required String token}) async {
+    if (_selectedFloor == null) {
+      debugPrint('[BookingProvider] Cannot fetch slots - no floor selected');
+      return;
+    }
+
+    _isLoadingSlots = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final floorId = _selectedFloor!.idFloor;
+      final vehicleType = _selectedVehicle?['jenis_kendaraan']?.toString() ??
+          _selectedVehicle?['jenis']?.toString();
+
+      debugPrint('[BookingProvider] Fetching slots for floor: $floorId');
+      debugPrint('[BookingProvider] Request timestamp: ${DateTime.now().toIso8601String()}');
+      if (vehicleType != null) {
+        debugPrint('[BookingProvider] Filtering by vehicle type: $vehicleType');
+      }
+
+      final slots = await _bookingService.getSlotsForVisualization(
+        floorId: floorId,
+        token: token,
+        vehicleType: vehicleType,
+      );
+
+      _slotsVisualization = slots;
+      _isLoadingSlots = false;
+
+      debugPrint('[BookingProvider] SUCCESS: Loaded ${slots.length} slots for visualization');
+      debugPrint('[BookingProvider] Response timestamp: ${DateTime.now().toIso8601String()}');
+      
+      if (slots.isEmpty) {
+        debugPrint('[BookingProvider] WARNING: No slots returned for floor: $floorId');
+      }
+      
+      notifyListeners();
+    } catch (e, stackTrace) {
+      _isLoadingSlots = false;
+
+      // Log detailed error information for debugging
+      debugPrint('[BookingProvider] ERROR: Failed to fetch slot visualization');
+      debugPrint('[BookingProvider] Floor ID: ${_selectedFloor?.idFloor}');
+      debugPrint('[BookingProvider] Error type: ${e.runtimeType}');
+      debugPrint('[BookingProvider] Error message: $e');
+      debugPrint('[BookingProvider] Stack trace: $stackTrace');
+      debugPrint('[BookingProvider] Timestamp: ${DateTime.now().toIso8601String()}');
+
+      // Provide user-friendly error messages based on error type
+      if (e.toString().contains('Unauthorized') || e.toString().contains('401')) {
+        _errorMessage = 'Sesi Anda telah berakhir. Silakan login kembali.';
+        debugPrint('[BookingProvider] ERROR_CODE: AUTH_ERROR');
+      } else if (e.toString().contains('Timeout') || e.toString().contains('timeout')) {
+        _errorMessage = 'Gagal memuat tampilan slot. Koneksi timeout. Silakan coba lagi.';
+        debugPrint('[BookingProvider] ERROR_CODE: TIMEOUT_ERROR');
+      } else if (e.toString().contains('Network') || e.toString().contains('network')) {
+        _errorMessage = 'Gagal memuat tampilan slot. Periksa koneksi internet Anda.';
+        debugPrint('[BookingProvider] ERROR_CODE: NETWORK_ERROR');
+      } else if (e.toString().contains('SocketException')) {
+        _errorMessage = 'Gagal memuat tampilan slot. Tidak dapat terhubung ke server.';
+        debugPrint('[BookingProvider] ERROR_CODE: SOCKET_ERROR');
+      } else if (e.toString().contains('FormatException')) {
+        _errorMessage = 'Gagal memuat tampilan slot. Format data tidak valid.';
+        debugPrint('[BookingProvider] ERROR_CODE: FORMAT_ERROR');
+      } else if (e.toString().contains('404') || e.toString().contains('Not Found')) {
+        _errorMessage = 'Gagal memuat tampilan slot. Data tidak ditemukan.';
+        debugPrint('[BookingProvider] ERROR_CODE: NOT_FOUND');
+      } else if (e.toString().contains('500') || e.toString().contains('Server Error')) {
+        _errorMessage = 'Gagal memuat tampilan slot. Terjadi kesalahan server.';
+        debugPrint('[BookingProvider] ERROR_CODE: SERVER_ERROR');
+      } else {
+        _errorMessage = 'Gagal memuat tampilan slot. Silakan coba lagi.';
+        debugPrint('[BookingProvider] ERROR_CODE: UNKNOWN_ERROR');
+      }
+
+      notifyListeners();
+    }
+  }
+
+  /// Retry fetching slot visualization after error
+  ///
+  /// Convenience method for retry button in UI
+  ///
+  /// Requirements: 15.1-15.10
+  Future<void> retryFetchSlotsVisualization({required String token}) async {
+    debugPrint('[BookingProvider] Retrying slot visualization fetch');
+    await fetchSlotsForVisualization(token: token);
+  }
+
+  /// Refresh slot visualization with debouncing
+  ///
+  /// Manually refreshes slot data with 500ms debounce to prevent
+  /// excessive API calls. Used by refresh button in UI.
+  ///
+  /// Parameters:
+  /// - [token]: Authentication token for API call
+  ///
+  /// Requirements: 12.1-12.11
+  void refreshSlotVisualization({required String token}) {
+    debugPrint('[BookingProvider] Refresh slot visualization requested');
+
+    // Cancel any pending refresh
+    _slotRefreshTimer?.cancel();
+
+    // Debounce the refresh (500ms)
+    _slotRefreshTimer = Timer(const Duration(milliseconds: 500), () {
+      debugPrint('[BookingProvider] Executing debounced slot refresh');
+      fetchSlotsForVisualization(token: token);
+    });
+  }
+
+  /// Reserve a random available slot on the selected floor
+  ///
+  /// Validates floor selection and calls backend to assign a specific slot.
+  /// Starts reservation timeout timer (5 minutes) on success.
+  /// Provides detailed error messages for no slots available scenario.
+  ///
+  /// Parameters:
+  /// - [token]: Authentication token for API call
+  /// - [userId]: User ID for reservation
+  ///
+  /// Returns: Future<bool> indicating success or failure
+  ///
+  /// Requirements: 12.1-12.11, 15.1-15.10
+  Future<bool> reserveRandomSlot({
+    required String token,
+    required String userId,
+  }) async {
+    if (_selectedFloor == null) {
+      _errorMessage = 'Silakan pilih lantai terlebih dahulu';
+      debugPrint('[BookingProvider] Cannot reserve slot - no floor selected');
+      notifyListeners();
+      return false;
+    }
+
+    if (!_selectedFloor!.hasAvailableSlots) {
+      _errorMessage = 'NO_SLOTS_AVAILABLE:${_selectedFloor!.floorName}';
+      debugPrint('[BookingProvider] Cannot reserve slot - no available slots on floor: ${_selectedFloor!.floorName}');
+      notifyListeners();
+      return false;
+    }
+
+    if (_selectedVehicle == null) {
+      _errorMessage = 'Silakan pilih kendaraan terlebih dahulu';
+      debugPrint('[BookingProvider] Cannot reserve slot - no vehicle selected');
+      notifyListeners();
+      return false;
+    }
+
+    _isReservingSlot = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final floorId = _selectedFloor!.idFloor;
+      final vehicleType = _selectedVehicle!['jenis_kendaraan']?.toString() ??
+          _selectedVehicle!['jenis']?.toString() ??
+          '';
+
+      debugPrint('[BookingProvider] Reserving random slot on floor: ${_selectedFloor!.floorName}');
+      debugPrint('[BookingProvider] Vehicle type: $vehicleType');
+
+      final reservation = await _bookingService.reserveRandomSlot(
+        floorId: floorId,
+        userId: userId,
+        vehicleType: vehicleType,
+        token: token,
+        durationMinutes: 5, // 5-minute reservation timeout
+      );
+
+      _isReservingSlot = false;
+
+      if (reservation != null) {
+        _reservedSlot = reservation;
+        
+        // Start reservation timeout timer
+        startReservationTimer();
+
+        debugPrint('[BookingProvider] Slot reserved successfully: ${reservation.slotCode}');
+        debugPrint('[BookingProvider] Reservation expires at: ${reservation.expiresAt}');
+        
+        notifyListeners();
+        return true;
+      } else {
+        // No slots available - use special error code for UI handling
+        _errorMessage = 'NO_SLOTS_AVAILABLE:${_selectedFloor!.floorName}';
+        debugPrint('[BookingProvider] Slot reservation failed - no slots available on floor: ${_selectedFloor!.floorName}');
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _isReservingSlot = false;
+      
+      // Check if error indicates no slots available
+      if (e.toString().contains('NO_SLOTS_AVAILABLE') || 
+          e.toString().contains('no slots') ||
+          e.toString().contains('tidak ada slot')) {
+        _errorMessage = 'NO_SLOTS_AVAILABLE:${_selectedFloor!.floorName}';
+        debugPrint('[BookingProvider] Slot reservation failed - no slots available (from API): ${_selectedFloor!.floorName}');
+      } else {
+        _errorMessage = 'Gagal mereservasi slot. Silakan coba lagi.';
+        debugPrint('[BookingProvider] Error reserving slot: $e');
+      }
+
+      notifyListeners();
+      return false;
+    }
+  }
+  
+  /// Get alternative floors with available slots
+  ///
+  /// Returns list of floors that have available slots, excluding the current floor.
+  /// Sorted by availability (most available first).
+  ///
+  /// Requirements: 15.1-15.10
+  List<ParkingFloorModel> getAlternativeFloors() {
+    if (_selectedFloor == null) {
+      return _floors.where((floor) => floor.hasAvailableSlots).toList()
+        ..sort((a, b) => b.availableSlots.compareTo(a.availableSlots));
+    }
+    
+    return _floors
+        .where((floor) => 
+            floor.idFloor != _selectedFloor!.idFloor && 
+            floor.hasAvailableSlots)
+        .toList()
+      ..sort((a, b) => b.availableSlots.compareTo(a.availableSlots));
+  }
+
+  /// Clear slot reservation
+  ///
+  /// Clears the reserved slot and stops the reservation timer.
+  /// Called when user changes floor or reservation expires.
+  ///
+  /// Requirements: 12.1-12.11
+  void clearReservation() {
+    debugPrint('[BookingProvider] Clearing slot reservation');
+
+    _reservedSlot = null;
+    
+    // Stop reservation timer
+    stopReservationTimer();
+
+    notifyListeners();
+  }
+
+  /// Start automatic slot refresh timer
+  ///
+  /// Refreshes slot visualization every 15 seconds while floor is selected.
+  /// Stops automatically when floor is deselected or page is disposed.
+  ///
+  /// Parameters:
+  /// - [token]: Authentication token for API calls
+  ///
+  /// Requirements: 11.10, 14.1-14.10
+  void startSlotRefreshTimer({required String token}) {
+    // Stop any existing timer
+    stopSlotRefreshTimer();
+
+    if (_selectedFloor == null) {
+      debugPrint('[BookingProvider] Cannot start slot refresh - no floor selected');
+      return;
+    }
+
+    debugPrint('[BookingProvider] Starting slot refresh timer (15s interval)');
+
+    // Set up periodic timer (15 seconds)
+    _slotRefreshTimer = Timer.periodic(
+      const Duration(seconds: 15),
+      (timer) {
+        // Only refresh if floor is still selected
+        if (_selectedFloor != null) {
+          debugPrint('[BookingProvider] Auto-refreshing slot visualization');
+          fetchSlotsForVisualization(token: token);
+        } else {
+          debugPrint('[BookingProvider] Stopping slot refresh - floor deselected');
+          stopSlotRefreshTimer();
+        }
+      },
+    );
+  }
+
+  /// Stop automatic slot refresh timer
+  ///
+  /// Requirements: 11.10, 14.1-14.10
+  void stopSlotRefreshTimer() {
+    if (_slotRefreshTimer != null) {
+      debugPrint('[BookingProvider] Stopping slot refresh timer');
+      _slotRefreshTimer?.cancel();
+      _slotRefreshTimer = null;
+    }
+  }
+
+  /// Start reservation timeout timer
+  ///
+  /// Monitors reservation expiration and auto-clears when timeout reached.
+  /// Timer duration is based on reservation's expiresAt timestamp.
+  ///
+  /// Requirements: 11.10, 14.1-14.10
+  void startReservationTimer() {
+    // Stop any existing timer
+    stopReservationTimer();
+
+    if (_reservedSlot == null) {
+      debugPrint('[BookingProvider] Cannot start reservation timer - no reservation');
+      return;
+    }
+
+    final timeRemaining = _reservedSlot!.timeRemaining;
+    
+    if (timeRemaining.isNegative) {
+      debugPrint('[BookingProvider] Reservation already expired');
+      clearReservation();
+      return;
+    }
+
+    debugPrint('[BookingProvider] Starting reservation timer (${timeRemaining.inSeconds}s remaining)');
+
+    // Set up timer to clear reservation when it expires
+    _reservationTimer = Timer(timeRemaining, () {
+      debugPrint('[BookingProvider] Reservation timeout reached');
+      _errorMessage = 'Waktu reservasi habis. Silakan reservasi ulang.';
+      clearReservation();
+      notifyListeners();
+    });
+  }
+
+  /// Stop reservation timeout timer
+  ///
+  /// Requirements: 11.10, 14.1-14.10
+  void stopReservationTimer() {
+    if (_reservationTimer != null) {
+      debugPrint('[BookingProvider] Stopping reservation timer');
+      _reservationTimer?.cancel();
+      _reservationTimer = null;
+    }
+  }
+
   /// Clear all state and reset provider
   void clear() {
     debugPrint('[BookingProvider] Clearing all state');
@@ -717,8 +1258,19 @@ class BookingProvider extends ChangeNotifier {
     _validationErrors = {};
     _createdBooking = null;
 
-    // Stop availability timer
+    // Clear slot reservation state
+    _floors = [];
+    _selectedFloor = null;
+    _slotsVisualization = [];
+    _reservedSlot = null;
+    _isLoadingFloors = false;
+    _isLoadingSlots = false;
+    _isReservingSlot = false;
+
+    // Stop all timers
     _stopAvailabilityTimer();
+    stopSlotRefreshTimer();
+    stopReservationTimer();
 
     notifyListeners();
   }
@@ -881,9 +1433,11 @@ class BookingProvider extends ChangeNotifier {
   void dispose() {
     debugPrint('[BookingProvider] Disposing provider');
     
-    // Stop timers
+    // Stop all timers
     _stopAvailabilityTimer();
     _cancelDebounceTimers();
+    stopSlotRefreshTimer();
+    stopReservationTimer();
     
     // Cancel pending API calls
     _bookingService.cancelPendingRequests();
@@ -893,6 +1447,10 @@ class BookingProvider extends ChangeNotifier {
     _selectedVehicle = null;
     _costBreakdown = null;
     _createdBooking = null;
+    _floors = [];
+    _selectedFloor = null;
+    _slotsVisualization = [];
+    _reservedSlot = null;
     
     super.dispose();
   }
