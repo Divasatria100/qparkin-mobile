@@ -116,5 +116,111 @@ class AdminController extends Controller
         return view('admin.profile', compact('user'));
     }
 
-    
+    public function editProfile()
+    {
+        return view('admin.edit-informasi');
+    }
+
+    public function updateProfile(Request $request)
+    {
+        // Logic untuk update profile
+        return redirect()->route('admin.profile')->with('success', 'Profile updated successfully');
+    }
+
+    public function editPhoto()
+    {
+        return view('admin.ubah-foto');
+    }
+
+    public function editSecurity()
+    {
+        return view('admin.ubah-keamanan');
+    }
+
+    public function notifikasi()
+    {
+        $notifications = [];
+        return view('admin.notifikasi', compact('notifications'));
+    }
+
+    public function tiket()
+    {
+        $user = Auth::user();
+        $userId = $user->id_user ?? $user->id ?? null;
+        $adminMall = $user->adminMall ?? AdminMall::where('id_user', $userId)->first();
+        
+        if (!$adminMall) {
+            abort(404, 'Admin mall data not found.');
+        }
+
+        $tickets = TransaksiParkir::where('id_mall', $adminMall->id_mall)
+            ->with('kendaraan')
+            ->orderBy('id_transaksi', 'DESC')
+            ->paginate(20);
+
+        return view('admin.tiket', compact('tickets'));
+    }
+
+    public function tiketDetail($id)
+    {
+        $ticket = TransaksiParkir::with('kendaraan')->findOrFail($id);
+        return view('admin.detail-tiket', compact('ticket'));
+    }
+
+    public function tarif()
+    {
+        $user = Auth::user();
+        $userId = $user->id_user ?? $user->id ?? null;
+        $adminMall = $user->adminMall ?? AdminMall::where('id_user', $userId)->first();
+        
+        if (!$adminMall) {
+            abort(404, 'Admin mall data not found.');
+        }
+
+        $tariffs = \App\Models\Tarif::where('id_mall', $adminMall->id_mall)->get();
+        return view('admin.tarif', compact('tariffs'));
+    }
+
+    public function editTarif($id)
+    {
+        $tariff = \App\Models\Tarif::findOrFail($id);
+        return view('admin.edit-tarif', compact('tariff'));
+    }
+
+    public function updateTarif(Request $request, $id)
+    {
+        // Logic untuk update tarif
+        return redirect()->route('admin.tarif')->with('success', 'Tarif updated successfully');
+    }
+
+    public function parkiran()
+    {
+        $user = Auth::user();
+        $userId = $user->id_user ?? $user->id ?? null;
+        $adminMall = $user->adminMall ?? AdminMall::where('id_user', $userId)->first();
+        
+        if (!$adminMall) {
+            abort(404, 'Admin mall data not found.');
+        }
+
+        $parkingAreas = Parkiran::where('id_mall', $adminMall->id_mall)->get();
+        return view('admin.parkiran', compact('parkingAreas'));
+    }
+
+    public function createParkiran()
+    {
+        return view('admin.tambah-parkiran');
+    }
+
+    public function detailParkiran($id)
+    {
+        $parkiran = Parkiran::findOrFail($id);
+        return view('admin.detail-parkiran', compact('parkiran'));
+    }
+
+    public function editParkiran($id)
+    {
+        $parkiran = Parkiran::findOrFail($id);
+        return view('admin.edit-parkiran', compact('parkiran'));
+    }
 }

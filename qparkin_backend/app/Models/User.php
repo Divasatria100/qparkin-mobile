@@ -38,7 +38,9 @@ class User extends Authenticatable
         'password',
         'role',
         'saldo_poin',
-        'status'
+        'status',
+        'provider',
+        'provider_id'
     ];
 
     protected $hidden = [
