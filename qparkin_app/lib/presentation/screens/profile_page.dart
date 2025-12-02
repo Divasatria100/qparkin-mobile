@@ -147,72 +147,73 @@ class _ProfilePageState extends State<ProfilePage> {
           color: const Color(0xFF573ED1),
           onRefresh: () async {
             // Announce refresh start
-            _announceToScreenReader('Memperbarui data profil');
+            if (mounted) {
+              _announceToScreenReader('Memperbarui data profil');
+            }
             
             try {
               await provider.refreshAll();
+              
+              if (!mounted) return;
+              
               if (provider.hasError) {
                 // Announce refresh failure
                 _announceToScreenReader('Gagal memperbarui data profil');
                 
                 // Show error snackbar if refresh fails
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        provider.errorMessage ?? 'Gagal memperbarui data',
-                        style: const TextStyle(fontFamily: 'Nunito'),
-                      ),
-                      backgroundColor: Colors.red[400],
-                      behavior: SnackBarBehavior.floating,
-                      duration: const Duration(seconds: 3),
-                    ),
-                  );
-                }
-              } else {
-                // Announce refresh success
-                _announceToScreenReader('Data profil berhasil diperbarui');
-                
-                // Show success snackbar if refresh succeeds
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Data berhasil diperbarui',
-                        style: TextStyle(fontFamily: 'Nunito'),
-                      ),
-                      backgroundColor: Color(0xFF4CAF50),
-                      behavior: SnackBarBehavior.floating,
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-                }
-              }
-            } catch (e) {
-              // Announce unexpected error
-              _announceToScreenReader('Terjadi kesalahan saat memperbarui data');
-              
-              // Handle any unexpected errors
-              if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: const Text(
-                      'Terjadi kesalahan saat memperbarui data',
-                      style: TextStyle(fontFamily: 'Nunito'),
+                    content: Text(
+                      provider.errorMessage ?? 'Gagal memperbarui data',
+                      style: const TextStyle(fontFamily: 'Nunito'),
                     ),
                     backgroundColor: Colors.red[400],
                     behavior: SnackBarBehavior.floating,
                     duration: const Duration(seconds: 3),
                   ),
                 );
+              } else {
+                // Announce refresh success
+                _announceToScreenReader('Data profil berhasil diperbarui');
+                
+                // Show success snackbar if refresh succeeds
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Data berhasil diperbarui',
+                      style: TextStyle(fontFamily: 'Nunito'),
+                    ),
+                    backgroundColor: Color(0xFF4CAF50),
+                    behavior: SnackBarBehavior.floating,
+                    duration: Duration(seconds: 2),
+                  ),
+                );
               }
+            } catch (e) {
+              if (!mounted) return;
+              
+              // Announce unexpected error
+              _announceToScreenReader('Terjadi kesalahan saat memperbarui data');
+              
+              // Handle any unexpected errors
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text(
+                    'Terjadi kesalahan saat memperbarui data',
+                    style: TextStyle(fontFamily: 'Nunito'),
+                  ),
+                  backgroundColor: Colors.red[400],
+                  behavior: SnackBarBehavior.floating,
+                  duration: const Duration(seconds: 3),
+                ),
+              );
             }
           },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               // 🔷 Header dengan gradient
               Container(
                 width: double.infinity,
@@ -368,7 +369,7 @@ class _ProfilePageState extends State<ProfilePage> {
               Transform.translate(
                 offset: const Offset(0, -70),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                   child: Column(
                     children: [
                       // Section: Informasi Kendaraan
@@ -424,7 +425,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           : Semantics(
                               label: 'Daftar kendaraan terdaftar, ${vehicles.length} kendaraan',
                               child: SizedBox(
-                                height: 150,
+                                height: 120,
                                 child: PageView.builder(
                                   controller:
                                       PageController(viewportFraction: 0.9),
@@ -433,164 +434,21 @@ class _ProfilePageState extends State<ProfilePage> {
                                     final vehicle = vehicles[index];
                                     return Semantics(
                                       label: 'Kendaraan ${index + 1} dari ${vehicles.length}',
-                                      hint: 'Geser ke kiri untuk menghapus',
-                                      child: Dismissible(
-                                        key: Key(vehicle.idKendaraan),
-                                        direction: DismissDirection.endToStart,
-                                        confirmDismiss: (direction) async {
-                                          // Show confirmation dialog before deletion
-                                          return await showDialog<bool>(
-                                            context: context,
-                                            builder: (BuildContext dialogContext) {
-                                              return Semantics(
-                                                label: 'Dialog konfirmasi hapus kendaraan',
-                                                child: AlertDialog(
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius: BorderRadius.circular(16),
-                                                  ),
-                                                  title: const Text(
-                                                    'Hapus Kendaraan',
-                                                    style: TextStyle(
-                                                      fontFamily: 'Nunito',
-                                                      fontWeight: FontWeight.w700,
-                                                    ),
-                                                  ),
-                                                  content: Text(
-                                                    'Apakah Anda yakin ingin menghapus ${vehicle.merk} ${vehicle.tipe} (${vehicle.platNomor})?',
-                                                    style: const TextStyle(
-                                                      fontFamily: 'Nunito',
-                                                    ),
-                                                  ),
-                                                  actions: [
-                                                    Semantics(
-                                                      button: true,
-                                                      label: 'Tombol batal',
-                                                      hint: 'Ketuk untuk membatalkan penghapusan',
-                                                      child: TextButton(
-                                                        onPressed: () => Navigator.of(dialogContext).pop(false),
-                                                        child: const Text(
-                                                          'Batal',
-                                                          style: TextStyle(
-                                                            fontFamily: 'Nunito',
-                                                            color: Color(0xFF8E8E93),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    Semantics(
-                                                      button: true,
-                                                      label: 'Tombol hapus',
-                                                      hint: 'Ketuk untuk menghapus kendaraan',
-                                                      child: TextButton(
-                                                        onPressed: () => Navigator.of(dialogContext).pop(true),
-                                                        child: const Text(
-                                                          'Hapus',
-                                                          style: TextStyle(
-                                                            fontFamily: 'Nunito',
-                                                            color: Colors.red,
-                                                            fontWeight: FontWeight.w600,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
+                                      hint: 'Geser untuk melihat kendaraan lain, ketuk untuk detail',
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(right: 12),
+                                        child: VehicleCard(
+                                          vehicle: vehicle,
+                                          isActive: vehicle.isActive,
+                                          onTap: () {
+                                            Navigator.of(context).push(
+                                              PageTransitions.slideFromRight(
+                                                page: VehicleDetailPage(
+                                                  vehicle: vehicle,
                                                 ),
-                                              );
-                                            },
-                                          ) ?? false;
-                                    },
-                                    onDismissed: (direction) async {
-                                      // Store vehicle data for undo
-                                      final deletedVehicle = vehicle;
-                                      
-                                      // Delete the vehicle
-                                      try {
-                                        await provider.deleteVehicle(vehicle.idKendaraan);
-                                        
-                                        // Announce deletion success
-                                        _announceToScreenReader('Kendaraan ${deletedVehicle.merk} ${deletedVehicle.tipe} berhasil dihapus');
-                                        
-                                        // Show undo snackbar
-                                        if (mounted) {
-                                          // ignore: use_build_context_synchronously
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                'Kendaraan ${deletedVehicle.merk} ${deletedVehicle.tipe} dihapus',
-                                                style: const TextStyle(fontFamily: 'Nunito'),
                                               ),
-                                              backgroundColor: const Color(0xFF4CAF50),
-                                              behavior: SnackBarBehavior.floating,
-                                              duration: const Duration(seconds: 4),
-                                              action: SnackBarAction(
-                                                label: 'Urungkan',
-                                                textColor: Colors.white,
-                                                onPressed: () async {
-                                                  // Restore the deleted vehicle
-                                                  await provider.addVehicle(deletedVehicle);
-                                                  // Announce restoration
-                                                  _announceToScreenReader('Kendaraan ${deletedVehicle.merk} ${deletedVehicle.tipe} dikembalikan');
-                                                },
-                                              ),
-                                            ),
-                                          );
-                                        }
-                                      } catch (e) {
-                                        // Announce deletion failure
-                                        _announceToScreenReader('Gagal menghapus kendaraan');
-                                        
-                                        // Show error snackbar if deletion fails
-                                        if (mounted) {
-                                          // ignore: use_build_context_synchronously
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(
-                                              content: const Text(
-                                                'Gagal menghapus kendaraan',
-                                                style: TextStyle(fontFamily: 'Nunito'),
-                                              ),
-                                              backgroundColor: Colors.red[400],
-                                              behavior: SnackBarBehavior.floating,
-                                              duration: const Duration(seconds: 3),
-                                            ),
-                                          );
-                                        }
-                                      }
-                                        },
-                                        background: Semantics(
-                                          label: 'Latar belakang hapus kendaraan',
-                                          child: Container(
-                                            margin: const EdgeInsets.only(right: 12),
-                                            decoration: BoxDecoration(
-                                              color: Colors.red,
-                                              borderRadius: BorderRadius.circular(12),
-                                            ),
-                                            alignment: Alignment.centerRight,
-                                            padding: const EdgeInsets.only(right: 24),
-                                            child: Semantics(
-                                              label: 'Ikon hapus',
-                                              child: const Icon(
-                                                Icons.delete,
-                                                color: Colors.white,
-                                                size: 32,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(right: 12),
-                                          child: VehicleCard(
-                                            vehicle: vehicle,
-                                            isActive: vehicle.isActive,
-                                            onTap: () {
-                                              Navigator.of(context).push(
-                                                PageTransitions.slideFromRight(
-                                                  page: VehicleDetailPage(
-                                                    vehicle: vehicle,
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                          ),
+                                            );
+                                          },
                                         ),
                                       ),
                                     );
@@ -598,7 +456,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 ),
                               ),
                             ),
-                      const SizedBox(height: 25),
+                      const SizedBox(height: 20),
 
                       // Section Akun
                       Semantics(
@@ -622,8 +480,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                 );
                                 
                                 // Refresh profile data after returning from edit page
-                                if (mounted && result != null) {
-                                  // ignore: use_build_context_synchronously
+                                if (!mounted) return;
+                                
+                                if (result != null) {
                                   final provider = context.read<ProfileProvider>();
                                   _announceToScreenReader('Memuat ulang data profil');
                                   await provider.fetchUserData();
@@ -984,52 +843,47 @@ class _ProfilePageState extends State<ProfilePage> {
       final authService = AuthService();
       await authService.logout();
 
+      if (!mounted) return;
+
       // Clear provider data
-      if (context.mounted) {
-        final provider = context.read<ProfileProvider>();
-        provider.clearError();
-      }
+      final provider = context.read<ProfileProvider>();
+      provider.clearError();
 
       // Announce logout to screen reader
       _announceToScreenReader('Berhasil keluar dari akun');
 
       // Close loading dialog and navigate
-      if (mounted) {
-        // ignore: use_build_context_synchronously
-        final navigator = Navigator.of(context);
-        navigator.pop(); // Close loading dialog
-        
-        // Navigate to welcome screen and clear navigation stack
-        navigator.pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (context) => const WelcomeScreen(),
-          ),
-          (route) => false, // Remove all routes from stack
-        );
-      }
+      final navigator = Navigator.of(context);
+      navigator.pop(); // Close loading dialog
+      
+      // Navigate to welcome screen and clear navigation stack
+      navigator.pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (context) => const WelcomeScreen(),
+        ),
+        (route) => false, // Remove all routes from stack
+      );
     } catch (e) {
+      if (!mounted) return;
+      
       // Announce error to screen reader
       _announceToScreenReader('Gagal keluar dari akun');
 
       // Close loading dialog and show error
-      if (mounted) {
-        // ignore: use_build_context_synchronously
-        Navigator.of(context).pop(); // Close loading dialog
-        
-        // Show error message
-        // ignore: use_build_context_synchronously
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Gagal keluar: ${e.toString()}',
-              style: const TextStyle(fontFamily: 'Nunito'),
-            ),
-            backgroundColor: Colors.red[400],
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 3),
+      Navigator.of(context).pop(); // Close loading dialog
+      
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Gagal keluar: ${e.toString()}',
+            style: const TextStyle(fontFamily: 'Nunito'),
           ),
-        );
-      }
+          backgroundColor: Colors.red[400],
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 3),
+        ),
+      );
     }
   }
 }
