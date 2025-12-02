@@ -33,4 +33,9 @@ class Mall extends Model
     {
         return $this->hasMany(TarifParkir::class, 'id_mall', 'id_mall');
     }
+
+    public function transaksiParkir()
+    {
+        return $this->hasMany(TransaksiParkir::class, 'id_mall', 'id_mall');
+    }
 }

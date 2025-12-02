@@ -12,7 +12,7 @@ class WebAuthController extends Controller
 {
     public function showLoginForm()
     {
-        return view('auth.login');
+        return view('auth.signin');
     }
 
     public function login(Request $request)
@@ -26,19 +26,22 @@ class WebAuthController extends Controller
 
         if ($user && Hash::check($credentials['password'], $user->password)) {
             Auth::login($user);
+            $request->session()->regenerate();
 
+            // Redirect based on role
             if ($user->isSuperAdmin()) {
-                return redirect()->route('superadmin.dashboard');
+                return redirect()->intended(route('superadmin.dashboard'));
             } elseif ($user->isAdminMall()) {
-                return redirect()->route('admin.dashboard');
+                return redirect()->intended(route('admin.dashboard'));
             }
 
+            // Default redirect for other roles
             return redirect()->intended('/');
         }
 
         return back()->withErrors([
             'name' => 'Kredensial tidak cocok dengan data kami.',
-        ]);
+        ])->withInput($request->only('name'));
     }
 
     public function logout(Request $request)
@@ -47,6 +50,14 @@ class WebAuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         
-        return redirect()->route('login');
+        return redirect()->route('signin');
+    }
+
+    public function sendResetLink(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+        
+        // Logic untuk send reset link
+        return back()->with('status', 'Password reset link sent!');
     }
 }
