@@ -5,8 +5,8 @@ class NavigationUtils {
     0: '/home',
     1: '/activity',
     2: '/map',
-    // 3: '/notifications', // TODO: Add notifications page route when implemented
-    // 4: '/profile', // TODO: Add profile page route when implemented
+    3: '/profile',
+    // Note: Index 2 (middle button) is reserved for QR scan FAB
   };
 
   static void handleNavigation(BuildContext context, int tappedIndex, int currentIndex) {

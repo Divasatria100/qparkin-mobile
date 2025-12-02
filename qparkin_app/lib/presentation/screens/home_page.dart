@@ -5,6 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../widgets/bottom_nav.dart';
 import '../widgets/premium_points_card.dart';
 import '../widgets/shimmer_loading.dart';
+import '../widgets/common/animated_card.dart';
 import '/utils/navigation_utils.dart';
 
 /// Home Page - Main landing page of QPARKIN app
@@ -127,7 +128,7 @@ class _HomePageState extends State<HomePage> {
       button: true,
       label: label,
       hint: 'Ketuk untuk membuka $label',
-      child: _AnimatedCard(
+      child: AnimatedCard(
         onTap: onTap,
         borderRadius: 16,
         child: Container(
@@ -667,7 +668,7 @@ class _HomePageState extends State<HomePage> {
                                                     '${location['name']}, jarak ${location['distance']}, ${location['available']} slot tersedia',
                                                 hint:
                                                     'Ketuk untuk melihat detail lokasi parkir di peta',
-                                                child: _AnimatedCard(
+                                                child: AnimatedCard(
                                                   onTap: () {
                                                     Navigator.pushNamed(
                                                         context, '/map');
@@ -961,81 +962,4 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-/// Animated card widget with scale animation on press
-/// Provides smooth micro-interaction feedback for tappable cards
-class _AnimatedCard extends StatefulWidget {
-  final Widget child;
-  final VoidCallback? onTap;
-  final double borderRadius;
 
-  const _AnimatedCard({
-    required this.child,
-    this.onTap,
-    this.borderRadius = 16,
-  });
-
-  @override
-  State<_AnimatedCard> createState() => _AnimatedCardState();
-}
-
-class _AnimatedCardState extends State<_AnimatedCard> {
-  bool _isPressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) {
-        setState(() {
-          _isPressed = true;
-        });
-      },
-      onTapUp: (_) {
-        setState(() {
-          _isPressed = false;
-        });
-        widget.onTap?.call();
-      },
-      onTapCancel: () {
-        setState(() {
-          _isPressed = false;
-        });
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        curve: Curves.easeInOut,
-        transform: Matrix4.identity()..scale(_isPressed ? 0.97 : 1.0),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(widget.borderRadius),
-            boxShadow: _isPressed
-                ? [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ]
-                : [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: widget.onTap,
-              borderRadius: BorderRadius.circular(widget.borderRadius),
-              splashColor: const Color(0xFF573ED1).withOpacity(0.15),
-              highlightColor: const Color(0xFF573ED1).withOpacity(0.08),
-              child: widget.child,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
