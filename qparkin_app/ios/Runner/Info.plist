@@ -45,5 +45,12 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- Location usage descriptions for OSM map integration -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>QParkin needs your location to show nearby parking and calculate routes</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>QParkin needs your location to show nearby parking and calculate routes</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>QParkin needs your location to show nearby parking and calculate routes</string>
 </dict>
 </plist>
