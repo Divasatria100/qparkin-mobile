@@ -110,6 +110,12 @@ class _BookingConfirmationDialogState
 
             const SizedBox(height: 32),
 
+            // Reserved slot information (if available)
+            if (widget.booking.hasReservedSlot) ...[
+              _buildReservedSlotInfo(),
+              const SizedBox(height: 24),
+            ],
+
             // QR Code section
             _buildQRCodeSection(),
 
@@ -198,6 +204,187 @@ class _BookingConfirmationDialogState
           ),
         ),
       ],
+    );
+  }
+
+  /// Build reserved slot information card
+  ///
+  /// Requirements: 3.1-3.12
+  Widget _buildReservedSlotInfo() {
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: Card(
+        elevation: 3,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              colors: [
+                const Color(0xFFE8E0FF), // Light purple
+                Colors.white,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: Column(
+            children: [
+              // Success icon and title
+              Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4CAF50),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check_circle,
+                      color: Colors.white,
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Slot Parkir Terkunci',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF4CAF50),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Slot telah direservasi untuk Anda',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 16),
+
+              // Slot location
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: const Color(0xFF573ED1),
+                    width: 2,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    // Slot code (large and prominent)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.local_parking,
+                          color: Color(0xFF573ED1),
+                          size: 32,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          widget.booking.formattedSlotLocation ?? 
+                              'Slot ${widget.booking.kodeSlot}',
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF573ED1),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    // Slot type (if available)
+                    if (widget.booking.formattedSlotType != null) ...[
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0x1A573ED1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              widget.booking.slotType == 'disable_friendly'
+                                  ? Icons.accessible
+                                  : Icons.directions_car,
+                              size: 16,
+                              color: const Color(0xFF573ED1),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              widget.booking.formattedSlotType!,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF573ED1),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // Info message
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0x1A573ED1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.info_outline,
+                      color: Color(0xFF573ED1),
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Slot ini telah dikunci khusus untuk booking Anda',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -318,8 +505,17 @@ class _BookingConfirmationDialogState
                 const SizedBox(height: 12),
               ],
 
-              // Slot code
-              if (widget.booking.kodeSlot != null) ...[
+              // Slot location (with floor if available)
+              if (widget.booking.hasReservedSlot) ...[
+                _buildSummaryRow(
+                  icon: Icons.local_parking,
+                  label: 'Lokasi Parkir',
+                  value: widget.booking.formattedSlotLocation ?? 
+                         'Slot ${widget.booking.kodeSlot}',
+                ),
+                const SizedBox(height: 12),
+              ] else if (widget.booking.kodeSlot != null) ...[
+                // Fallback for bookings without full reservation data
                 _buildSummaryRow(
                   icon: Icons.local_parking,
                   label: 'Slot',

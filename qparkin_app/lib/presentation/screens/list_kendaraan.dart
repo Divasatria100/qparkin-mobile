@@ -1,6 +1,7 @@
 // 📄 lib/presentation/screens/list_kendaraan.dart
 import 'package:flutter/material.dart';
 import 'tambah_kendaraan.dart'; // ✅ import halaman tambah kendaraan
+import '../../utils/page_transitions.dart';
 
 class VehicleListPage extends StatefulWidget {
   const VehicleListPage({super.key});
@@ -190,10 +191,9 @@ class _VehicleListPageState extends State<VehicleListPage> {
             right: 30,
             child: GestureDetector(
               onTap: () async {
-                final newVehicle = await Navigator.push<Map<String, dynamic>>(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const VehicleSelectionPage(),
+                final newVehicle = await Navigator.of(context).push<Map<String, dynamic>>(
+                  PageTransitions.slideFromRight(
+                    page: const VehicleSelectionPage(),
                   ),
                 );
 

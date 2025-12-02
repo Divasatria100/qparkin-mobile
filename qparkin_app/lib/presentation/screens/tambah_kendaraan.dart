@@ -1,6 +1,5 @@
 // 📄 lib/presentation/screens/tambah_kendaraan.dart
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class VehicleSelectionPage extends StatefulWidget {
   const VehicleSelectionPage({super.key});
@@ -162,7 +161,8 @@ class _VehicleSelectionPageState extends State<VehicleSelectionPage> {
                                 Text(
                                   vehicle["name"]!,
                                   textAlign: TextAlign.center,
-                                  style: GoogleFonts.montserrat(
+                                  style: TextStyle(
+                                    fontFamily: 'Nunito',
                                     fontWeight: FontWeight.w500,
                                     color: isSelected
                                         ? const Color(0xFF3A0CA3)
@@ -313,7 +313,8 @@ class _VehicleSelectionPageState extends State<VehicleSelectionPage> {
                                         child: Text(
                                           type,
                                           textAlign: TextAlign.center,
-                                          style: GoogleFonts.montserrat(
+                                          style: TextStyle(
+                                            fontFamily: 'Nunito',
                                             fontSize: 14,
                                             fontWeight: isSelected
                                                 ? FontWeight.w600

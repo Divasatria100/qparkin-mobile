@@ -4,6 +4,8 @@ class BookingRequest {
   final DateTime waktuMulai;
   final int durasiJam;
   final String? notes;
+  final String? idSlot; // Optional: Reserved slot ID
+  final String? reservationId; // Optional: Reservation ID
 
   BookingRequest({
     required this.idMall,
@@ -11,6 +13,8 @@ class BookingRequest {
     required this.waktuMulai,
     required this.durasiJam,
     this.notes,
+    this.idSlot,
+    this.reservationId,
   });
 
   /// Validate booking request data
@@ -57,6 +61,8 @@ class BookingRequest {
       'durasi_jam': durasiJam,
       'waktu_selesai': waktuSelesai.toIso8601String(),
       if (notes != null && notes!.isNotEmpty) 'notes': notes,
+      if (idSlot != null && idSlot!.isNotEmpty) 'id_slot': idSlot,
+      if (reservationId != null && reservationId!.isNotEmpty) 'reservation_id': reservationId,
     };
   }
 
@@ -70,6 +76,8 @@ class BookingRequest {
           : DateTime.now(),
       durasiJam: _parseInt(json['durasi_jam']),
       notes: json['notes']?.toString(),
+      idSlot: json['id_slot']?.toString(),
+      reservationId: json['reservation_id']?.toString(),
     );
   }
 
@@ -89,6 +97,8 @@ class BookingRequest {
     DateTime? waktuMulai,
     int? durasiJam,
     String? notes,
+    String? idSlot,
+    String? reservationId,
   }) {
     return BookingRequest(
       idMall: idMall ?? this.idMall,
@@ -96,12 +106,15 @@ class BookingRequest {
       waktuMulai: waktuMulai ?? this.waktuMulai,
       durasiJam: durasiJam ?? this.durasiJam,
       notes: notes ?? this.notes,
+      idSlot: idSlot ?? this.idSlot,
+      reservationId: reservationId ?? this.reservationId,
     );
   }
 
   @override
   String toString() {
     return 'BookingRequest(idMall: $idMall, idKendaraan: $idKendaraan, '
-        'waktuMulai: $waktuMulai, durasiJam: $durasiJam, notes: $notes)';
+        'waktuMulai: $waktuMulai, durasiJam: $durasiJam, notes: $notes, '
+        'idSlot: $idSlot, reservationId: $reservationId)';
   }
 }
