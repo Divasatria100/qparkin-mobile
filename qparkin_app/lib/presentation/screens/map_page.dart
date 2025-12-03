@@ -57,7 +57,24 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  Future<void> _selectMall(int index) async {
+  // Select mall without switching tabs (for card tap)
+  void _selectMall(int index) {
+    // Get the mall from MapProvider's mall list
+    final mall = _mapProvider.malls[index];
+    
+    setState(() {
+      _selectedMallIndex = index;
+      _selectedMall = {
+        'name': mall.name,
+        'distance': '', // Will be calculated by MapProvider
+        'address': mall.address,
+        'available': mall.availableSlots,
+      };
+    });
+  }
+
+  // Select mall and switch to map tab with route (for route button)
+  Future<void> _selectMallAndShowMap(int index) async {
     // Get the mall from MapProvider's mall list
     final mall = _mapProvider.malls[index];
     
@@ -77,12 +94,28 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       
       // Automatically switch to map tab
       _tabController.animateTo(0);
+      
+      // Activate map focus mode after a short delay to ensure tab switch completes
+      await Future.delayed(const Duration(milliseconds: 300));
+      if (mounted) {
+        setState(() {
+          _isMapFocusMode = true;
+        });
+      }
     } catch (e) {
       debugPrint('[MapPage] Error selecting mall: $e');
       
-      // Maintain app stability - still switch to map tab
+      // Maintain app stability - still switch to map tab and activate focus mode
       // The mall will be selected, just without route
       _tabController.animateTo(0);
+      
+      // Activate map focus mode even on error
+      await Future.delayed(const Duration(milliseconds: 300));
+      if (mounted) {
+        setState(() {
+          _isMapFocusMode = true;
+        });
+      }
       
       // Show error if it's a route calculation issue
       if (e is RouteCalculationException || e is NetworkException) {
@@ -90,7 +123,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
           MapErrorUtils.showRouteCalculationError(
             context,
             onRetry: () async {
-              await _selectMall(index);
+              await _selectMallAndShowMap(index);
             },
           );
         }
@@ -752,7 +785,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                     
                     // Route Button
                     TextButton.icon(
-                      onPressed: () => _showRouteOnMap(mall),
+                      onPressed: () => _selectMallAndShowMap(index),
                       icon: const Icon(
                         Icons.navigation,
                         size: 16,

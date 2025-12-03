@@ -16,6 +16,7 @@ import 'presentation/screens/home_page.dart';
 import 'presentation/screens/map_page.dart';
 import 'presentation/screens/activity_page.dart';
 import 'presentation/screens/profile_page.dart';
+import 'presentation/screens/list_kendaraan.dart';
 import 'pages/notification_screen.dart';
 import 'pages/scan_screen.dart';
 import 'pages/point_screen.dart';
@@ -86,6 +87,7 @@ class MyApp extends StatelessWidget {
           '/map': (context) => const MapPage(),
           '/activity': (context) => const ActivityPage(),
           '/profile': (context) => const ProfilePage(),
+          '/list-kendaraan': (context) => const VehicleListPage(),
           '/notifikasi': (context) => const NotificationScreen(),
           '/scan': (context) => const ScanScreen(),
           '/point': (context) => const PointScreen(),

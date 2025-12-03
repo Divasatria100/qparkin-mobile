@@ -275,9 +275,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                     children: [
                                       const Center(
                                         child: Icon(
-                                          Icons.notifications_outlined,
+                                          Icons.notifications,
                                           color: Colors.white,
-                                          size: 24,
+                                          size: 28,
                                         ),
                                       ),
                                       if (notificationProvider.hasUnread)
@@ -306,9 +306,9 @@ class _ProfilePageState extends State<ProfilePage> {
                           size: 56,
                           semanticLabel: 'Foto profil ${user?.name ?? 'pengguna'}',
                           fallbackIcon: Icons.person,
-                          fallbackIconSize: 30,
-                          fallbackIconColor: Colors.black,
-                          backgroundColor: Colors.white,
+                          fallbackIconSize: 32,
+                          fallbackIconColor: Colors.white,
+                          backgroundColor: Colors.white.withOpacity(0.3),
                         ),
                         const SizedBox(width: 12),
                         Semantics(
