@@ -111,7 +111,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildErrorState(ProfileProvider provider) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Semantics(
           label: 'Halaman profil dalam keadaan error',
@@ -141,7 +141,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final vehicles = provider.vehicles;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: RefreshIndicator(
           color: const Color(0xFF573ED1),
@@ -165,7 +165,6 @@ class _ProfilePageState extends State<ProfilePage> {
                   SnackBar(
                     content: Text(
                       provider.errorMessage ?? 'Gagal memperbarui data',
-                      style: const TextStyle(fontFamily: 'Nunito'),
                     ),
                     backgroundColor: Colors.red[400],
                     behavior: SnackBarBehavior.floating,
@@ -181,7 +180,6 @@ class _ProfilePageState extends State<ProfilePage> {
                   const SnackBar(
                     content: Text(
                       'Data berhasil diperbarui',
-                      style: TextStyle(fontFamily: 'Nunito'),
                     ),
                     backgroundColor: Color(0xFF4CAF50),
                     behavior: SnackBarBehavior.floating,
@@ -200,7 +198,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 SnackBar(
                   content: const Text(
                     'Terjadi kesalahan saat memperbarui data',
-                    style: TextStyle(fontFamily: 'Nunito'),
                   ),
                   backgroundColor: Colors.red[400],
                   behavior: SnackBarBehavior.floating,
@@ -217,13 +214,12 @@ class _ProfilePageState extends State<ProfilePage> {
               // 🔷 Header dengan gradient
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(20, 40, 20, 100),
+                padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Color(0xFF42CBF8),
+                      Color(0xFF7C5ED1),
                       Color(0xFF573ED1),
-                      Color(0xFF39108A),
                     ],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
@@ -238,9 +234,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         const Text(
                           "Profile",
                           style: TextStyle(
-                            fontFamily: 'Nunito',
-                            fontSize: 22,
-                            fontWeight: FontWeight.w700,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
                         ),
@@ -269,8 +264,12 @@ class _ProfilePageState extends State<ProfilePage> {
                                   width: 48,
                                   height: 48,
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.2),
-                                    shape: BoxShape.circle,
+                                    color: Colors.white.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(24),
+                                    border: Border.all(
+                                      color: Colors.white.withOpacity(0.3),
+                                      width: 1,
+                                    ),
                                   ),
                                   child: Stack(
                                     children: [
@@ -322,9 +321,10 @@ class _ProfilePageState extends State<ProfilePage> {
                                 child: Text(
                                   user?.name ?? 'Pengguna',
                                   style: const TextStyle(
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.w700,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
                                     color: Colors.white,
+                                    letterSpacing: 0.3,
                                   ),
                                 ),
                               ),
@@ -332,10 +332,12 @@ class _ProfilePageState extends State<ProfilePage> {
                                 label: 'Email: ${user?.email ?? 'email@example.com'}',
                                 child: Text(
                                   user?.email ?? 'email@example.com',
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.white70,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.white.withOpacity(0.8),
                                   ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ],
@@ -366,12 +368,10 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
 
               // 🔹 Konten utama
-              Transform.translate(
-                offset: const Offset(0, -70),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                  child: Column(
-                    children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+                child: Column(
+                  children: [
                       // Section: Informasi Kendaraan
                       Semantics(
                         header: true,
@@ -380,30 +380,32 @@ class _ProfilePageState extends State<ProfilePage> {
                           child: Text(
                             "Informasi Kendaraan",
                             style: TextStyle(
-                              fontFamily: 'Nunito',
-                              fontSize: 17,
-                              fontWeight: FontWeight.w700,
-                              color: Color.fromARGB(255, 250, 245, 245),
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
                       vehicles.isEmpty
                           ? Semantics(
                               label: 'Daftar kendaraan kosong',
                               child: Container(
                                 height: 200,
-                                margin: const EdgeInsets.only(right: 12),
-                                padding: const EdgeInsets.all(18),
+                                padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: Colors.grey.shade200,
+                                    width: 1,
+                                  ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.08),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 3),
+                                      color: Colors.black.withOpacity(0.05),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
                                     ),
                                   ],
                                 ),
@@ -456,7 +458,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 ),
                               ),
                             ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 24),
 
                       // Section Akun
                       Semantics(
@@ -542,12 +544,11 @@ class _ProfilePageState extends State<ProfilePage> {
                     ],
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-          ),
-        ),
+      ),
       bottomNavigationBar: Semantics(
         label: 'Navigasi bawah, halaman profil aktif',
         child: CurvedNavigationBar(
@@ -564,10 +565,14 @@ class _ProfilePageState extends State<ProfilePage> {
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.grey.shade200,
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -579,13 +584,13 @@ class _ProfilePageState extends State<ProfilePage> {
           Semantics(
             header: true,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.all(16),
               child: Text(
                 title,
                 style: const TextStyle(
-                  fontFamily: 'Nunito',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
                 ),
               ),
             ),
@@ -605,24 +610,28 @@ class _ProfilePageState extends State<ProfilePage> {
       enabled: onTap != null,
       child: InkWell(
         onTap: onTap ?? () {},
-        splashColor: Colors.blue.withValues(alpha: 0.05),
+        splashColor: const Color(0xFF573ED1).withOpacity(0.05),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          padding: const EdgeInsets.all(16),
           child: Row(
             children: [
               Semantics(
                 label: 'Ikon $title',
                 child: Container(
-                  width: 36,
-                  height: 36,
+                  width: 44,
+                  height: 44,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF5F5F5),
-                    borderRadius: BorderRadius.circular(8),
+                    color: const Color(0xFF573ED1).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(icon, color: Colors.grey[500]),
+                  child: Icon(
+                    icon,
+                    color: const Color(0xFF573ED1),
+                    size: 20,
+                  ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -630,16 +639,17 @@ class _ProfilePageState extends State<ProfilePage> {
                     Text(
                       title,
                       style: const TextStyle(
-                        fontFamily: 'Nunito',
                         fontWeight: FontWeight.w600,
-                        fontSize: 14,
+                        fontSize: 16,
+                        color: Colors.black87,
                       ),
                     ),
+                    const SizedBox(height: 4),
                     Text(
                       subtitle,
-                      style: const TextStyle(
-                        color: Color(0xFF969696),
-                        fontSize: 12,
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 14,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -650,7 +660,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 label: 'Ikon panah kanan',
                 child: Icon(
                   Icons.chevron_right,
-                  color: Colors.grey[400],
+                  color: Colors.grey.shade400,
                   size: 20,
                 ),
               ),
@@ -669,19 +679,19 @@ class _ProfilePageState extends State<ProfilePage> {
       hint: 'Ketuk untuk keluar dari akun',
       child: InkWell(
         onTap: () => _showLogoutConfirmationDialog(context),
-        splashColor: Colors.red.withValues(alpha: 0.05),
+        splashColor: Colors.red.withOpacity(0.05),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          padding: const EdgeInsets.all(16),
           child: Row(
             children: [
               Semantics(
                 label: 'Ikon keluar',
                 child: Container(
-                  width: 36,
-                  height: 36,
+                  width: 44,
+                  height: 44,
                   decoration: BoxDecoration(
                     color: Colors.red[50],
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     Icons.logout,
@@ -690,7 +700,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -698,17 +708,17 @@ class _ProfilePageState extends State<ProfilePage> {
                     Text(
                       'Keluar',
                       style: TextStyle(
-                        fontFamily: 'Nunito',
                         fontWeight: FontWeight.w600,
-                        fontSize: 14,
+                        fontSize: 16,
                         color: Colors.red[600],
                       ),
                     ),
-                    const Text(
+                    const SizedBox(height: 4),
+                    Text(
                       'Keluar dari akun Anda',
                       style: TextStyle(
-                        color: Color(0xFF969696),
-                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                        fontSize: 14,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -752,8 +762,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 const Text(
                   'Konfirmasi Keluar',
                   style: TextStyle(
-                    fontFamily: 'Nunito',
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.bold,
                     fontSize: 18,
                   ),
                 ),
@@ -763,7 +772,6 @@ class _ProfilePageState extends State<ProfilePage> {
               'Apakah Anda yakin ingin keluar dari akun Anda? '
               'Anda perlu login kembali untuk mengakses aplikasi.',
               style: TextStyle(
-                fontFamily: 'Nunito',
                 fontSize: 14,
                 height: 1.5,
               ),
@@ -778,7 +786,6 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: const Text(
                     'Batal',
                     style: TextStyle(
-                      fontFamily: 'Nunito',
                       color: Color(0xFF8E8E93),
                       fontWeight: FontWeight.w600,
                     ),
@@ -804,9 +811,8 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: Text(
                     'Keluar',
                     style: TextStyle(
-                      fontFamily: 'Nunito',
                       color: Colors.red[600],
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
@@ -877,7 +883,6 @@ class _ProfilePageState extends State<ProfilePage> {
         SnackBar(
           content: Text(
             'Gagal keluar: ${e.toString()}',
-            style: const TextStyle(fontFamily: 'Nunito'),
           ),
           backgroundColor: Colors.red[400],
           behavior: SnackBarBehavior.floating,

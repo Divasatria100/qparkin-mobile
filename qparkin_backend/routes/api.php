@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Auth\ApiAuthController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\KendaraanController;
 use App\Http\Controllers\Api\MallController;
@@ -26,9 +26,9 @@ Route::get('/health', function () {
 
 // Authentication Routes
 Route::prefix('auth')->group(function () {
-    Route::post('/register', [AuthController::class, 'register']);
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/google-login', [AuthController::class, 'googleLogin']);
+    Route::post('/register', [ApiAuthController::class, 'register']);
+    Route::post('/login', [ApiAuthController::class, 'login']);
+    Route::post('/google-login', [ApiAuthController::class, 'googleLogin']);
 });
 
 // Protected Routes - Require Authentication
@@ -36,8 +36,8 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Auth
     Route::prefix('auth')->group(function () {
-        Route::post('/logout', [AuthController::class, 'logout']);
-        Route::get('/me', [AuthController::class, 'me']);
+        Route::post('/logout', [ApiAuthController::class, 'logout']);
+        Route::get('/me', [ApiAuthController::class, 'getUser']);
     });
 
     // User Profile & Settings

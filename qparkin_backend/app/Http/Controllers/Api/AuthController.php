@@ -14,24 +14,24 @@ class AuthController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
-            'no_telp' => 'nullable|string|max:20',
+            'email' => 'nullable|string|email|max:255|unique:user,email',
+            'password' => 'required|string|min:4',
+            'no_telp' => 'required|string|max:20|unique:user,nomor_hp',
         ]);
 
         $user = User::create([
             'name' => $validated['name'],
-            'email' => $validated['email'],
+            'email' => $validated['email'] ?? null,
             'password' => Hash::make($validated['password']),
-            'no_telp' => $validated['no_telp'] ?? null,
-            'role' => 'user',
+            'nomor_hp' => $validated['no_telp'],
+            'role' => 'customer',
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'success' => true,
-            'message' => 'Registration successful',
+            'message' => 'Registrasi berhasil',
             'data' => [
                 'user' => $user,
                 'token' => $token
@@ -41,24 +41,36 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required'
+        $validated = $request->validate([
+            'email' => 'required|string',
+            'password' => 'required|string'
         ]);
 
-        if (!Auth::attempt($credentials)) {
+        // Cek apakah user login dengan nomor HP atau email
+        $loginField = filter_var($validated['email'], FILTER_VALIDATE_EMAIL) ? 'email' : 'nomor_hp';
+        
+        $user = User::where($loginField, $validated['email'])->first();
+
+        if (!$user || !Hash::check($validated['password'], $user->password)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid credentials'
+                'message' => 'Nomor HP/Email atau password salah'
             ], 401);
         }
 
-        $user = Auth::user();
+        // Cek status user
+        if ($user->status !== 'aktif') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akun tidak aktif'
+            ], 403);
+        }
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'success' => true,
-            'message' => 'Login successful',
+            'message' => 'Login berhasil',
             'data' => [
                 'user' => $user,
                 'token' => $token
