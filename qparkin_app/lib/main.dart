@@ -1,6 +1,7 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'data/services/auth_service.dart';
 import 'data/services/parking_service.dart';
 import 'data/services/profile_service.dart';
@@ -19,7 +20,13 @@ import 'pages/notification_screen.dart';
 import 'pages/scan_screen.dart';
 import 'pages/point_screen.dart';
 
-void main() {
+void main() async {
+  // Ensure Flutter binding is initialized
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Indonesian locale for date formatting
+  await initializeDateFormatting('id_ID', null);
+  
   runApp(const MyApp());
 }
 
@@ -70,7 +77,7 @@ class MyApp extends StatelessWidget {
             return const AboutPage();
           },
         ),
-        initialRoute: '/notifikasi',
+        initialRoute: '/about',
         routes: {
           '/about': (context) => const AboutPage(),
           LoginScreen.routeName: (context) => const LoginScreen(),

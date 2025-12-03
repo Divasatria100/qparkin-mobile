@@ -14,6 +14,9 @@ class BookingSummaryCard extends StatelessWidget {
   final Duration duration;
   final DateTime endTime;
   final double totalCost;
+  final String? reservedSlotCode;
+  final String? reservedFloorName;
+  final String? reservedSlotType;
 
   const BookingSummaryCard({
     Key? key,
@@ -26,6 +29,9 @@ class BookingSummaryCard extends StatelessWidget {
     required this.duration,
     required this.endTime,
     required this.totalCost,
+    this.reservedSlotCode,
+    this.reservedFloorName,
+    this.reservedSlotType,
   }) : super(key: key);
 
   String _formatCurrency(double amount) {
@@ -59,8 +65,12 @@ class BookingSummaryCard extends StatelessWidget {
     final costFontSize = ResponsiveHelper.getResponsiveFontSize(context, 18);
     final iconSize = ResponsiveHelper.getIconSize(context, 20);
     
+    final slotInfo = reservedSlotCode != null && reservedFloorName != null
+        ? 'Slot parkir $reservedFloorName - Slot $reservedSlotCode, ${reservedSlotType ?? "Regular Parking"}. '
+        : '';
+    
     return Semantics(
-      label: 'Ringkasan booking. Lokasi $mallName, $mallAddress. Kendaraan $vehiclePlat, $vehicleType, $vehicleBrand. Waktu mulai $startTimeText, durasi $durationText, selesai $endTimeText. Total estimasi $costText',
+      label: 'Ringkasan booking. Lokasi $mallName, $mallAddress. ${slotInfo}Kendaraan $vehiclePlat, $vehicleType, $vehicleBrand. Waktu mulai $startTimeText, durasi $durationText, selesai $endTimeText. Total estimasi $costText',
       child: Card(
         elevation: 4,
         shape: RoundedRectangleBorder(
@@ -121,6 +131,40 @@ class BookingSummaryCard extends StatelessWidget {
                 color: Colors.grey.shade200,
                 height: 24,
               ),
+              
+              // Reserved Slot Section (if available)
+              if (reservedSlotCode != null && reservedFloorName != null) ...[
+                _buildSection(
+                  context: context,
+                  icon: Icons.local_parking,
+                  title: 'Slot Parkir',
+                  content: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '$reservedFloorName - Slot $reservedSlotCode',
+                        style: TextStyle(
+                          fontSize: bodyFontSize,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        reservedSlotType ?? 'Regular Parking',
+                        style: TextStyle(
+                          fontSize: captionFontSize,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Divider(
+                  color: Colors.grey.shade200,
+                  height: 24,
+                ),
+              ],
               
               // Vehicle Section
               _buildSection(
