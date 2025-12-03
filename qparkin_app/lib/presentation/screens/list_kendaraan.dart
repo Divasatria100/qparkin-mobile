@@ -68,8 +68,7 @@ class _VehicleListPageState extends State<VehicleListPage> {
               const Text(
                 'Hapus Kendaraan',
                 style: TextStyle(
-                  fontFamily: 'Nunito',
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.bold,
                   fontSize: 18,
                 ),
               ),
@@ -78,7 +77,6 @@ class _VehicleListPageState extends State<VehicleListPage> {
           content: Text(
             'Apakah Anda yakin ingin menghapus ${vehicle['name']} (${vehicle['plate']})?',
             style: const TextStyle(
-              fontFamily: 'Nunito',
               fontSize: 14,
               height: 1.5,
             ),
@@ -89,7 +87,6 @@ class _VehicleListPageState extends State<VehicleListPage> {
               child: const Text(
                 'Batal',
                 style: TextStyle(
-                  fontFamily: 'Nunito',
                   color: Color(0xFF8E8E93),
                   fontWeight: FontWeight.w600,
                 ),
@@ -113,9 +110,8 @@ class _VehicleListPageState extends State<VehicleListPage> {
               child: Text(
                 'Hapus',
                 style: TextStyle(
-                  fontFamily: 'Nunito',
                   color: Colors.red[600],
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
@@ -139,38 +135,31 @@ class _VehicleListPageState extends State<VehicleListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F6F9),
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
           Column(
             children: [
-              // 🔹 Header dengan 1 logo PNG “Qparkin”
+              // 🔹 Header
               Container(
                 width: double.infinity,
-                height: 180,
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Color(0xFF42CBF8),
+                      Color(0xFF7C5ED1),
                       Color(0xFF573ED1),
-                      Color(0xFF39108A),
                     ],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                   ),
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(24),
-                    bottomRight: Radius.circular(24),
-                  ),
                 ),
                 child: SafeArea(
-                  child: Stack(
-                    children: [
-                      // Tombol Back
-                      Positioned(
-                        left: 16,
-                        top: 8,
-                        child: IconButton(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    child: Row(
+                      children: [
+                        // Tombol Back
+                        IconButton(
                           icon: const Icon(
                             Icons.arrow_back,
                             color: Colors.white,
@@ -179,16 +168,18 @@ class _VehicleListPageState extends State<VehicleListPage> {
                           onPressed: () => Navigator.of(context).pop(),
                           tooltip: 'Kembali',
                         ),
-                      ),
-                      // Logo
-                      Center(
-                        child: Image.asset(
-                          'assets/images/qparkin.png',
-                          height: 60,
-                          fit: BoxFit.contain,
+                        const SizedBox(width: 8),
+                        // Title
+                        const Text(
+                          'List Kendaraan',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -196,16 +187,16 @@ class _VehicleListPageState extends State<VehicleListPage> {
               // 🔹 Konten
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'List Kendaraan',
+                        'Kendaraan Terdaftar',
                         style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF333333),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -223,26 +214,42 @@ class _VehicleListPageState extends State<VehicleListPage> {
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 200),
                             margin: const EdgeInsets.only(bottom: 12),
-                            padding: EdgeInsets.all(isSelected ? 12 : 14),
+                            padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              border: isSelected
-                                  ? Border.all(
-                                      color: const Color(0xFF5B9FFF),
-                                      width: 2,
-                                    )
-                                  : null,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: isSelected 
+                                    ? const Color(0xFF573ED1)
+                                    : Colors.grey.shade200,
+                                width: isSelected ? 2 : 1,
+                              ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.04),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
+                                  color: isSelected
+                                      ? const Color(0xFF573ED1).withOpacity(0.2)
+                                      : Colors.black.withOpacity(0.05),
+                                  blurRadius: isSelected ? 16 : 8,
+                                  offset: Offset(0, isSelected ? 4 : 2),
                                 ),
                               ],
                             ),
                             child: Row(
                               children: [
+                                Container(
+                                  width: 44,
+                                  height: 44,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF573ED1).withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Icon(
+                                    vehicle['icon'],
+                                    color: const Color(0xFF573ED1),
+                                    size: 24,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -250,41 +257,27 @@ class _VehicleListPageState extends State<VehicleListPage> {
                                       Text(
                                         vehicle['name']!,
                                         style: const TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w600,
-                                          color: Color(0xFF333333),
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black87,
                                         ),
                                       ),
-                                      const SizedBox(height: 3),
+                                      const SizedBox(height: 4),
                                       Text(
                                         vehicle['plate']!,
-                                        style: const TextStyle(
-                                          fontSize: 13,
-                                          color: Color(0xFF999999),
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.grey.shade600,
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
-                                Container(
-                                  width: 44,
-                                  height: 44,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFE3F2FF),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Icon(
-                                    vehicle['icon'],
-                                    color: const Color(0xFF5B9FFF),
-                                    size: 26,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
                                 // Tombol Hapus
                                 IconButton(
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.delete_outline,
-                                    color: Colors.red,
+                                    color: Colors.red[600],
                                     size: 24,
                                   ),
                                   onPressed: () {
@@ -306,8 +299,8 @@ class _VehicleListPageState extends State<VehicleListPage> {
 
           // 🔹 Tombol tambah kendaraan
           Positioned(
-            top: 420,
-            right: 30,
+            bottom: 24,
+            right: 24,
             child: GestureDetector(
               onTap: () async {
                 final newVehicle = await Navigator.of(context).push<Map<String, dynamic>>(
@@ -326,8 +319,8 @@ class _VehicleListPageState extends State<VehicleListPage> {
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [
-                      Color(0xFF7BA3FF),
-                      Color(0xFF5B8FFF),
+                      Color(0xFF7C5ED1),
+                      Color(0xFF573ED1),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -335,7 +328,7 @@ class _VehicleListPageState extends State<VehicleListPage> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF5B9FFF).withOpacity(0.4),
+                      color: const Color(0xFF573ED1).withOpacity(0.4),
                       blurRadius: 20,
                       offset: const Offset(0, 6),
                     ),

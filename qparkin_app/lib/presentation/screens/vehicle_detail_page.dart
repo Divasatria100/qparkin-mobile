@@ -17,7 +17,7 @@ class VehicleDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text(
           'Detail Kendaraan',
@@ -41,9 +41,8 @@ class VehicleDetailPage extends StatelessWidget {
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Color(0xFF42CBF8),
+                    Color(0xFF7C5ED1),
                     Color(0xFF573ED1),
-                    Color(0xFF39108A),
                   ],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
@@ -173,11 +172,15 @@ class VehicleDetailPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.grey.shade200,
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -227,11 +230,11 @@ class VehicleDetailPage extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 40,
-          height: 40,
+          width: 44,
+          height: 44,
           decoration: BoxDecoration(
-            color: const Color(0xFFF5F5F5),
-            borderRadius: BorderRadius.circular(10),
+            color: const Color(0xFF573ED1).withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
             icon,
@@ -246,10 +249,10 @@ class VehicleDetailPage extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Nunito',
-                  fontSize: 12,
-                  color: Color(0xFF8E8E93),
+                  fontSize: 14,
+                  color: Colors.grey.shade600,
                 ),
               ),
               const SizedBox(height: 4),
@@ -257,9 +260,9 @@ class VehicleDetailPage extends StatelessWidget {
                 value,
                 style: const TextStyle(
                   fontFamily: 'Nunito',
-                  fontSize: 15,
+                  fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF2E3A8C),
+                  color: Colors.black87,
                 ),
               ),
             ],

@@ -31,23 +31,22 @@ class _ProfilePageShimmerState extends State<ProfilePageShimmer>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const NeverScrollableScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header shimmer
+              // Header shimmer dengan gradient ungu yang baru
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(20, 40, 20, 100),
+                padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Color(0xFF42CBF8),
+                      Color(0xFF7C5ED1),
                       Color(0xFF573ED1),
-                      Color(0xFF39108A),
                     ],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
@@ -56,45 +55,62 @@ class _ProfilePageShimmerState extends State<ProfilePageShimmer>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildShimmerBox(
-                      width: 80,
-                      height: 22,
-                      borderRadius: 4,
+                    // Header dengan notification icon
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildShimmerBox(
+                          width: 80,
+                          height: 20,
+                          borderRadius: 4,
+                        ),
+                        // Notification icon shimmer
+                        _buildShimmerBox(
+                          width: 48,
+                          height: 48,
+                          borderRadius: 24,
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 20),
+                    // User info shimmer
                     const UserInfoShimmer(),
+                    const SizedBox(height: 20),
+                    // Premium Points Card shimmer
+                    _buildShimmerBox(
+                      width: double.infinity,
+                      height: 80,
+                      borderRadius: 16,
+                    ),
                   ],
                 ),
               ),
 
               // Content shimmer
-              Transform.translate(
-                offset: const Offset(0, -70),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Vehicle section title
-                      _buildShimmerBox(
-                        width: 180,
-                        height: 17,
-                        borderRadius: 4,
-                      ),
-                      const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Vehicle section title
+                    _buildShimmerBox(
+                      width: 180,
+                      height: 18,
+                      borderRadius: 4,
+                    ),
+                    const SizedBox(height: 16),
 
-                      // Vehicle card shimmer
-                      const VehicleCardShimmer(),
-                      const SizedBox(height: 25),
+                    // Vehicle card shimmer
+                    const VehicleCardShimmer(),
+                    const SizedBox(height: 24),
 
-                      // Account section shimmer
-                      _buildSectionShimmer(),
-                      const SizedBox(height: 16),
+                    // Account section shimmer
+                    _buildSectionShimmer(),
+                    const SizedBox(height: 16),
 
-                      // Other section shimmer
-                      _buildSectionShimmer(),
-                    ],
-                  ),
+                    // Other section shimmer
+                    _buildSectionShimmer(),
+                  ],
                 ),
               ),
             ],
@@ -108,10 +124,14 @@ class _ProfilePageShimmerState extends State<ProfilePageShimmer>
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.grey.shade200,
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -121,38 +141,38 @@ class _ProfilePageShimmerState extends State<ProfilePageShimmer>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.all(16),
             child: _buildShimmerBox(
               width: 100,
-              height: 16,
+              height: 18,
               borderRadius: 4,
             ),
           ),
           ...List.generate(
             3,
             (index) => Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
                   _buildShimmerBox(
-                    width: 36,
-                    height: 36,
-                    borderRadius: 8,
+                    width: 44,
+                    height: 44,
+                    borderRadius: 12,
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildShimmerBox(
                           width: double.infinity,
-                          height: 14,
+                          height: 16,
                           borderRadius: 4,
                         ),
                         const SizedBox(height: 4),
                         _buildShimmerBox(
                           width: 200,
-                          height: 12,
+                          height: 14,
                           borderRadius: 4,
                         ),
                       ],
@@ -237,28 +257,32 @@ class _VehicleCardShimmerState extends State<VehicleCardShimmer>
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 150,
+      height: 120,
       margin: const EdgeInsets.only(right: 12),
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.grey.shade200,
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Row(
         children: [
           _buildShimmerBox(
-            width: 72,
-            height: 72,
+            width: 60,
+            height: 60,
             borderRadius: 12,
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -272,13 +296,13 @@ class _VehicleCardShimmerState extends State<VehicleCardShimmer>
                 const SizedBox(height: 8),
                 _buildShimmerBox(
                   width: 100,
-                  height: 13,
+                  height: 14,
                   borderRadius: 4,
                 ),
                 const SizedBox(height: 8),
                 _buildShimmerBox(
-                  width: 120,
-                  height: 14,
+                  width: 80,
+                  height: 12,
                   borderRadius: 4,
                 ),
               ],
