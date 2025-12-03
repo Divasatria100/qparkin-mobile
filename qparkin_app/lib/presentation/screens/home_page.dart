@@ -5,6 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../widgets/bottom_nav.dart';
 import '../widgets/premium_points_card.dart';
 import '../widgets/shimmer_loading.dart';
+import '../widgets/common/animated_card.dart';
 import '/utils/navigation_utils.dart';
 import '/pages/notification_screen.dart';
 
@@ -84,7 +85,7 @@ class _HomePageState extends State<HomePage> {
       button: true,
       label: label,
       hint: 'Ketuk untuk membuka $label',
-      child: _AnimatedCard(
+      child: AnimatedCard(
         onTap: onTap,
         borderRadius: 16,
         child: Container(
@@ -484,6 +485,34 @@ class _HomePageState extends State<HomePage> {
                                                     child: FaIcon(
                                                       FontAwesomeIcons
                                                           .bagShopping,
+                    // Nearby Locations List - Shows max 3 locations
+                    // Handles three states: loading (shimmer), error, empty, success
+                    _isLoading
+                        ? const HomePageLocationShimmer()
+                        : _hasError
+                            ? _buildErrorState()
+                            : nearbyLocations.isEmpty
+                                ? _buildEmptyState()
+                                : Column(
+                                    children: nearbyLocations
+                                        .take(3)
+                                        .map((location) => Padding(
+                                              padding: const EdgeInsets.only(
+                                                  bottom: 12),
+                                              child: Semantics(
+                                                button: true,
+                                                label:
+                                                    '${location['name']}, jarak ${location['distance']}, ${location['available']} slot tersedia',
+                                                hint:
+                                                    'Ketuk untuk melihat detail lokasi parkir di peta',
+                                                child: AnimatedCard(
+                                                  onTap: () {
+                                                    Navigator.pushNamed(
+                                                        context, '/map');
+                                                  },
+                                                  borderRadius: 16,
+                                                  child: Container(
+                                                    decoration: BoxDecoration(
                                                       color: Colors.white,
                                                       size: 20,
                                                     ),
@@ -710,3 +739,4 @@ class _AnimatedCardState extends State<_AnimatedCard> {
     );
   }
 }
+

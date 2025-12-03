@@ -18,6 +18,13 @@ class BookingModel {
   final String? platNomor;
   final String? jenisKendaraan;
   final String? kodeSlot;
+  
+  // Slot reservation fields
+  final String? idSlot;
+  final String? reservationId;
+  final String? floorName;
+  final String? floorNumber;
+  final String? slotType; // 'regular' or 'disable_friendly'
 
   BookingModel({
     required this.idTransaksi,
@@ -37,6 +44,11 @@ class BookingModel {
     this.platNomor,
     this.jenisKendaraan,
     this.kodeSlot,
+    this.idSlot,
+    this.reservationId,
+    this.floorName,
+    this.floorNumber,
+    this.slotType,
   });
 
   /// Get formatted duration string (e.g., "2 jam 30 menit")
@@ -67,6 +79,27 @@ class BookingModel {
   /// Check if booking is completed
   bool get isCompleted {
     return status == 'selesai';
+  }
+
+  /// Check if booking has reserved slot information
+  bool get hasReservedSlot {
+    return idSlot != null && kodeSlot != null;
+  }
+
+  /// Get formatted slot location (e.g., "Lantai 1 - Slot A15")
+  String? get formattedSlotLocation {
+    if (floorName != null && kodeSlot != null) {
+      return '$floorName - Slot $kodeSlot';
+    } else if (kodeSlot != null) {
+      return 'Slot $kodeSlot';
+    }
+    return null;
+  }
+
+  /// Get formatted slot type label
+  String? get formattedSlotType {
+    if (slotType == null) return null;
+    return slotType == 'disable_friendly' ? 'Disable-Friendly' : 'Regular Parking';
   }
 
   /// Get remaining time until booking starts
@@ -127,6 +160,11 @@ class BookingModel {
       platNomor: json['plat_nomor']?.toString(),
       jenisKendaraan: json['jenis_kendaraan']?.toString(),
       kodeSlot: json['kode_slot']?.toString(),
+      idSlot: json['id_slot']?.toString(),
+      reservationId: json['reservation_id']?.toString(),
+      floorName: json['floor_name']?.toString(),
+      floorNumber: json['floor_number']?.toString(),
+      slotType: json['slot_type']?.toString(),
     );
   }
 
@@ -150,6 +188,11 @@ class BookingModel {
       'plat_nomor': platNomor,
       'jenis_kendaraan': jenisKendaraan,
       'kode_slot': kodeSlot,
+      'id_slot': idSlot,
+      'reservation_id': reservationId,
+      'floor_name': floorName,
+      'floor_number': floorNumber,
+      'slot_type': slotType,
     };
   }
 
@@ -206,6 +249,11 @@ class BookingModel {
     String? platNomor,
     String? jenisKendaraan,
     String? kodeSlot,
+    String? idSlot,
+    String? reservationId,
+    String? floorName,
+    String? floorNumber,
+    String? slotType,
   }) {
     return BookingModel(
       idTransaksi: idTransaksi ?? this.idTransaksi,
@@ -225,6 +273,11 @@ class BookingModel {
       platNomor: platNomor ?? this.platNomor,
       jenisKendaraan: jenisKendaraan ?? this.jenisKendaraan,
       kodeSlot: kodeSlot ?? this.kodeSlot,
+      idSlot: idSlot ?? this.idSlot,
+      reservationId: reservationId ?? this.reservationId,
+      floorName: floorName ?? this.floorName,
+      floorNumber: floorNumber ?? this.floorNumber,
+      slotType: slotType ?? this.slotType,
     );
   }
 }

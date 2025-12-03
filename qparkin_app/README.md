@@ -2,11 +2,20 @@
 
 ## 📱 Tentang Proyek
 
-**Nama Aplikasi:** Parkey
+**Nama Aplikasi:** Parkey (QPARKIN)
 **Deskripsi:**
 *Inovasi Aplikasi Mobile Berbasis QR Code untuk Sistem Tiket Parkir Digital di Pusat Perbelanjaan.*
 
 Parkey dirancang untuk mempermudah proses parkir dengan sistem tiket digital menggunakan QR Code, mulai dari proses masuk parkir, scan tiket, hingga keluar area parkir.
+
+### ✨ Fitur Utama
+
+- **🏠 Home Page:** Dashboard dengan quick access dan informasi parkir aktif
+- **📊 Activity Page:** Riwayat transaksi parkir dan statistik penggunaan
+- **🗺️ Map Page:** Peta lokasi mall dan ketersediaan parkir
+- **👤 Profile Page:** Manajemen akun, kendaraan, dan poin reward
+- **🎫 Booking System:** Pemesanan slot parkir dengan konfirmasi real-time
+- **💳 Points System:** Sistem reward poin untuk pengguna setia
 
 ---
 
@@ -313,10 +322,100 @@ lib/
 
 ---
 
+---
+
+## 🎯 11. Fitur Profile Page
+
+### 📌 Gambaran Umum
+
+Profile Page adalah halaman manajemen akun pengguna yang komprehensif dengan fitur-fitur modern dan user-friendly.
+
+### ✨ Fitur-Fitur Utama
+
+#### 1. **Informasi Pengguna**
+- Foto profil dengan caching otomatis
+- Nama, email, dan nomor telepon
+- Tanggal pembuatan akun
+- Saldo poin reward
+
+#### 2. **Manajemen Kendaraan**
+- Daftar kendaraan terdaftar
+- Tambah, edit, dan hapus kendaraan
+- Set kendaraan aktif
+- Swipe-to-delete dengan konfirmasi
+- Badge "Aktif" untuk kendaraan yang sedang digunakan
+
+#### 3. **Edit Profil**
+- Update nama, email, nomor telepon
+- Upload foto profil
+- Validasi form real-time
+- Loading state saat menyimpan
+
+#### 4. **Integrasi Poin**
+- Tampilan saldo poin dengan gradient card
+- Navigasi ke riwayat poin
+- Update reaktif saat poin berubah
+
+#### 5. **State Management**
+- Loading state dengan shimmer animation
+- Error state dengan tombol retry
+- Empty state dengan guidance
+- Pull-to-refresh untuk update data
+
+#### 6. **Fitur Aksesibilitas**
+- Semantic labels untuk screen reader
+- Minimum touch target 48dp
+- High contrast text
+- Support untuk large text settings
+
+#### 7. **Logout Aman**
+- Konfirmasi sebelum logout
+- Clear semua data lokal
+- Hapus authentication tokens
+- Kembali ke halaman login
+
+### 🏗️ Arsitektur Profile Page
+
+```
+ProfilePage
+├── ProfileProvider (State Management)
+│   ├── User Data
+│   ├── Vehicle List
+│   └── Loading/Error States
+├── GradientHeader (Reusable Component)
+│   ├── User Info
+│   └── Points Card
+├── Vehicle Section
+│   └── VehicleCard (Reusable Component)
+└── Menu Sections
+    ├── Account Settings
+    └── Other Options
+```
+
+### 📚 Komponen Reusable
+
+Profile page menggunakan komponen-komponen yang dapat digunakan ulang:
+
+1. **AnimatedCard** - Card dengan animasi tap feedback
+2. **GradientHeader** - Header dengan gradient brand
+3. **EmptyStateWidget** - Tampilan untuk state kosong/error
+4. **ProfileShimmerLoading** - Loading placeholder
+
+### 🔗 Dokumentasi Terkait
+
+- [Profile Provider API](docs/profile_provider_api.md)
+- [Reusable Components Guide](docs/reusable_components_guide.md)
+- [Profile Page Features](docs/profile_page_features.md)
+- [Accessibility Features](docs/accessibility_features.md)
+
+---
+
 ✅ **Dengan dokumentasi ini, semua anggota tim Parkey:**
 
 * Tahu di mana meletakkan file.
 * Bisa menjaga struktur proyek tetap konsisten.
 * Mudah memahami alur kerja saat aplikasi berkembang.
+* Memahami fitur-fitur profile page dan cara implementasinya.
+* Dapat menggunakan komponen reusable untuk konsistensi UI.
 
 ---

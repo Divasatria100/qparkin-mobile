@@ -11,6 +11,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const successMessage = document.getElementById('successMessage');
     const notification = document.getElementById('notification');
 
+    // Laravel will handle authentication via form submission
+    // No dummy users needed - backend handles this
+
     // Password visibility toggle
     passwordToggle.addEventListener('click', function() {
         const isPassword = passwordInput.type === 'password';
@@ -27,23 +30,22 @@ document.addEventListener('DOMContentLoaded', function() {
         validatePassword();
     });
 
-    // Form submission
-    signinForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const isUsernameValid = validateUsername();
-        const isPasswordValid = validatePassword();
-        
-        if (isUsernameValid && isPasswordValid) {
-            // Show loading state
-            submitBtn.classList.add('loading');
+    // Form submission - Let Laravel handle it naturally
+    // Just add loading state for better UX
+    if (signinForm) {
+        signinForm.addEventListener('submit', function(e) {
+            const isUsernameValid = validateUsername();
+            const isPasswordValid = validatePassword();
             
-            // Submit the form (actual form submission)
-            this.submit();
-        } else {
-            showNotification('Please fix the errors before submitting', 'error');
-        }
-    });
+            if (isUsernameValid && isPasswordValid) {
+                submitBtn.classList.add('loading');
+                // Form will submit naturally to Laravel backend
+            } else {
+                e.preventDefault();
+                showNotification('Please fix the errors before submitting', 'error');
+            }
+        });
+    }
 
     // Validation functions
     function validateUsername() {
@@ -106,29 +108,22 @@ document.addEventListener('DOMContentLoaded', function() {
             input.classList.add('has-value');
         }
     });
+});
 
-    // Pastikan label tidak menutupi input
-    document.querySelectorAll('input').forEach(input => {
-        input.addEventListener('focus', function() {
-            this.classList.add('has-value');
-        });
-        
-        input.addEventListener('blur', function() {
-            if (this.value.trim() === '') {
-                this.classList.remove('has-value');
-            }
-        });
-        
-        // Inisialisasi untuk nilai yang sudah ada
-        if (input.value.trim() !== '') {
-            input.classList.add('has-value');
+// Pastikan label tidak menutupi input
+document.querySelectorAll('input').forEach(input => {
+    input.addEventListener('focus', function() {
+        this.classList.add('has-value');
+    });
+    
+    input.addEventListener('blur', function() {
+        if (this.value.trim() === '') {
+            this.classList.remove('has-value');
         }
     });
-
-    // Handle Laravel validation errors
-    const urlParams = new URLSearchParams(window.location.search);
-    const error = urlParams.get('error');
-    if (error) {
-        showNotification(error, 'error');
+    
+    // Inisialisasi untuk nilai yang sudah ada
+    if (input.value.trim() !== '') {
+        input.classList.add('has-value');
     }
 });

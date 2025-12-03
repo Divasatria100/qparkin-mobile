@@ -1,121 +1,96 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sesi Kedaluwarsa - QParkIn</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    animation: {
-                        'fade-in': 'fadeIn 1s ease-in-out',
-                        'slide-in': 'slideIn 0.8s ease-out',
-                        'bounce-gentle': 'bounceGentle 2s ease-in-out infinite',
-                        'pulse-slow': 'pulse 3s ease-in-out infinite',
-                        'float': 'float 3s ease-in-out infinite',
-                    },
-                    keyframes: {
-                        fadeIn: {
-                            '0%': {
-                                opacity: '0',
-                                transform: 'translateY(20px)'
-                            },
-                            '100%': {
-                                opacity: '1',
-                                transform: 'translateY(0)'
-                            }
-                        },
-                        slideIn: {
-                            '0%': {
-                                transform: 'translateX(-100%)'
-                            },
-                            '100%': {
-                                transform: 'translateX(0)'
-                            }
-                        },
-                        bounceGentle: {
-                            '0%, 100%': {
-                                transform: 'translateY(0)'
-                            },
-                            '50%': {
-                                transform: 'translateY(-10px)'
-                            }
-                        },
-                        float: {
-                            '0%, 100%': {
-                                transform: 'translateY(0px) rotate(0deg)'
-                            },
-                            '33%': {
-                                transform: 'translateY(-10px) rotate(1deg)'
-                            },
-                            '66%': {
-                                transform: 'translateY(5px) rotate(-1deg)'
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <title>419 - Session Expired | QPARKIN</title>
     <style>
-        /* Custom gradient background */
-        .bg-gradient-animated {
-            background: linear-gradient(-45deg, #667eea, #573ED1, #42CBF8, #39108A);
-            background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-
-        @keyframes gradientShift {
-            0% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
-
-            100% {
-                background-position: 0% 50%;
-            }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
-
-        /* Glass morphism effect */
-        .glass {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        .error-container {
+            background: white;
+            border-radius: 20px;
+            padding: 60px 40px;
+            text-align: center;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
-
-        /* Floating elements */
-        .floating-element {
-            position: absolute;
-            opacity: 0.1;
-            pointer-events: none;
+        .error-code {
+            font-size: 120px;
+            font-weight: 700;
+            color: #667eea;
+            line-height: 1;
+            margin-bottom: 20px;
+        }
+        .error-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 15px;
+        }
+        .error-message {
+            font-size: 16px;
+            color: #64748b;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .error-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 30px;
+            background: #fef3c7;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .error-icon svg {
+            width: 50px;
+            height: 50px;
+            color: #f59e0b;
+        }
+        .btn-home {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 14px 32px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn-home:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
         }
     </style>
 </head>
-
-<body class="bg-gradient-animated min-h-screen flex items-center justify-center relative overflow-hidden">
-
-    <!-- Floating background elements -->
-    <div class="floating-element w-64 h-64 bg-white rounded-full top-20 left-30 animate-float"></div>
-    <div class="floating-element w-32 h-32 bg-purple-300 rounded-full top-1/2 right-20 animate-pulse-slow"
-        style="animation-delay: 1s;"></div>
-    <div class="floating-element w-48 h-48 bg-blue-300 rounded-full bottom-20 left-10 animate-bounce-gentle"
-        style="animation-delay: 2s;"></div>
-
-        <div class=" p-8 rounded-lg text-center ">
-            <h1 class="text-7xl text-white font-bold mb-4">419</h1>
-            <h2 class="text-3xl text-white font-semibold mb-4">Sesi Kadaluwarsa</h2>
-            <p class="text-gray-200 mb-6">Sesi Anda telah berakhir. Silakan refresh halaman dan coba lagi.</p>
-        <a href="{{ url('/') }}" class="bg-gradient-to-r bg-white/30 hover:bg-blue-700 text-white font-bold py-3 px-5 rounded-xl">
-            Kembali Login
-        </a>
+<body>
+    <div class="error-container">
+        <div class="error-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
         </div>
-    </body>
-
+        <div class="error-code">419</div>
+        <h1 class="error-title">Sesi Berakhir</h1>
+        <p class="error-message">
+            Sesi Anda telah berakhir. Silakan muat ulang halaman dan coba lagi.
+        </p>
+        <a href="javascript:location.reload()" class="btn-home">Muat Ulang Halaman</a>
+    </div>
+</body>
 </html>
