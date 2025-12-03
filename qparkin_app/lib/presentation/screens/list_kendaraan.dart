@@ -49,6 +49,93 @@ class _VehicleListPageState extends State<VehicleListPage> {
     showSnackbar("${newVehicle['name']} berhasil ditambahkan!");
   }
 
+  void _showDeleteConfirmation(BuildContext context, int index, Map<String, dynamic> vehicle) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              Icon(
+                Icons.warning_amber_rounded,
+                color: Colors.orange[700],
+                size: 28,
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                'Hapus Kendaraan',
+                style: TextStyle(
+                  fontFamily: 'Nunito',
+                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            'Apakah Anda yakin ingin menghapus ${vehicle['name']} (${vehicle['plate']})?',
+            style: const TextStyle(
+              fontFamily: 'Nunito',
+              fontSize: 14,
+              height: 1.5,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text(
+                'Batal',
+                style: TextStyle(
+                  fontFamily: 'Nunito',
+                  color: Color(0xFF8E8E93),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                _deleteVehicle(index, vehicle);
+              },
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.red[50],
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(
+                'Hapus',
+                style: TextStyle(
+                  fontFamily: 'Nunito',
+                  color: Colors.red[600],
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _deleteVehicle(int index, Map<String, dynamic> vehicle) {
+    setState(() {
+      vehicles.removeAt(index);
+      if (selectedIndex >= vehicles.length) {
+        selectedIndex = vehicles.length - 1;
+      }
+      if (selectedIndex < 0) selectedIndex = 0;
+    });
+    showSnackbar("${vehicle['name']} berhasil dihapus!");
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,12 +164,31 @@ class _VehicleListPageState extends State<VehicleListPage> {
                   ),
                 ),
                 child: SafeArea(
-                  child: Center(
-                    child: Image.asset(
-                      'assets/images/qparkin.png',
-                      height: 60,
-                      fit: BoxFit.contain,
-                    ),
+                  child: Stack(
+                    children: [
+                      // Tombol Back
+                      Positioned(
+                        left: 16,
+                        top: 8,
+                        child: IconButton(
+                          icon: const Icon(
+                            Icons.arrow_back,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                          onPressed: () => Navigator.of(context).pop(),
+                          tooltip: 'Kembali',
+                        ),
+                      ),
+                      // Logo
+                      Center(
+                        child: Image.asset(
+                          'assets/images/qparkin.png',
+                          height: 60,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -172,6 +278,19 @@ class _VehicleListPageState extends State<VehicleListPage> {
                                     color: const Color(0xFF5B9FFF),
                                     size: 26,
                                   ),
+                                ),
+                                const SizedBox(width: 8),
+                                // Tombol Hapus
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete_outline,
+                                    color: Colors.red,
+                                    size: 24,
+                                  ),
+                                  onPressed: () {
+                                    _showDeleteConfirmation(context, index, vehicle);
+                                  },
+                                  tooltip: 'Hapus kendaraan',
                                 ),
                               ],
                             ),
