@@ -3,12 +3,13 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AuthService {
-static const String baseUrl = String.fromEnvironment('API_URL');
-  static const String loginEndpoint = '/api/login';
+  static const String baseUrl = String.fromEnvironment('API_URL');
+  static const String loginEndpoint = '/api/auth/login';
+  static const String registerEndpoint = '/api/auth/register';
 
   final _secureStorage = const FlutterSecureStorage();
 
-  /// Login menggunakan nomor HP dan PIN
+  /// Login menggunakan email dan password
   /// Returns: {'success': bool, 'message': string, 'user': Map?, 'token': string?}
   Future<Map<String, dynamic>> login({
     required String phone,
@@ -18,7 +19,7 @@ static const String baseUrl = String.fromEnvironment('API_URL');
     try {
       final url = Uri.parse('$baseUrl$loginEndpoint');
 
-      // Persiapan request body
+      // Persiapan request body - backend expects nomor_hp and pin
       final body = {
         'nomor_hp': phone,
         'pin': pin,
@@ -42,38 +43,47 @@ static const String baseUrl = String.fromEnvironment('API_URL');
 
       // Status 200 - Login berhasil
       if (response.statusCode == 200) {
-        final token = responseData['token'] as String?;
-        final user = responseData['user'] as Map<String, dynamic>?;
+        final success = responseData['success'] as bool? ?? false;
+        
+        if (success) {
+          final token = responseData['token'] as String?;
+          final user = responseData['user'] as Map<String, dynamic>?;
 
-        if (token != null && token.isNotEmpty) {
-          // Simpan token ke secure storage
-          await _secureStorage.write(key: 'auth_token', value: token);
+          if (token != null && token.isNotEmpty) {
+            // Simpan token ke secure storage
+            await _secureStorage.write(key: 'auth_token', value: token);
 
-          // Simpan user data
-          if (user != null) {
-            await _secureStorage.write(
-              key: 'user_data',
-              value: jsonEncode(user),
-            );
-          }
+            // Simpan user data
+            if (user != null) {
+              await _secureStorage.write(
+                key: 'user_data',
+                value: jsonEncode(user),
+              );
+            }
 
-          // Jika rememberMe aktif, simpan nomor HP
-          if (rememberMe) {
-            await _secureStorage.write(key: 'saved_phone', value: phone);
+            // Jika rememberMe aktif, simpan nomor HP
+            if (rememberMe) {
+              await _secureStorage.write(key: 'saved_phone', value: phone);
+            } else {
+              await _secureStorage.delete(key: 'saved_phone');
+            }
+
+            return {
+              'success': true,
+              'message': responseData['message'] ?? 'Login berhasil',
+              'user': user,
+              'token': token,
+            };
           } else {
-            await _secureStorage.delete(key: 'saved_phone');
+            return {
+              'success': false,
+              'message': 'Token tidak ditemukan dalam response',
+            };
           }
-
-          return {
-            'success': true,
-            'message': 'Login berhasil',
-            'user': user,
-            'token': token,
-          };
         } else {
           return {
             'success': false,
-            'message': 'Token tidak ditemukan dalam response',
+            'message': responseData['message'] ?? 'Login gagal',
           };
         }
       }
@@ -156,7 +166,7 @@ static const String baseUrl = String.fromEnvironment('API_URL');
     }
   }
 
-  /// Registrasi menggunakan nama, nomor HP, dan PIN
+  /// Registrasi menggunakan nama, email/nomor HP, dan password
   /// Returns: {'success': bool, 'message': string}
   Future<Map<String, dynamic>> register({
     required String nama,
@@ -164,9 +174,9 @@ static const String baseUrl = String.fromEnvironment('API_URL');
     required String pin,
   }) async {
     try {
-      final url = Uri.parse('$baseUrl/api/register');
+      final url = Uri.parse('$baseUrl$registerEndpoint');
 
-      // Persiapan request body
+      // Persiapan request body - backend expects nama, nomor_hp, pin
       final body = {
         'nama': nama,
         'nomor_hp': nomorHp,
@@ -191,17 +201,20 @@ static const String baseUrl = String.fromEnvironment('API_URL');
 
       // Status 201 - Registrasi berhasil (Created)
       if (response.statusCode == 201) {
+        final success = responseData['success'] as bool? ?? false;
+        
         return {
-          'success': true,
-          'message': responseData['message'] ?? 'Registrasi berhasil',
+          'success': success,
+          'message': responseData['message'] ?? (success ? 'Registrasi berhasil' : 'Registrasi gagal'),
         };
       }
 
       // Status 200 - OK (jika backend menggunakan 200)
       else if (response.statusCode == 200) {
+        final success = responseData['success'] as bool? ?? false;
         return {
-          'success': true,
-          'message': responseData['message'] ?? 'Registrasi berhasil',
+          'success': success,
+          'message': responseData['message'] ?? (success ? 'Registrasi berhasil' : 'Registrasi gagal'),
         };
       }
 

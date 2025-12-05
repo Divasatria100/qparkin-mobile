@@ -1,9 +1,13 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'data/services/auth_service.dart';
 import 'data/services/parking_service.dart';
+import 'data/services/profile_service.dart';
 import 'logic/providers/active_parking_provider.dart';
+import 'logic/providers/profile_provider.dart';
+import 'logic/providers/notification_provider.dart';
 
 import 'presentation/screens/about_page.dart';
 import 'presentation/screens/login_screen.dart';
@@ -11,11 +15,19 @@ import 'presentation/screens/signup_screen.dart';
 import 'presentation/screens/home_page.dart';
 import 'presentation/screens/map_page.dart';
 import 'presentation/screens/activity_page.dart';
+import 'presentation/screens/profile_page.dart';
+import 'presentation/screens/list_kendaraan.dart';
 import 'pages/notification_screen.dart';
 import 'pages/scan_screen.dart';
 import 'pages/point_screen.dart';
 
-void main() {
+void main() async {
+  // Ensure Flutter binding is initialized
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Indonesian locale for date formatting
+  await initializeDateFormatting('id_ID', null);
+  
   runApp(const MyApp());
 }
 
@@ -32,7 +44,14 @@ class MyApp extends StatelessWidget {
             parkingService: ParkingService(),
           ),
         ),
-        // Tambahkan provider lain di sini jika diperlukan
+        // ProfileProvider untuk mengelola state profil pengguna
+        ChangeNotifierProvider(
+          create: (_) => ProfileProvider(),
+        ),
+        // NotificationProvider untuk mengelola state notifikasi
+        ChangeNotifierProvider(
+          create: (_) => NotificationProvider(),
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -59,14 +78,16 @@ class MyApp extends StatelessWidget {
             return const AboutPage();
           },
         ),
-        initialRoute: '/map  ',
-        routes: {
+        initialRoute: '/about',
+        routes: { 
           '/about': (context) => const AboutPage(),
           LoginScreen.routeName: (context) => const LoginScreen(),
           SignUpScreen.routeName: (context) => const SignUpScreen(),
           '/home': (context) => const HomePage(),
           '/map': (context) => const MapPage(),
           '/activity': (context) => const ActivityPage(),
+          '/profile': (context) => const ProfilePage(),
+          '/list-kendaraan': (context) => const VehicleListPage(),
           '/notifikasi': (context) => const NotificationScreen(),
           '/scan': (context) => const ScanScreen(),
           '/point': (context) => const PointScreen(),

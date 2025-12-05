@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../widgets/bottom_nav.dart';
@@ -20,6 +21,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   late MapProvider _mapProvider;
   int? _selectedMallIndex;
   Map<String, dynamic>? _selectedMall;
+  bool _isMapFocusMode = false;
 
   @override
   void initState() {
@@ -40,6 +42,12 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     });
   }
 
+  void _toggleMapFocusMode() {
+    setState(() {
+      _isMapFocusMode = !_isMapFocusMode;
+    });
+  }
+
   @override
   void dispose() {
     _tabController.dispose();
@@ -47,7 +55,24 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  Future<void> _selectMall(int index) async {
+  // Select mall without switching tabs (for card tap)
+  void _selectMall(int index) {
+    // Get the mall from MapProvider's mall list
+    final mall = _mapProvider.malls[index];
+    
+    setState(() {
+      _selectedMallIndex = index;
+      _selectedMall = {
+        'name': mall.name,
+        'distance': '', // Will be calculated by MapProvider
+        'address': mall.address,
+        'available': mall.availableSlots,
+      };
+    });
+  }
+
+  // Select mall and switch to map tab with route (for route button)
+  Future<void> _selectMallAndShowMap(int index) async {
     // Get the mall from MapProvider's mall list
     final mall = _mapProvider.malls[index];
     
@@ -67,12 +92,28 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       
       // Automatically switch to map tab
       _tabController.animateTo(0);
+      
+      // Activate map focus mode after a short delay to ensure tab switch completes
+      await Future.delayed(const Duration(milliseconds: 300));
+      if (mounted) {
+        setState(() {
+          _isMapFocusMode = true;
+        });
+      }
     } catch (e) {
       debugPrint('[MapPage] Error selecting mall: $e');
       
-      // Maintain app stability - still switch to map tab
+      // Maintain app stability - still switch to map tab and activate focus mode
       // The mall will be selected, just without route
       _tabController.animateTo(0);
+      
+      // Activate map focus mode even on error
+      await Future.delayed(const Duration(milliseconds: 300));
+      if (mounted) {
+        setState(() {
+          _isMapFocusMode = true;
+        });
+      }
       
       // Show error if it's a route calculation issue
       if (e is RouteCalculationException || e is NetworkException) {
@@ -80,7 +121,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
           MapErrorUtils.showRouteCalculationError(
             context,
             onRetry: () async {
-              await _selectMall(index);
+              await _selectMallAndShowMap(index);
             },
           );
         }
@@ -103,8 +144,16 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       // Use MapProvider to select the mall (this will trigger route calculation)
       await _mapProvider.selectMall(mall);
       
-      // Switch to map tab
+      // Switch to map tab and activate focus mode
       _tabController.animateTo(0);
+      
+      // Activate map focus mode after a short delay to ensure tab switch completes
+      await Future.delayed(const Duration(milliseconds: 300));
+      if (mounted) {
+        setState(() {
+          _isMapFocusMode = true;
+        });
+      }
     } on RouteCalculationException catch (_) {
       // Show route calculation error snackbar
       if (mounted) {
@@ -116,8 +165,14 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         );
       }
       
-      // Still switch to map tab to show the mall
+      // Still switch to map tab and activate focus mode to show the mall
       _tabController.animateTo(0);
+      await Future.delayed(const Duration(milliseconds: 300));
+      if (mounted) {
+        setState(() {
+          _isMapFocusMode = true;
+        });
+      }
     } on NetworkException catch (_) {
       // Show network error banner
       if (mounted) {
@@ -129,8 +184,14 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         );
       }
       
-      // Still switch to map tab to show the mall
+      // Still switch to map tab and activate focus mode to show the mall
       _tabController.animateTo(0);
+      await Future.delayed(const Duration(milliseconds: 300));
+      if (mounted) {
+        setState(() {
+          _isMapFocusMode = true;
+        });
+      }
     } catch (e) {
       debugPrint('[MapPage] Error showing route: $e');
       
@@ -145,8 +206,14 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         );
       }
       
-      // Still switch to map tab to show the mall
+      // Still switch to map tab and activate focus mode to show the mall
       _tabController.animateTo(0);
+      await Future.delayed(const Duration(milliseconds: 300));
+      if (mounted) {
+        setState(() {
+          _isMapFocusMode = true;
+        });
+      }
     }
   }
 
@@ -188,71 +255,154 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       value: _mapProvider,
       child: Scaffold(
         appBar: AppBar(
-        automaticallyImplyLeading: false,
-        centerTitle: true,
-        title: const Text(
-          'Peta Lokasi Parkir',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+          automaticallyImplyLeading: false,
+          centerTitle: true,
+          leading: _isMapFocusMode
+              ? IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: _toggleMapFocusMode,
+                  tooltip: 'Kembali',
+                )
+              : null,
+          title: Text(
+            _isMapFocusMode ? 'Mode Fokus Peta' : 'Peta Lokasi Parkir',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
           ),
+          backgroundColor: const Color(0xFF573ED1),
+          elevation: 0,
         ),
-        backgroundColor: const Color(0xFF573ED1),
-        elevation: 0,
-      ),
-      body: Column(
-        children: [
-          // Tab Bar
-          Container(
-            color: Colors.white,
-            child: TabBar(
-              controller: _tabController,
-              tabs: const [
-                Tab(
-                  icon: Icon(Icons.map, size: 20),
-                  text: 'Peta',
-                ),
-                Tab(
-                  icon: Icon(Icons.list, size: 20),
-                  text: 'Daftar Mall',
-                ),
-              ],
-              indicatorColor: const Color(0xFF573ED1),
-              labelColor: const Color(0xFF573ED1),
-              unselectedLabelColor: Colors.grey,
-              labelStyle: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
+        body: _isMapFocusMode
+            ? _buildFullScreenMapView()
+            : Column(
+                children: [
+                  // Tab Bar
+                  Container(
+                    color: Colors.white,
+                    child: TabBar(
+                      controller: _tabController,
+                      tabs: const [
+                        Tab(
+                          icon: Icon(Icons.map, size: 20),
+                          text: 'Peta',
+                        ),
+                        Tab(
+                          icon: Icon(Icons.list, size: 20),
+                          text: 'Daftar Mall',
+                        ),
+                      ],
+                      indicatorColor: const Color(0xFF573ED1),
+                      labelColor: const Color(0xFF573ED1),
+                      unselectedLabelColor: Colors.grey,
+                      labelStyle: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  
+                  // Tab Content
+                  Expanded(
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        // Tab 1: Map View
+                        _buildMapView(),
+                        
+                        // Tab 2: Mall List View
+                        _buildMallListView(),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ),
-          
-          // Tab Content
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                // Tab 1: Map View
-                _buildMapView(),
-                
-                // Tab 2: Mall List View
-                _buildMallListView(),
-              ],
-            ),
-          ),
-        ],
-      ),
-        bottomNavigationBar: CurvedNavigationBar(
-          index: 2,
-          onTap: (index) => NavigationUtils.handleNavigation(context, index, 2),
-        ),
+        bottomNavigationBar: _isMapFocusMode
+            ? null
+            : CurvedNavigationBar(
+                index: 2,
+                onTap: (index) => NavigationUtils.handleNavigation(context, index, 2),
+              ),
       ),
     );
   }
 
   Widget _buildMapView() {
-    // Use MapView widget that consumes MapProvider
+    // Use MapView widget that consumes MapProvider with blur overlay
+    return Stack(
+      children: [
+        const MapView(),
+        
+        // Blur overlay with tap to activate
+        Positioned.fill(
+          child: GestureDetector(
+            onTap: _toggleMapFocusMode,
+            child: Container(
+              color: Colors.black.withOpacity(0.3),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                child: Container(
+                  color: Colors.black.withOpacity(0.1),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.touch_app,
+                                size: 48,
+                                color: const Color(0xFF573ED1),
+                              ),
+                              const SizedBox(height: 12),
+                              const Text(
+                                'Ketuk untuk Melihat Peta',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF573ED1),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Sentuh untuk Berinteraksi',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFullScreenMapView() {
+    // Full screen map view without overlay
     return const MapView();
   }
 
@@ -633,7 +783,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                     
                     // Route Button
                     TextButton.icon(
-                      onPressed: () => _showRouteOnMap(mall),
+                      onPressed: () => _selectMallAndShowMap(index),
                       icon: const Icon(
                         Icons.navigation,
                         size: 16,

@@ -162,6 +162,7 @@ class _VehicleSelectionPageState extends State<VehicleSelectionPage> {
                                   vehicle["name"]!,
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
+                                    fontFamily: 'Nunito',
                                     fontWeight: FontWeight.w500,
                                     color: isSelected
                                         ? const Color(0xFF3A0CA3)
@@ -313,6 +314,7 @@ class _VehicleSelectionPageState extends State<VehicleSelectionPage> {
                                           type,
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
+                                            fontFamily: 'Nunito',
                                             fontSize: 14,
                                             fontWeight: isSelected
                                                 ? FontWeight.w600

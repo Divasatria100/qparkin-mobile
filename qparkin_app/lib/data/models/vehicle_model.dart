@@ -1,3 +1,5 @@
+import 'vehicle_statistics.dart';
+
 /// Model representing a vehicle registered by the user
 class VehicleModel {
   final String idKendaraan;
@@ -6,6 +8,8 @@ class VehicleModel {
   final String merk;
   final String tipe;
   final String? warna;
+  final bool isActive;
+  final VehicleStatistics? statistics;
 
   VehicleModel({
     required this.idKendaraan,
@@ -14,6 +18,8 @@ class VehicleModel {
     required this.merk,
     required this.tipe,
     this.warna,
+    this.isActive = false,
+    this.statistics,
   });
 
   factory VehicleModel.fromJson(Map<String, dynamic> json) {
@@ -24,6 +30,10 @@ class VehicleModel {
       merk: json['merk']?.toString() ?? '',
       tipe: json['tipe']?.toString() ?? '',
       warna: json['warna']?.toString(),
+      isActive: json['is_active'] == true || json['is_active'] == 1,
+      statistics: json['statistics'] != null
+          ? VehicleStatistics.fromJson(json['statistics'])
+          : null,
     );
   }
 
@@ -35,7 +45,31 @@ class VehicleModel {
       'merk': merk,
       'tipe': tipe,
       'warna': warna,
+      'is_active': isActive,
+      'statistics': statistics?.toJson(),
     };
+  }
+
+  VehicleModel copyWith({
+    String? idKendaraan,
+    String? platNomor,
+    String? jenisKendaraan,
+    String? merk,
+    String? tipe,
+    String? warna,
+    bool? isActive,
+    VehicleStatistics? statistics,
+  }) {
+    return VehicleModel(
+      idKendaraan: idKendaraan ?? this.idKendaraan,
+      platNomor: platNomor ?? this.platNomor,
+      jenisKendaraan: jenisKendaraan ?? this.jenisKendaraan,
+      merk: merk ?? this.merk,
+      tipe: tipe ?? this.tipe,
+      warna: warna ?? this.warna,
+      isActive: isActive ?? this.isActive,
+      statistics: statistics ?? this.statistics,
+    );
   }
 
   String get displayName => '$platNomor - $merk $tipe';

@@ -4,6 +4,10 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../models/booking_request.dart';
 import '../models/booking_response.dart';
+import '../models/booking_model.dart';
+import '../models/parking_floor_model.dart';
+import '../models/parking_slot_model.dart';
+import '../models/slot_reservation_model.dart';
 
 /// Service for handling booking-related API operations
 /// Provides methods for creating bookings and checking slot availability
@@ -24,6 +28,16 @@ class BookingService {
 
   // Track pending requests for cancellation
   bool _isCancelled = false;
+
+  // Cache for floor data (5 minutes)
+  static final Map<String, List<ParkingFloorModel>> _floorCache = {};
+  static final Map<String, DateTime> _floorCacheTimestamp = {};
+  static const Duration _floorCacheDuration = Duration(minutes: 5);
+
+  // Cache for slot visualization data (2 minutes)
+  static final Map<String, List<ParkingSlotModel>> _slotCache = {};
+  static final Map<String, DateTime> _slotCacheTimestamp = {};
+  static const Duration _slotCacheDuration = Duration(minutes: 2);
 
   /// Create a new parking booking
   /// 
@@ -486,6 +500,421 @@ class BookingService {
     if (value is double) return value.toInt();
     if (value is String) return int.tryParse(value) ?? 0;
     return 0;
+  }
+
+  /// Get list of parking floors for a mall
+  ///
+  /// Fetches floor data with availability information
+  /// Implements caching strategy (5 minutes)
+  /// Returns empty list on error
+  ///
+  /// Requirements: 11.1-11.10
+  Future<List<ParkingFloorModel>> getFloors({
+    required String mallId,
+    required String token,
+  }) async {
+    try {
+      // Check if cancelled before starting
+      if (_isCancelled) {
+        debugPrint('[BookingService] getFloors cancelled');
+        return [];
+      }
+
+      // Check cache first
+      final cached = _getCachedFloors(mallId);
+      if (cached != null) {
+        debugPrint('[BookingService] Returning cached floors for mall $mallId');
+        return cached;
+      }
+
+      final uri = Uri.parse('$_baseUrl/api/parking/floors/$mallId');
+      debugPrint('[BookingService] Fetching floors from: $uri');
+
+      final response = await _client.get(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      ).timeout(_timeout);
+
+      debugPrint('[BookingService] getFloors response status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        try {
+          final data = json.decode(response.body);
+          debugPrint('[BookingService] getFloors data: $data');
+
+          List<dynamic> floorsJson;
+          
+          // Handle different response formats
+          if (data['data'] is List) {
+            floorsJson = data['data'];
+          } else if (data['floors'] is List) {
+            floorsJson = data['floors'];
+          } else if (data is List) {
+            floorsJson = data;
+          } else {
+            debugPrint('[BookingService] Unexpected response format');
+            return [];
+          }
+
+          final floors = floorsJson
+              .map((json) => ParkingFloorModel.fromJson(json))
+              .where((floor) => floor.validate())
+              .toList();
+
+          // Cache the result
+          _cacheFloors(mallId, floors);
+
+          debugPrint('[BookingService] Parsed ${floors.length} floors');
+          return floors;
+        } catch (e) {
+          debugPrint('[BookingService] Error parsing floors response: $e');
+          return [];
+        }
+      } else if (response.statusCode == 404) {
+        debugPrint('[BookingService] No floors found (404)');
+        return [];
+      } else if (response.statusCode == 401) {
+        debugPrint('[BookingService] Unauthorized (401)');
+        throw Exception('Unauthorized: Invalid or expired token');
+      } else {
+        debugPrint('[BookingService] Unexpected status: ${response.statusCode}');
+        return [];
+      }
+    } on TimeoutException catch (e) {
+      debugPrint('[BookingService] getFloors timeout: $e');
+      return [];
+    } on http.ClientException catch (e) {
+      debugPrint('[BookingService] Network error during getFloors: ${e.message}');
+      return [];
+    } catch (e) {
+      debugPrint('[BookingService] Error fetching floors: $e');
+      if (e.toString().contains('Unauthorized')) {
+        rethrow;
+      }
+      return [];
+    }
+  }
+
+  /// Get floors with retry mechanism
+  ///
+  /// Attempts the request up to [maxRetries] times
+  /// Returns empty list on all failures
+  ///
+  /// Requirements: 11.1-11.10
+  Future<List<ParkingFloorModel>> getFloorsWithRetry({
+    required String mallId,
+    required String token,
+    int maxRetries = 2,
+  }) async {
+    int attempt = 0;
+    Duration delay = const Duration(milliseconds: 500);
+
+    debugPrint('[BookingService] Fetching floors with retry (max: $maxRetries)');
+
+    while (attempt < maxRetries) {
+      try {
+        attempt++;
+        debugPrint('[BookingService] getFloors attempt $attempt of $maxRetries');
+
+        final floors = await getFloors(
+          mallId: mallId,
+          token: token,
+        );
+
+        if (attempt > 1) {
+          debugPrint('[BookingService] getFloors successful on attempt $attempt');
+        }
+
+        return floors;
+      } catch (e) {
+        debugPrint('[BookingService] getFloors attempt $attempt failed: $e');
+
+        // Don't retry on auth errors
+        if (e.toString().contains('Unauthorized')) {
+          debugPrint('[BookingService] Auth error - not retrying');
+          rethrow;
+        }
+
+        if (attempt >= maxRetries) {
+          debugPrint('[BookingService] All getFloors attempts exhausted');
+          return [];
+        }
+
+        await Future.delayed(delay);
+        delay *= 2;
+      }
+    }
+
+    return [];
+  }
+
+  /// Get slots for visualization on a specific floor
+  ///
+  /// Fetches slot data for display purposes (non-interactive)
+  /// Supports vehicle type filtering
+  /// Implements caching strategy (2 minutes)
+  /// Returns empty list on error
+  ///
+  /// Requirements: 11.1-11.10
+  Future<List<ParkingSlotModel>> getSlotsForVisualization({
+    required String floorId,
+    required String token,
+    String? vehicleType,
+  }) async {
+    try {
+      // Check if cancelled before starting
+      if (_isCancelled) {
+        debugPrint('[BookingService] getSlotsForVisualization cancelled');
+        return [];
+      }
+
+      // Check cache first
+      final cacheKey = vehicleType != null ? '${floorId}_$vehicleType' : floorId;
+      final cached = _getCachedSlots(cacheKey);
+      if (cached != null) {
+        debugPrint('[BookingService] Returning cached slots for floor $floorId');
+        return cached;
+      }
+
+      final queryParams = vehicleType != null
+          ? {'vehicle_type': vehicleType}
+          : <String, String>{};
+
+      final uri = Uri.parse('$_baseUrl/api/parking/slots/$floorId/visualization')
+          .replace(queryParameters: queryParams);
+      
+      debugPrint('[BookingService] Fetching slots from: $uri');
+
+      final response = await _client.get(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      ).timeout(_timeout);
+
+      debugPrint('[BookingService] getSlotsForVisualization response status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        try {
+          final data = json.decode(response.body);
+          debugPrint('[BookingService] getSlotsForVisualization data: $data');
+
+          List<dynamic> slotsJson;
+          
+          // Handle different response formats
+          if (data['data'] is List) {
+            slotsJson = data['data'];
+          } else if (data['slots'] is List) {
+            slotsJson = data['slots'];
+          } else if (data is List) {
+            slotsJson = data;
+          } else {
+            debugPrint('[BookingService] Unexpected response format');
+            return [];
+          }
+
+          final slots = slotsJson
+              .map((json) => ParkingSlotModel.fromJson(json))
+              .where((slot) => slot.validate())
+              .toList();
+
+          // Cache the result
+          _cacheSlots(cacheKey, slots);
+
+          debugPrint('[BookingService] Parsed ${slots.length} slots');
+          return slots;
+        } catch (e) {
+          debugPrint('[BookingService] Error parsing slots response: $e');
+          return [];
+        }
+      } else if (response.statusCode == 404) {
+        debugPrint('[BookingService] No slots found (404)');
+        return [];
+      } else if (response.statusCode == 401) {
+        debugPrint('[BookingService] Unauthorized (401)');
+        throw Exception('Unauthorized: Invalid or expired token');
+      } else {
+        debugPrint('[BookingService] Unexpected status: ${response.statusCode}');
+        return [];
+      }
+    } on TimeoutException catch (e) {
+      debugPrint('[BookingService] getSlotsForVisualization timeout: $e');
+      return [];
+    } on http.ClientException catch (e) {
+      debugPrint('[BookingService] Network error during getSlotsForVisualization: ${e.message}');
+      return [];
+    } catch (e) {
+      debugPrint('[BookingService] Error fetching slots: $e');
+      if (e.toString().contains('Unauthorized')) {
+        rethrow;
+      }
+      return [];
+    }
+  }
+
+  /// Reserve a random available slot on specified floor
+  ///
+  /// Backend automatically assigns a specific slot
+  /// Returns SlotReservationModel on success, null on failure
+  /// Implements 5-minute reservation timeout
+  ///
+  /// Requirements: 11.1-11.10
+  Future<SlotReservationModel?> reserveRandomSlot({
+    required String floorId,
+    required String userId,
+    required String vehicleType,
+    required String token,
+    int durationMinutes = 5,
+  }) async {
+    try {
+      // Check if cancelled before starting
+      if (_isCancelled) {
+        debugPrint('[BookingService] reserveRandomSlot cancelled');
+        return null;
+      }
+
+      final uri = Uri.parse('$_baseUrl/api/parking/slots/reserve-random');
+      debugPrint('[BookingService] Reserving random slot at: $uri');
+
+      final requestBody = {
+        'id_floor': floorId,
+        'id_user': userId,
+        'vehicle_type': vehicleType,
+        'duration_minutes': durationMinutes,
+      };
+
+      debugPrint('[BookingService] Reserve request data: $requestBody');
+
+      final response = await _client.post(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: json.encode(requestBody),
+      ).timeout(_timeout);
+
+      debugPrint('[BookingService] reserveRandomSlot response status: ${response.statusCode}');
+      debugPrint('[BookingService] reserveRandomSlot response body: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        try {
+          final data = json.decode(response.body);
+          debugPrint('[BookingService] reserveRandomSlot data: $data');
+
+          Map<String, dynamic> reservationJson;
+          
+          // Handle different response formats
+          if (data['data'] is Map) {
+            reservationJson = Map<String, dynamic>.from(data['data']);
+          } else if (data['reservation'] is Map) {
+            reservationJson = Map<String, dynamic>.from(data['reservation']);
+          } else if (data is Map && data.containsKey('reservation_id')) {
+            reservationJson = Map<String, dynamic>.from(data);
+          } else {
+            debugPrint('[BookingService] Unexpected response format');
+            return null;
+          }
+
+          final reservation = SlotReservationModel.fromJson(reservationJson);
+
+          if (!reservation.validate()) {
+            debugPrint('[BookingService] Invalid reservation data');
+            return null;
+          }
+
+          debugPrint('[BookingService] Slot reserved successfully: ${reservation.slotCode}');
+          return reservation;
+        } catch (e) {
+          debugPrint('[BookingService] Error parsing reservation response: $e');
+          return null;
+        }
+      } else if (response.statusCode == 404) {
+        debugPrint('[BookingService] No slots available (404)');
+        return null;
+      } else if (response.statusCode == 409) {
+        debugPrint('[BookingService] Conflict - no slots available (409)');
+        return null;
+      } else if (response.statusCode == 401) {
+        debugPrint('[BookingService] Unauthorized (401)');
+        throw Exception('Unauthorized: Invalid or expired token');
+      } else {
+        debugPrint('[BookingService] Unexpected status: ${response.statusCode}');
+        return null;
+      }
+    } on TimeoutException catch (e) {
+      debugPrint('[BookingService] reserveRandomSlot timeout: $e');
+      return null;
+    } on http.ClientException catch (e) {
+      debugPrint('[BookingService] Network error during reserveRandomSlot: ${e.message}');
+      return null;
+    } catch (e) {
+      debugPrint('[BookingService] Error reserving slot: $e');
+      if (e.toString().contains('Unauthorized')) {
+        rethrow;
+      }
+      return null;
+    }
+  }
+
+  /// Helper method to get cached floors
+  List<ParkingFloorModel>? _getCachedFloors(String mallId) {
+    final timestamp = _floorCacheTimestamp[mallId];
+    if (timestamp == null) return null;
+
+    final age = DateTime.now().difference(timestamp);
+    if (age > _floorCacheDuration) {
+      // Cache expired
+      _floorCache.remove(mallId);
+      _floorCacheTimestamp.remove(mallId);
+      return null;
+    }
+
+    return _floorCache[mallId];
+  }
+
+  /// Helper method to cache floors
+  void _cacheFloors(String mallId, List<ParkingFloorModel> floors) {
+    _floorCache[mallId] = floors;
+    _floorCacheTimestamp[mallId] = DateTime.now();
+  }
+
+  /// Helper method to get cached slots
+  List<ParkingSlotModel>? _getCachedSlots(String cacheKey) {
+    final timestamp = _slotCacheTimestamp[cacheKey];
+    if (timestamp == null) return null;
+
+    final age = DateTime.now().difference(timestamp);
+    if (age > _slotCacheDuration) {
+      // Cache expired
+      _slotCache.remove(cacheKey);
+      _slotCacheTimestamp.remove(cacheKey);
+      return null;
+    }
+
+    return _slotCache[cacheKey];
+  }
+
+  /// Helper method to cache slots
+  void _cacheSlots(String cacheKey, List<ParkingSlotModel> slots) {
+    _slotCache[cacheKey] = slots;
+    _slotCacheTimestamp[cacheKey] = DateTime.now();
+  }
+
+  /// Clear all caches
+  void clearCache() {
+    debugPrint('[BookingService] Clearing all caches');
+    _floorCache.clear();
+    _floorCacheTimestamp.clear();
+    _slotCache.clear();
+    _slotCacheTimestamp.clear();
   }
 
   /// Cancel all pending API requests

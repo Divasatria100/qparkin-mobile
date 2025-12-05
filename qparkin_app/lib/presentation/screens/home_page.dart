@@ -2,10 +2,12 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
 import '../widgets/bottom_nav.dart';
-import '../widgets/premium_points_card.dart';
 import '../widgets/shimmer_loading.dart';
+import '../widgets/common/animated_card.dart';
 import '/utils/navigation_utils.dart';
+import '../../logic/providers/profile_provider.dart';
 
 /// Home Page - Main landing page of QPARKIN app
 ///
@@ -60,6 +62,11 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _loadData();
+    // Load profile data for header
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ProfileProvider>().fetchUserData();
+      context.read<ProfileProvider>().fetchVehicles();
+    });
   }
 
   /// Loads parking location data from API
@@ -127,7 +134,7 @@ class _HomePageState extends State<HomePage> {
       button: true,
       label: label,
       hint: 'Ketuk untuk membuka $label',
-      child: _AnimatedCard(
+      child: AnimatedCard(
         onTap: onTap,
         borderRadius: 16,
         child: Container(
@@ -374,218 +381,356 @@ class _HomePageState extends State<HomePage> {
               child: SafeArea(
                 bottom: false,
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
-                  child: Column(
-                    children: [
-                      Row(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 20), // Consistent 16dp horizontal padding
+                  child: Consumer<ProfileProvider>(
+                    builder: (context, profileProvider, child) {
+                      final user = profileProvider.user;
+                      final vehicles = profileProvider.vehicles;
+                      final isProfileIncomplete = 
+                        user?.phoneNumber == null || 
+                        user?.phoneNumber?.isEmpty == true ||
+                        vehicles.isEmpty;
+
+                      return Column(
                         children: [
-                          Expanded(
-                            child: Semantics(
-                              label: 'Lokasi saat ini',
-                              hint: 'Ketuk untuk mengubah lokasi',
-                              textField: true,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: Colors.white.withOpacity(0.3),
-                                    width: 1,
+                          // Top Row: Profile Avatar + Location + Notification
+                          Row(
+                            children: [
+                              // Profile Avatar with Badge
+                              Semantics(
+                                button: true,
+                                label: 'Profil pengguna',
+                                hint: 'Ketuk untuk membuka halaman profil',
+                                child: InkWell(
+                                  onTap: () {
+                                    Navigator.pushNamed(context, '/profile');
+                                  },
+                                  borderRadius: BorderRadius.circular(24),
+                                  child: Stack(
+                                    children: [
+                                      Container(
+                                        width: 48,
+                                        height: 48,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withOpacity(0.2),
+                                          borderRadius: BorderRadius.circular(24),
+                                          border: Border.all(
+                                            color: Colors.white.withOpacity(0.3),
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(24),
+                                          child: BackdropFilter(
+                                            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                                            child: user?.photoUrl != null && user!.photoUrl!.isNotEmpty
+                                              ? CircleAvatar(
+                                                  radius: 24,
+                                                  backgroundImage: NetworkImage(user.photoUrl!),
+                                                  backgroundColor: Colors.transparent,
+                                                  onBackgroundImageError: (_, __) {},
+                                                  child: Container(), // Fallback handled by backgroundColor
+                                                )
+                                              : const Center(
+                                                  child: Icon(
+                                                    Icons.person,
+                                                    color: Colors.white,
+                                                    size: 28,
+                                                  ),
+                                                ),
+                                          ),
+                                        ),
+                                      ),
+                                      // Badge indicator for incomplete profile
+                                      if (isProfileIncomplete)
+                                        Positioned(
+                                          right: 0,
+                                          top: 0,
+                                          child: Container(
+                                            width: 12,
+                                            height: 12,
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFF44336),
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                color: const Color(0xFF573ED1),
+                                                width: 2,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                    ],
                                   ),
                                 ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(16),
-                                  child: BackdropFilter(
-                                    filter: ImageFilter.blur(
-                                        sigmaX: 10, sigmaY: 10),
-                                    child: TextField(
-                                      readOnly: true,
-                                      decoration: InputDecoration(
-                                        hintText: 'Lokasi saat ini',
-                                        hintStyle: const TextStyle(
-                                            color: Colors.white),
-                                        prefixIcon: const Icon(
-                                          Icons.location_on,
-                                          color: Colors.white,
+                              ),
+                              const SizedBox(width: 12),
+                              // Location Input
+                              Expanded(
+                                child: Semantics(
+                                  label: 'Lokasi saat ini',
+                                  hint: 'Ketuk untuk mengubah lokasi',
+                                  textField: true,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(
+                                        color: Colors.white.withOpacity(0.3),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(16),
+                                      child: BackdropFilter(
+                                        filter: ImageFilter.blur(
+                                            sigmaX: 10, sigmaY: 10),
+                                        child: TextField(
+                                          readOnly: true,
+                                          decoration: InputDecoration(
+                                            hintText: 'Lokasi saat ini',
+                                            hintStyle: const TextStyle(
+                                                color: Colors.white),
+                                            prefixIcon: const Icon(
+                                              Icons.location_on,
+                                              color: Colors.white,
+                                            ),
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
+                                              borderSide: BorderSide.none,
+                                            ),
+                                            contentPadding:
+                                                const EdgeInsets.symmetric(
+                                              horizontal: 16,
+                                              vertical: 16,
+                                            ),
+                                            filled: true,
+                                            fillColor: Colors.transparent,
+                                          ),
                                         ),
-                                        border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(16),
-                                          borderSide: BorderSide.none,
-                                        ),
-                                        contentPadding:
-                                            const EdgeInsets.symmetric(
-                                          horizontal: 16,
-                                          vertical: 16,
-                                        ),
-                                        filled: true,
-                                        fillColor: Colors.transparent,
                                       ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Semantics(
-                            button: true,
-                            label: 'Notifikasi',
-                            hint: 'Ketuk untuk melihat notifikasi',
-                            child: Container(
-                              width: 48,
-                              height: 48,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(24),
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.3),
-                                  width: 1,
-                                ),
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(24),
-                                child: BackdropFilter(
-                                  filter:
-                                      ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                                  child: Center(
-                                    child: Icon(
-                                      Icons.notifications,
-                                      color: Colors.white,
-                                      size: 28,
+                              const SizedBox(width: 12),
+                              // Notification Icon
+                              Semantics(
+                                button: true,
+                                label: 'Notifikasi',
+                                hint: 'Ketuk untuk melihat notifikasi',
+                                child: InkWell(
+                                  onTap: () {
+                                    Navigator.pushNamed(context, '/notifikasi');
+                                  },
+                                  borderRadius: BorderRadius.circular(24),
+                                  child: Container(
+                                    width: 48,
+                                    height: 48,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(24),
+                                      border: Border.all(
+                                        color: Colors.white.withOpacity(0.3),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(24),
+                                      child: BackdropFilter(
+                                        filter:
+                                            ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                                        child: const Center(
+                                          child: Icon(
+                                            Icons.notifications,
+                                            color: Colors.white,
+                                            size: 28,
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16), // 16dp spacing after Top Row
+                          
+                          // Welcome Text
+                          const Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              'Selamat Datang Kembali!',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8), // 8dp spacing after Welcome Text
+                          
+                          // Sub-Header: Vehicle Info + Points Badge
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              // Left: Active Vehicle Info
+                              Expanded(
+                                child: Semantics(
+                                  button: true,
+                                  label: vehicles.isNotEmpty 
+                                    ? 'Kendaraan aktif: ${vehicles.firstWhere((v) => v.isActive, orElse: () => vehicles.first).merk} ${vehicles.firstWhere((v) => v.isActive, orElse: () => vehicles.first).tipe} - ${vehicles.firstWhere((v) => v.isActive, orElse: () => vehicles.first).platNomor}'
+                                    : 'Belum ada kendaraan terdaftar',
+                                  hint: 'Ketuk untuk melihat daftar kendaraan',
+                                  child: InkWell(
+                                    onTap: () {
+                                      Navigator.pushNamed(context, '/list-kendaraan');
+                                    },
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 10,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.15),
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: Colors.white.withOpacity(0.3),
+                                          width: 1,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(
+                                            Icons.directions_car,
+                                            color: Colors.white,
+                                            size: 18,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Flexible(
+                                            child: Text(
+                                              vehicles.isNotEmpty
+                                                ? '${vehicles.firstWhere((v) => v.isActive, orElse: () => vehicles.first).merk} ${vehicles.firstWhere((v) => v.isActive, orElse: () => vehicles.first).tipe} - ${vehicles.firstWhere((v) => v.isActive, orElse: () => vehicles.first).platNomor}'
+                                                : 'Tambah Kendaraan',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Icon(
+                                            Icons.arrow_forward_ios,
+                                            color: Colors.white.withOpacity(0.7),
+                                            size: 12,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              
+                              // Right: Points Badge
+                              Semantics(
+                                button: true,
+                                label: 'Poin Anda: ${user?.saldoPoin ?? 0} poin',
+                                hint: 'Ketuk untuk melihat detail poin',
+                                child: InkWell(
+                                  onTap: () {
+                                    Navigator.pushNamed(context, '/profile');
+                                  },
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 10,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        colors: [
+                                          Color(0xFFFFA726),
+                                          Color(0xFFFF9800),
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: const Color(0xFFFFA726).withOpacity(0.4),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(
+                                          Icons.stars,
+                                          color: Colors.white,
+                                          size: 18,
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          '${user?.saldoPoin ?? 0}',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          
+                          // Search Field
+                          Semantics(
+                            textField: true,
+                            label: 'Cari lokasi parkir',
+                            hint:
+                                'Ketik untuk mencari lokasi parkir, mal, atau jalan',
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: TextField(
+                                decoration: InputDecoration(
+                                  hintText:
+                                      'Cari lokasi parkir, mal, atau jalan...',
+                                  hintStyle: const TextStyle(color: Colors.grey),
+                                  prefixIcon: const Icon(
+                                    Icons.search,
+                                    color: Colors.grey,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 16,
+                                  ),
+                                  filled: true,
+                                  fillColor: Colors.white,
                                 ),
                               ),
                             ),
                           ),
                         ],
-                      ),
-                      const SizedBox(height: 20),
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Selamat Datang Kembali!',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      // Profile Section (without points)
-                      Semantics(
-                        label:
-                            'Profil pengguna: Diva Satria, divasatria100@gmail.com',
-                        child: Row(
-                          children: [
-                            Semantics(
-                              label: 'Foto profil',
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.1),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: CircleAvatar(
-                                  radius: 28,
-                                  backgroundColor:
-                                      Colors.white.withOpacity(0.3),
-                                  child: const Icon(
-                                    Icons.person,
-                                    color: Colors.white,
-                                    size: 32,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Diva Satria',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 0.3,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'divasatria100@gmail.com',
-                                    style: TextStyle(
-                                      color: Colors.white.withOpacity(0.8),
-                                      fontSize: 13,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      // Premium Points Card
-                      PremiumPointsCard(
-                        points: 200,
-                        variant: PointsCardVariant.purple,
-                        onTap: () {
-                          // TODO: Navigate to points history page
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Navigasi ke riwayat poin'),
-                              duration: Duration(seconds: 2),
-                              backgroundColor: Color(0xFF573ED1),
-                            ),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 20),
-                      Semantics(
-                        textField: true,
-                        label: 'Cari lokasi parkir',
-                        hint:
-                            'Ketik untuk mencari lokasi parkir, mal, atau jalan',
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: TextField(
-                            decoration: InputDecoration(
-                              hintText:
-                                  'Cari lokasi parkir, mal, atau jalan...',
-                              hintStyle: const TextStyle(color: Colors.grey),
-                              prefixIcon: const Icon(
-                                Icons.search,
-                                color: Colors.grey,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide.none,
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 16,
-                              ),
-                              filled: true,
-                              fillColor: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                      );
+                    },
                   ),
                 ),
               ),
@@ -667,7 +812,7 @@ class _HomePageState extends State<HomePage> {
                                                     '${location['name']}, jarak ${location['distance']}, ${location['available']} slot tersedia',
                                                 hint:
                                                     'Ketuk untuk melihat detail lokasi parkir di peta',
-                                                child: _AnimatedCard(
+                                                child: AnimatedCard(
                                                   onTap: () {
                                                     Navigator.pushNamed(
                                                         context, '/map');
@@ -961,81 +1106,4 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-/// Animated card widget with scale animation on press
-/// Provides smooth micro-interaction feedback for tappable cards
-class _AnimatedCard extends StatefulWidget {
-  final Widget child;
-  final VoidCallback? onTap;
-  final double borderRadius;
 
-  const _AnimatedCard({
-    required this.child,
-    this.onTap,
-    this.borderRadius = 16,
-  });
-
-  @override
-  State<_AnimatedCard> createState() => _AnimatedCardState();
-}
-
-class _AnimatedCardState extends State<_AnimatedCard> {
-  bool _isPressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) {
-        setState(() {
-          _isPressed = true;
-        });
-      },
-      onTapUp: (_) {
-        setState(() {
-          _isPressed = false;
-        });
-        widget.onTap?.call();
-      },
-      onTapCancel: () {
-        setState(() {
-          _isPressed = false;
-        });
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        curve: Curves.easeInOut,
-        transform: Matrix4.identity()..scale(_isPressed ? 0.97 : 1.0),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(widget.borderRadius),
-            boxShadow: _isPressed
-                ? [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ]
-                : [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: widget.onTap,
-              borderRadius: BorderRadius.circular(widget.borderRadius),
-              splashColor: const Color(0xFF573ED1).withOpacity(0.15),
-              highlightColor: const Color(0xFF573ED1).withOpacity(0.08),
-              child: widget.child,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
