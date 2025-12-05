@@ -9,9 +9,10 @@ This guide provides detailed documentation on how to use all components in the B
 1. [Providers](#providers)
 2. [Services](#services)
 3. [Widgets](#widgets)
-4. [Utilities](#utilities)
-5. [Models](#models)
-6. [Usage Examples](#usage-examples)
+4. [New Widgets (v2.0)](#new-widgets-v20)
+5. [Utilities](#utilities)
+6. [Models](#models)
+7. [Usage Examples](#usage-examples)
 
 ---
 
@@ -35,6 +36,15 @@ BookingProvider({BookingService? bookingService})
 // Mall and vehicle selection
 Map<String, dynamic>? selectedMall
 Map<String, dynamic>? selectedVehicle
+
+// NEW: Slot reservation state (v2.0)
+List<ParkingFloorModel> floors
+ParkingFloorModel? selectedFloor
+List<ParkingSlotModel> slotsVisualization
+SlotReservationModel? reservedSlot
+bool isLoadingFloors
+bool isLoadingSlots
+bool isReservingSlot
 
 // Time and duration
 DateTime? startTime
@@ -67,6 +77,18 @@ void initialize(Map<String, dynamic> mallData)
 // Select vehicle
 void selectVehicle(Map<String, dynamic> vehicle)
 
+// NEW: Floor and slot reservation methods (v2.0)
+Future<void> fetchFloors(String mallId, String token)
+Future<void> fetchSlotsForVisualization(String floorId, String token)
+void selectFloor(ParkingFloorModel floor)
+Future<bool> reserveRandomSlot(String floorId, String token)
+void clearReservation()
+Future<void> refreshSlotVisualization(String token)
+void startSlotRefreshTimer(String token)
+void stopSlotRefreshTimer()
+void startReservationTimer()
+void stopReservationTimer()
+
 // Set booking time
 void setStartTime(DateTime time, {String? token})
 
@@ -83,7 +105,7 @@ Future<void> checkAvailability({required String token})
 void startPeriodicAvailabilityCheck({required String token})
 void stopPeriodicAvailabilityCheck()
 
-// Confirm booking
+// Confirm booking (updated to include reserved slot)
 Future<bool> confirmBooking({
   required String token,
   Function(BookingModel)? onSuccess,
@@ -155,6 +177,21 @@ BookingService({
 
 **Key Methods:**
 ```dart
+// NEW: Slot reservation methods (v2.0)
+Future<List<ParkingFloorModel>> getFloors(String mallId, String token)
+Future<List<ParkingSlotModel>> getSlotsForVisualization(
+  String floorId,
+  String token,
+  {String? vehicleType}
+)
+Future<SlotReservationModel?> reserveRandomSlot(
+  String floorId,
+  String userId,
+  String vehicleType,
+  String token,
+  {int durationMinutes = 5}
+)
+
 // Create booking
 Future<BookingResponse> createBooking({
   required BookingRequest request,
@@ -491,6 +528,332 @@ BookingSummaryCard(
 
 ---
 
+## New Widgets (v2.0)
+
+### 7. FloorSelectorWidget
+
+Displays a list of parking floors with availability information for user selection.
+
+**Location:** `lib/presentation/widgets/floor_selector_widget.dart`
+
+**Constructor:**
+```dart
+FloorSelectorWidget({
+  Key? key,
+  required this.floors,
+  required this.selectedFloor,
+  required this.onFloorSelected,
+  this.isLoading = false,
+  this.onRetry,
+})
+```
+
+**Props:**
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| floors | List<ParkingFloorModel> | Yes | List of available floors |
+| selectedFloor | ParkingFloorModel? | Yes | Currently selected floor |
+| onFloorSelected | Function(ParkingFloorModel) | Yes | Callback when floor is selected |
+| isLoading | bool | No | Show loading indicator |
+| onRetry | VoidCallback? | No | Callback for retry button on error |
+
+**Usage:**
+```dart
+FloorSelectorWidget(
+  floors: bookingProvider.floors,
+  selectedFloor: bookingProvider.selectedFloor,
+  onFloorSelected: (floor) {
+    bookingProvider.selectFloor(floor);
+  },
+  isLoading: bookingProvider.isLoadingFloors,
+  onRetry: () {
+    bookingProvider.fetchFloors(mallId, authToken);
+  },
+)
+```
+
+**Features:**
+- Card-based layout with floor badges
+- Real-time availability display
+- Purple accent for selected floor
+- Disabled state for unavailable floors
+- Shimmer loading animation
+- Error state with retry button
+
+---
+
+### 8. SlotVisualizationWidget
+
+Non-interactive visual display of parking slots with status colors.
+
+**Location:** `lib/presentation/widgets/slot_visualization_widget.dart`
+
+**Constructor:**
+```dart
+SlotVisualizationWidget({
+  Key? key,
+  required this.slots,
+  required this.floorName,
+  required this.onRefresh,
+  this.isLoading = false,
+  this.lastUpdated,
+})
+```
+
+**Props:**
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| slots | List<ParkingSlotModel> | Yes | List of slots to visualize |
+| floorName | String | Yes | Name of the floor |
+| onRefresh | VoidCallback | Yes | Callback for manual refresh |
+| isLoading | bool | No | Show loading indicator |
+| lastUpdated | DateTime? | No | Last update timestamp |
+
+**Usage:**
+```dart
+SlotVisualizationWidget(
+  slots: bookingProvider.slotsVisualization,
+  floorName: bookingProvider.selectedFloor!.floorName,
+  onRefresh: () {
+    bookingProvider.refreshSlotVisualization(authToken);
+  },
+  isLoading: bookingProvider.isLoadingSlots,
+  lastUpdated: DateTime.now(),
+)
+```
+
+**Features:**
+- Grid layout (4-6 columns, responsive)
+- Color-coded status (green, grey, yellow, red)
+- Slot type icons (regular, accessible)
+- Display-only (no tap interaction)
+- Auto-refresh every 15 seconds
+- Manual refresh button
+- Available slots counter
+- Last updated timestamp
+
+**Important:** This widget is for visualization only. Users cannot tap individual slots.
+
+---
+
+### 9. SlotReservationButton
+
+Action button to trigger random slot reservation on selected floor.
+
+**Location:** `lib/presentation/widgets/slot_reservation_button.dart`
+
+**Constructor:**
+```dart
+SlotReservationButton({
+  Key? key,
+  required this.floorName,
+  required this.onReserve,
+  this.isLoading = false,
+  this.isEnabled = true,
+})
+```
+
+**Props:**
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| floorName | String | Yes | Name of the floor to reserve on |
+| onReserve | VoidCallback | Yes | Callback when button is tapped |
+| isLoading | bool | No | Show loading indicator |
+| isEnabled | bool | No | Enable/disable button |
+
+**Usage:**
+```dart
+SlotReservationButton(
+  floorName: bookingProvider.selectedFloor!.floorName,
+  onReserve: () async {
+    final success = await bookingProvider.reserveRandomSlot(
+      bookingProvider.selectedFloor!.idFloor,
+      authToken,
+    );
+    if (success) {
+      // Show success message
+    }
+  },
+  isLoading: bookingProvider.isReservingSlot,
+  isEnabled: bookingProvider.selectedFloor != null &&
+            bookingProvider.selectedFloor!.hasAvailableSlots,
+)
+```
+
+**Features:**
+- Full-width button (56px height)
+- Purple background with white text
+- Random/casino icon
+- Loading state with spinner
+- Disabled state (grey)
+- Haptic feedback on tap
+
+---
+
+### 10. ReservedSlotInfoCard
+
+Displays reserved slot information after successful reservation.
+
+**Location:** `lib/presentation/widgets/reserved_slot_info_card.dart`
+
+**Constructor:**
+```dart
+ReservedSlotInfoCard({
+  Key? key,
+  required this.reservation,
+  this.onCancel,
+})
+```
+
+**Props:**
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| reservation | SlotReservationModel | Yes | Reserved slot information |
+| onCancel | VoidCallback? | No | Callback to cancel reservation |
+
+**Usage:**
+```dart
+if (bookingProvider.hasReservedSlot)
+  ReservedSlotInfoCard(
+    reservation: bookingProvider.reservedSlot!,
+    onCancel: () {
+      bookingProvider.clearReservation();
+    },
+  )
+```
+
+**Features:**
+- Green success indicator
+- Slot code and floor name display
+- Slot type (Regular/Accessible)
+- Expiration countdown timer
+- Slide-up animation on appear
+- Scale animation effect
+- Optional cancel button
+
+---
+
+### 11. UnifiedTimeDurationCard
+
+Modern combined interface for time and duration selection.
+
+**Location:** `lib/presentation/widgets/unified_time_duration_card.dart`
+
+**Constructor:**
+```dart
+UnifiedTimeDurationCard({
+  Key? key,
+  required this.startTime,
+  required this.duration,
+  required this.onStartTimeChanged,
+  required this.onDurationChanged,
+  this.minStartTime,
+  this.maxStartTime,
+  this.durationOptions = const [1, 2, 3, 4],
+})
+```
+
+**Props:**
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| startTime | DateTime? | Yes | Current start time |
+| duration | Duration? | Yes | Current duration |
+| onStartTimeChanged | Function(DateTime) | Yes | Callback when start time changes |
+| onDurationChanged | Function(Duration) | Yes | Callback when duration changes |
+| minStartTime | DateTime? | No | Minimum selectable start time |
+| maxStartTime | DateTime? | No | Maximum selectable start time |
+| durationOptions | List<int> | No | Duration preset options in hours |
+
+**Usage:**
+```dart
+UnifiedTimeDurationCard(
+  startTime: bookingProvider.startTime,
+  duration: bookingProvider.bookingDuration,
+  onStartTimeChanged: (time) {
+    bookingProvider.setStartTime(time, token: authToken);
+  },
+  onDurationChanged: (duration) {
+    bookingProvider.setDuration(duration, token: authToken);
+  },
+  minStartTime: DateTime.now().add(Duration(minutes: 15)),
+  maxStartTime: DateTime.now().add(Duration(days: 7)),
+  durationOptions: [1, 2, 3, 4],
+)
+```
+
+**Features:**
+- Single unified card design
+- Date & time section with calendar icon
+- Material DatePicker integration
+- Material TimePicker integration
+- "Sekarang + 15 menit" quick action
+- Large interactive duration chips (80x56px)
+- Horizontal scrollable chip row
+- Custom duration dialog (> 4 hours)
+- Calculated end time display
+- Purple accent theme
+- Smooth animations (300ms)
+- Responsive layout
+
+**Replaces:** `TimeDurationPicker` widget (deprecated)
+
+---
+
+### 12. DurationChip
+
+Large, interactive button component for duration selection.
+
+**Location:** `lib/presentation/widgets/duration_chip.dart`
+
+**Constructor:**
+```dart
+DurationChip({
+  Key? key,
+  required this.duration,
+  required this.label,
+  required this.isSelected,
+  required this.onTap,
+})
+```
+
+**Props:**
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| duration | Duration | Yes | Duration value |
+| label | String | Yes | Display label (e.g., "2 Jam") |
+| isSelected | bool | Yes | Whether chip is selected |
+| onTap | VoidCallback | Yes | Callback when tapped |
+
+**Usage:**
+```dart
+DurationChip(
+  duration: Duration(hours: 2),
+  label: '2 Jam',
+  isSelected: selectedDuration == Duration(hours: 2),
+  onTap: () {
+    onDurationChanged(Duration(hours: 2));
+  },
+)
+```
+
+**Features:**
+- Minimum size: 80px × 56px
+- Purple background when selected
+- Light purple background when unselected
+- Checkmark icon when selected
+- Scale animation on tap (1.0 → 0.95 → 1.0)
+- Haptic feedback
+- Elevation 2 (unselected), 4 (selected)
+- 12px rounded corners
+
+---
+
 ## Utilities
 
 ### CostCalculator
@@ -589,6 +952,107 @@ if (errors.isEmpty) {
 
 ## Models
 
+### New Models (v2.0)
+
+#### ParkingFloorModel
+
+Represents a parking floor with availability information.
+
+**Location:** `lib/data/models/parking_floor_model.dart`
+
+**Properties:**
+```dart
+final String idFloor
+final String idMall
+final int floorNumber
+final String floorName
+final int totalSlots
+final int availableSlots
+final int occupiedSlots
+final int reservedSlots
+final DateTime lastUpdated
+
+// Computed properties
+bool get hasAvailableSlots
+double get occupancyRate
+String get availabilityText
+```
+
+**Methods:**
+```dart
+factory ParkingFloorModel.fromJson(Map<String, dynamic> json)
+Map<String, dynamic> toJson()
+```
+
+---
+
+#### ParkingSlotModel
+
+Represents a parking slot for visualization purposes (non-interactive).
+
+**Location:** `lib/data/models/parking_slot_model.dart`
+
+**Properties:**
+```dart
+enum SlotStatus { available, occupied, reserved, disabled }
+enum SlotType { regular, disableFriendly }
+
+final String idSlot
+final String idFloor
+final String slotCode
+final SlotStatus status
+final SlotType slotType
+final int? positionX
+final int? positionY
+final DateTime lastUpdated
+
+// Computed properties
+Color get statusColor
+IconData get typeIcon
+String get typeLabel
+```
+
+**Methods:**
+```dart
+factory ParkingSlotModel.fromJson(Map<String, dynamic> json)
+Map<String, dynamic> toJson()
+```
+
+---
+
+#### SlotReservationModel
+
+Represents a reserved parking slot.
+
+**Location:** `lib/data/models/slot_reservation_model.dart`
+
+**Properties:**
+```dart
+final String reservationId
+final String slotId
+final String slotCode
+final String floorName
+final String floorNumber
+final SlotType slotType
+final DateTime reservedAt
+final DateTime expiresAt
+final bool isActive
+
+// Computed properties
+bool get isExpired
+Duration get timeRemaining
+String get displayName
+String get typeLabel
+```
+
+**Methods:**
+```dart
+factory SlotReservationModel.fromJson(Map<String, dynamic> json)
+Map<String, dynamic> toJson()
+```
+
+---
+
 ### BookingModel
 
 Represents a booking record.
@@ -603,6 +1067,9 @@ final String qrCode
 final String idMall
 final String idParkiran
 final String idKendaraan
+final String? idSlot              // NEW (v2.0)
+final String? slotCode            // NEW (v2.0)
+final String? floorName           // NEW (v2.0)
 final DateTime waktuMulai
 final DateTime waktuSelesai
 final int durasiBooking
@@ -635,6 +1102,8 @@ final String idMall
 final String idKendaraan
 final DateTime waktuMulai
 final int durasiJam
+final String? idSlot              // NEW (v2.0) - Optional
+final String? reservationId       // NEW (v2.0) - Optional
 final String? notes
 ```
 
@@ -680,7 +1149,7 @@ factory BookingResponse.fromJson(Map<String, dynamic> json)
 
 ## Usage Examples
 
-### Complete Booking Flow
+### Complete Booking Flow (v2.0 with Slot Reservation)
 
 ```dart
 class BookingPage extends StatefulWidget {
@@ -702,14 +1171,20 @@ class _BookingPageState extends State<BookingPage> {
       final bookingProvider = Provider.of<BookingProvider>(context, listen: false);
       bookingProvider.initialize(widget.mallData);
       
-      // Start periodic availability checks
       final authToken = getAuthToken();
+      
+      // NEW: Fetch floors for slot reservation
+      bookingProvider.fetchFloors(widget.mallData['id'], authToken);
+      
+      // Start periodic availability checks
       bookingProvider.startPeriodicAvailabilityCheck(token: authToken);
     });
   }
   
   @override
   Widget build(BuildContext context) {
+    final authToken = getAuthToken();
+    
     return Scaffold(
       appBar: AppBar(
         title: Text('Booking Parkir'),
@@ -741,8 +1216,80 @@ class _BookingPageState extends State<BookingPage> {
                 
                 SizedBox(height: 16),
                 
-                // Time and duration picker
-                TimeDurationPicker(
+                // NEW: Floor & Slot Reservation Section
+                Text(
+                  'Pilih Lokasi Parkir',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 12),
+                
+                // NEW: Floor selector
+                FloorSelectorWidget(
+                  floors: bookingProvider.floors,
+                  selectedFloor: bookingProvider.selectedFloor,
+                  onFloorSelected: (floor) {
+                    bookingProvider.selectFloor(floor);
+                    bookingProvider.fetchSlotsForVisualization(
+                      floor.idFloor,
+                      authToken,
+                    );
+                  },
+                  isLoading: bookingProvider.isLoadingFloors,
+                ),
+                
+                SizedBox(height: 16),
+                
+                // NEW: Slot visualization (if floor selected)
+                if (bookingProvider.selectedFloor != null) ...[
+                  SlotVisualizationWidget(
+                    slots: bookingProvider.slotsVisualization,
+                    floorName: bookingProvider.selectedFloor!.floorName,
+                    onRefresh: () {
+                      bookingProvider.refreshSlotVisualization(authToken);
+                    },
+                    isLoading: bookingProvider.isLoadingSlots,
+                    lastUpdated: DateTime.now(),
+                  ),
+                  
+                  SizedBox(height: 16),
+                  
+                  // NEW: Slot reservation button
+                  SlotReservationButton(
+                    floorName: bookingProvider.selectedFloor!.floorName,
+                    onReserve: () async {
+                      final success = await bookingProvider.reserveRandomSlot(
+                        bookingProvider.selectedFloor!.idFloor,
+                        authToken,
+                      );
+                      if (success) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Slot berhasil direservasi!'),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                      }
+                    },
+                    isLoading: bookingProvider.isReservingSlot,
+                    isEnabled: bookingProvider.selectedFloor!.hasAvailableSlots,
+                  ),
+                  
+                  SizedBox(height: 16),
+                  
+                  // NEW: Reserved slot info card
+                  if (bookingProvider.hasReservedSlot)
+                    ReservedSlotInfoCard(
+                      reservation: bookingProvider.reservedSlot!,
+                      onCancel: () {
+                        bookingProvider.clearReservation();
+                      },
+                    ),
+                ],
+                
+                SizedBox(height: 16),
+                
+                // NEW: Unified time and duration card (replaces TimeDurationPicker)
+                UnifiedTimeDurationCard(
                   startTime: bookingProvider.startTime,
                   duration: bookingProvider.bookingDuration,
                   onStartTimeChanged: (time) {
@@ -751,11 +1298,14 @@ class _BookingPageState extends State<BookingPage> {
                   onDurationChanged: (duration) {
                     bookingProvider.setDuration(duration, token: authToken);
                   },
+                  minStartTime: DateTime.now().add(Duration(minutes: 15)),
+                  maxStartTime: DateTime.now().add(Duration(days: 7)),
+                  durationOptions: [1, 2, 3, 4],
                 ),
                 
                 SizedBox(height: 16),
                 
-                // Slot availability
+                // Slot availability (legacy indicator)
                 SlotAvailabilityIndicator(
                   availableSlots: bookingProvider.availableSlots,
                   vehicleType: selectedVehicle?.jenisKendaraan ?? '',
@@ -778,7 +1328,7 @@ class _BookingPageState extends State<BookingPage> {
                 
                 SizedBox(height: 16),
                 
-                // Booking summary
+                // Booking summary (updated with slot info)
                 if (bookingProvider.canConfirmBooking)
                   BookingSummaryCard(
                     mallName: widget.mallData['name'],
@@ -789,6 +1339,8 @@ class _BookingPageState extends State<BookingPage> {
                     endTime: bookingProvider.calculatedEndTime!,
                     duration: bookingProvider.bookingDuration!,
                     totalCost: bookingProvider.estimatedCost,
+                    // NEW: Reserved slot info
+                    reservedSlot: bookingProvider.reservedSlot,
                   ),
               ],
             ),
@@ -818,6 +1370,18 @@ class _BookingPageState extends State<BookingPage> {
     BookingProvider bookingProvider,
   ) async {
     final authToken = getAuthToken();
+    
+    // NEW: Validate slot reservation
+    if (bookingProvider.reservedSlot != null && 
+        bookingProvider.reservedSlot!.isExpired) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Reservasi slot telah berakhir. Silakan reservasi ulang.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
     
     final success = await bookingProvider.confirmBooking(
       token: authToken,
@@ -858,6 +1422,10 @@ class _BookingPageState extends State<BookingPage> {
     // Stop periodic checks when leaving page
     final bookingProvider = Provider.of<BookingProvider>(context, listen: false);
     bookingProvider.stopPeriodicAvailabilityCheck();
+    // NEW: Stop slot refresh timer
+    bookingProvider.stopSlotRefreshTimer();
+    // NEW: Stop reservation timer
+    bookingProvider.stopReservationTimer();
     super.dispose();
   }
 }
@@ -867,6 +1435,7 @@ class _BookingPageState extends State<BookingPage> {
 
 ## Best Practices
 
+### General
 1. **Always dispose providers** when leaving the page
 2. **Use Consumer widgets** for reactive UI updates
 3. **Handle loading states** with shimmer or progress indicators
@@ -875,6 +1444,20 @@ class _BookingPageState extends State<BookingPage> {
 6. **Cache data** to reduce API calls
 7. **Implement retry logic** for network failures
 8. **Test all edge cases** with unit and widget tests
+
+### Slot Reservation (v2.0)
+9. **Stop all timers on dispose** - Call `stopSlotRefreshTimer()` and `stopReservationTimer()`
+10. **Validate reservation expiry** - Check `reservedSlot.isExpired` before confirming booking
+11. **Handle no slots available** - Show alternative floors when reservation fails
+12. **Clear reservation on floor change** - Automatically clear when user selects different floor
+13. **Show countdown timer** - Display remaining time for slot reservation
+14. **Auto-refresh slot visualization** - Update every 15 seconds during active session
+15. **Provide manual refresh** - Allow users to manually refresh slot availability
+16. **Use shimmer loading** - Show skeleton screens while loading floors/slots
+17. **Implement haptic feedback** - Provide tactile response on slot reservation
+18. **Cache floor data** - Cache for 5 minutes to reduce API calls
+19. **Debounce refresh requests** - Prevent excessive API calls (500ms debounce)
+20. **Handle reservation conflicts** - Show clear message if user already has active reservation
 
 ---
 
@@ -893,6 +1476,37 @@ class _BookingPageState extends State<BookingPage> {
 
 **Issue:** Memory leaks
 - **Solution:** Always call `stopPeriodicAvailabilityCheck()` in dispose()
+
+### Slot Reservation Issues (v2.0)
+
+**Issue:** Floors not loading
+- **Solution:** Check `fetchFloors()` is called with correct mallId and token
+- **Solution:** Verify mall has slot reservation feature enabled
+
+**Issue:** Slot visualization not displaying
+- **Solution:** Ensure floor is selected before calling `fetchSlotsForVisualization()`
+- **Solution:** Check `selectedFloor` is not null
+
+**Issue:** Reservation fails with "No slots available"
+- **Solution:** Check `selectedFloor.hasAvailableSlots` before allowing reservation
+- **Solution:** Suggest alternative floors to user
+
+**Issue:** Reservation expires before booking
+- **Solution:** Increase reservation duration (default 5 minutes)
+- **Solution:** Show countdown timer to user
+- **Solution:** Allow quick re-reservation
+
+**Issue:** Slot refresh not working
+- **Solution:** Ensure `startSlotRefreshTimer()` is called after floor selection
+- **Solution:** Check timer is not null and is active
+
+**Issue:** Reserved slot not showing in booking
+- **Solution:** Verify `reservedSlot` is not null and not expired
+- **Solution:** Check booking request includes `idSlot` and `reservationId`
+
+**Issue:** Multiple reservation timers running
+- **Solution:** Always call `stopReservationTimer()` before starting new one
+- **Solution:** Clear timer in `clearReservation()` method
 
 ---
 

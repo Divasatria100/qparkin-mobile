@@ -13,6 +13,8 @@ class Booking extends Model
     protected $primaryKey = 'id_transaksi';
 
     protected $fillable = [
+        'id_slot',
+        'reservation_id',
         'waktu_mulai',
         'waktu_selesai',
         'durasi_booking',
@@ -23,5 +25,15 @@ class Booking extends Model
     public function transaksiParkir()
     {
         return $this->belongsTo(TransaksiParkir::class, 'id_transaksi', 'id_transaksi');
+    }
+
+    public function slot()
+    {
+        return $this->belongsTo(ParkingSlot::class, 'id_slot', 'id_slot');
+    }
+
+    public function reservation()
+    {
+        return $this->hasOne(SlotReservation::class, 'reservation_id', 'reservation_id');
     }
 }

@@ -766,8 +766,17 @@ class _BookingPageContentState extends State<_BookingPageContent> {
 
   /// Build slot reservation section with floor selector, visualization, and reservation button
   ///
-  /// Requirements: 3.1-3.12
+  /// Conditionally renders based on mall's hasSlotReservationEnabled feature flag.
+  /// If disabled, returns empty container for seamless UX (auto-assignment will be used).
+  ///
+  /// Requirements: 3.1-3.12, 17.1-17.9
   Widget _buildSlotReservationSection(BookingProvider provider, double spacing) {
+    // Check if slot reservation is enabled for this mall
+    // If feature is disabled, return empty container (auto-assignment will be used)
+    if (!provider.isSlotReservationEnabled) {
+      return const SizedBox.shrink();
+    }
+    
     final titleFontSize = ResponsiveHelper.getResponsiveFontSize(context, 18);
     
     return Column(

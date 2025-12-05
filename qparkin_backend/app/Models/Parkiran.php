@@ -28,4 +28,9 @@ class Parkiran extends Model
     {
         return $this->hasMany(TransaksiParkir::class, 'id_parkiran', 'id_parkiran');
     }
+
+    public function floors()
+    {
+        return $this->hasMany(ParkingFloor::class, 'id_parkiran', 'id_parkiran');
+    }
 }

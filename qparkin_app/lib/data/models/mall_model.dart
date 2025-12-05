@@ -39,6 +39,7 @@ class MallModel {
   final double longitude;
   final int availableSlots;
   final String distance;
+  final bool hasSlotReservationEnabled;
 
   MallModel({
     required this.id,
@@ -48,6 +49,7 @@ class MallModel {
     required this.longitude,
     required this.availableSlots,
     this.distance = '',
+    this.hasSlotReservationEnabled = false,
   });
 
   /// Convert latitude and longitude to [GeoPoint] for OSM plugin.
@@ -172,6 +174,8 @@ class MallModel {
       longitude: _parseDouble(json['longitude']),
       availableSlots: _parseInt(json['available_slots'] ?? json['kapasitas']),
       distance: json['distance']?.toString() ?? '',
+      hasSlotReservationEnabled: json['has_slot_reservation_enabled'] == true ||
+          json['has_slot_reservation_enabled'] == 1,
     );
   }
 
@@ -198,6 +202,7 @@ class MallModel {
       'longitude': longitude,
       'available_slots': availableSlots,
       'distance': distance,
+      'has_slot_reservation_enabled': hasSlotReservationEnabled,
     };
   }
 
@@ -244,6 +249,7 @@ class MallModel {
     double? longitude,
     int? availableSlots,
     String? distance,
+    bool? hasSlotReservationEnabled,
   }) {
     return MallModel(
       id: id ?? this.id,
@@ -253,6 +259,8 @@ class MallModel {
       longitude: longitude ?? this.longitude,
       availableSlots: availableSlots ?? this.availableSlots,
       distance: distance ?? this.distance,
+      hasSlotReservationEnabled:
+          hasSlotReservationEnabled ?? this.hasSlotReservationEnabled,
     );
   }
 
@@ -266,7 +274,8 @@ class MallModel {
         other.latitude == latitude &&
         other.longitude == longitude &&
         other.availableSlots == availableSlots &&
-        other.distance == distance;
+        other.distance == distance &&
+        other.hasSlotReservationEnabled == hasSlotReservationEnabled;
   }
 
   @override
@@ -279,6 +288,7 @@ class MallModel {
       longitude,
       availableSlots,
       distance,
+      hasSlotReservationEnabled,
     );
   }
 
@@ -286,6 +296,7 @@ class MallModel {
   String toString() {
     return 'MallModel(id: $id, name: $name, address: $address, '
         'latitude: $latitude, longitude: $longitude, '
-        'availableSlots: $availableSlots, distance: $distance)';
+        'availableSlots: $availableSlots, distance: $distance, '
+        'hasSlotReservationEnabled: $hasSlotReservationEnabled)';
   }
 }

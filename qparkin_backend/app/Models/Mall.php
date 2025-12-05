@@ -16,7 +16,12 @@ class Mall extends Model
         'nama_mall',
         'lokasi',
         'kapasitas',
-        'alamat_gmaps'
+        'alamat_gmaps',
+        'has_slot_reservation_enabled'
+    ];
+
+    protected $casts = [
+        'has_slot_reservation_enabled' => 'boolean',
     ];
 
     public function adminMall()
