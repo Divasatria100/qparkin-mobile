@@ -59,7 +59,7 @@ class MyApp extends StatelessWidget {
             return const AboutPage();
           },
         ),
-        initialRoute: '/notifikasi',
+        initialRoute: '/map  ',
         routes: {
           '/about': (context) => const AboutPage(),
           LoginScreen.routeName: (context) => const LoginScreen(),

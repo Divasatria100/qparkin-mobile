@@ -1,8 +1,10 @@
 import 'dart:math';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:qparkin_app/logic/providers/map_provider.dart';
 import 'package:qparkin_app/data/models/mall_model.dart';
+import 'package:qparkin_app/data/models/route_data.dart';
 import 'package:qparkin_app/data/services/location_service.dart';
 import 'package:qparkin_app/data/services/route_service.dart';
 

@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../models/booking_request.dart';
 import '../models/booking_response.dart';
-import '../models/booking_model.dart';
 
 /// Service for handling booking-related API operations
 /// Provides methods for creating bookings and checking slot availability

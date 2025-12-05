@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:qparkin_app/presentation/screens/map_page.dart';
 import 'package:qparkin_app/presentation/screens/booking_page.dart';
 import 'package:qparkin_app/logic/providers/map_provider.dart';

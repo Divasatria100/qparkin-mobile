@@ -5,8 +5,6 @@ import '../widgets/map_view.dart';
 import '/utils/navigation_utils.dart';
 import '/utils/map_error_utils.dart';
 import '/logic/providers/map_provider.dart';
-import '/data/models/mall_model.dart';
-import '/data/services/location_service.dart';
 import '/data/services/route_service.dart';
 import 'booking_page.dart';
 
