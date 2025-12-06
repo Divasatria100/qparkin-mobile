@@ -90,16 +90,23 @@ class BookingController extends Controller
 
             // If no slot provided and no reservation, auto-assign a slot
             if (!$idSlot) {
-                $idSlot = $this->autoAssignSlot($request->id_parkiran, $request->id_kendaraan);
+                $idSlot = $this->autoAssignSlot(
+                    $request->id_parkiran,
+                    $request->id_kendaraan,
+                    $request->waktu_mulai,
+                    $request->durasi_booking
+                );
                 
                 if (!$idSlot) {
                     DB::rollBack();
                     return response()->json([
                         'success' => false,
                         'message' => 'NO_SLOTS_AVAILABLE',
-                        'error' => 'Tidak ada slot tersedia'
+                        'error' => 'Tidak ada slot tersedia untuk waktu yang dipilih'
                     ], 404);
                 }
+                
+                Log::info("Auto-assigned slot {$idSlot} for booking");
             }
 
             // Calculate end time
@@ -254,36 +261,42 @@ class BookingController extends Controller
 
     /**
      * Auto-assign an available slot when no reservation is provided
-     * This is the fallback mechanism for backward compatibility
+     * 
+     * This method uses SlotAutoAssignmentService to:
+     * 1. Find an available slot
+     * 2. Create a temporary reservation to lock it
+     * 3. Prevent overbooking
+     * 
+     * Used for malls with slot reservation disabled (simple parking)
      */
-    private function autoAssignSlot($idParkiran, $idKendaraan)
+    private function autoAssignSlot($idParkiran, $idKendaraan, $waktuMulai = null, $durasiBooking = 1)
     {
         try {
-            // Get vehicle type
-            $kendaraan = \App\Models\Kendaraan::find($idKendaraan);
-            if (!$kendaraan) {
-                return null;
+            $autoAssignService = new \App\Services\SlotAutoAssignmentService();
+            
+            // Get user ID from request
+            $userId = request()->user()->id_user;
+            
+            // Use provided time or default to now
+            $startTime = $waktuMulai ?? now()->toDateTimeString();
+            
+            // Assign slot with reservation
+            $slotId = $autoAssignService->assignSlot(
+                $idParkiran,
+                $idKendaraan,
+                $userId,
+                $startTime,
+                $durasiBooking
+            );
+            
+            if ($slotId) {
+                Log::info("Auto-assigned slot {$slotId} for parkiran {$idParkiran}, vehicle {$idKendaraan}");
+            } else {
+                Log::warning("Failed to auto-assign slot for parkiran {$idParkiran}, vehicle {$idKendaraan}");
             }
-
-            // Get floors for this parkiran
-            $floors = \App\Models\ParkingFloor::where('id_parkiran', $idParkiran)
-                ->active()
-                ->hasAvailableSlots()
-                ->get();
-
-            foreach ($floors as $floor) {
-                // Try to find an available slot on this floor
-                $slot = ParkingSlot::where('id_floor', $floor->id_floor)
-                    ->where('status', 'available')
-                    ->where('jenis_kendaraan', $kendaraan->jenis_kendaraan)
-                    ->first();
-
-                if ($slot) {
-                    return $slot->id_slot;
-                }
-            }
-
-            return null;
+            
+            return $slotId;
+            
         } catch (\Exception $e) {
             Log::error('Error auto-assigning slot: ' . $e->getMessage());
             return null;
