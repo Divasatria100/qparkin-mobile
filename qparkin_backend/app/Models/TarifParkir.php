@@ -11,12 +11,18 @@ class TarifParkir extends Model
 
     protected $table = 'tarif_parkir';
     protected $primaryKey = 'id_tarif';
+    public $timestamps = false;
 
     protected $fillable = [
         'id_mall',
         'jenis_kendaraan',
         'satu_jam_pertama',
         'tarif_parkir_per_jam'
+    ];
+
+    protected $casts = [
+        'satu_jam_pertama' => 'decimal:2',
+        'tarif_parkir_per_jam' => 'decimal:2',
     ];
 
     public function mall()

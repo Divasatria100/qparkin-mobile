@@ -532,35 +532,35 @@
         align-items: flex-start;
         padding: 20px;
     }
-    
+
     .header-actions {
         width: 100%;
         justify-content: space-between;
     }
-    
+
     .detail-content {
         padding: 20px;
     }
-    
+
     .stats-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .section-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 12px;
     }
-    
+
     .slot-filters {
         flex-direction: column;
         align-items: flex-start;
     }
-    
+
     .lantai-container.grid-view {
         grid-template-columns: 1fr;
     }
-    
+
     .slot-grid {
         grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
     }
@@ -570,13 +570,13 @@
     .stats-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .header-info {
         flex-direction: column;
         align-items: flex-start;
         gap: 8px;
     }
-    
+
     .lantai-slots {
         grid-template-columns: repeat(auto-fit, minmax(30px, 1fr));
     }
@@ -620,6 +620,7 @@
         opacity: 0;
         transform: translateY(30px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -687,4 +688,290 @@
     filter: blur(4px);
     pointer-events: none;
     user-select: none;
+}
+
+/*
+ Additional Detail Parkiran Styles */
+.lantai-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.lantai-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.lantai-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, #f8fafc 0%, white 100%);
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.lantai-card-header h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+
+.lantai-badge {
+    background: #6366f1;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.lantai-card-body {
+    padding: 20px;
+}
+
+.lantai-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.lantai-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.lantai-stat .label {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.lantai-stat .value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.lantai-stat .value.available {
+    color: #059669;
+}
+
+.lantai-stat .value.occupied {
+    color: #dc2626;
+}
+
+.lantai-progress {
+    margin-top: 12px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #6366f1 0%, #4f46e5 100%);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.slot-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px solid #e2e8f0;
+    background: white;
+    transition: all 0.3s ease;
+    min-height: 80px;
+}
+
+.slot-item.available {
+    border-color: #10b981;
+    background: #d1fae5;
+}
+
+.slot-item.occupied {
+    border-color: #ef4444;
+    background: #fee2e2;
+}
+
+.slot-item.reserved {
+    border-color: #f59e0b;
+    background: #fef3c7;
+}
+
+.slot-item.maintenance {
+    border-color: #6b7280;
+    background: #f3f4f6;
+}
+
+.slot-code {
+    font-weight: 700;
+    font-size: 0.875rem;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.slot-status {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.slot-item.available .slot-status {
+    color: #065f46;
+}
+
+.slot-item.occupied .slot-status {
+    color: #991b1b;
+}
+
+.slot-item.reserved .slot-status {
+    color: #92400e;
+}
+
+.slot-item.maintenance .slot-status {
+    color: #374151;
+}
+
+.slot-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.slot-filters {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    min-width: 200px;
+}
+
+.filter-group label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.filter-group select {
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-group select:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.kode-badge {
+    background: #eff6ff;
+    color: #1e40af;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: 1px solid #bfdbfe;
+}
+
+.info-item {
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.btn-back {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: white;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.btn-back:hover {
+    background: #f8fafc;
+    color: #475569;
+    text-decoration: none;
+}
+
+.btn-edit {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.btn-edit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    color: white;
+    text-decoration: none;
+}
+
+@media (max-width: 768px) {
+    .slot-grid {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    }
+
+    .lantai-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-group {
+        min-width: 100%;
+    }
 }

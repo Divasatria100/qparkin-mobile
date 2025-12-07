@@ -453,8 +453,13 @@
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .btn-save.loading {
@@ -508,6 +513,7 @@
         opacity: 0;
         transform: translateY(30px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -595,6 +601,7 @@
         opacity: 0;
         transform: translateY(-50px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -775,6 +782,7 @@
         transform: translateX(100%);
         opacity: 0;
     }
+
     to {
         transform: translateX(0);
         opacity: 1;
@@ -807,41 +815,41 @@
         grid-template-columns: 1fr;
         gap: 20px;
     }
-    
+
     .edit-header {
         padding: 20px;
     }
-    
+
     .edit-content {
         padding: 20px;
     }
-    
+
     .edit-actions {
         padding: 16px 20px;
         flex-direction: column;
     }
-    
+
     .current-stats {
         grid-template-columns: 1fr;
     }
-    
+
     .preview-stats {
         grid-template-columns: 1fr;
     }
-    
+
     .lantai-fields {
         grid-template-columns: 1fr;
     }
-    
+
     .parkiran-form {
         padding: 16px;
     }
-    
+
     .current-info-card {
         flex-direction: column;
         text-align: center;
     }
-    
+
     .info-icon {
         margin: 0 auto;
     }
@@ -852,12 +860,284 @@
         margin: 5% auto;
         width: 95%;
     }
-    
+
     .modal-footer {
         flex-direction: column;
     }
-    
-    .btn-cancel, .btn-danger {
+
+    .btn-cancel,
+    .btn-danger {
         width: 100%;
     }
+}
+
+/* 
+Additional Edit Parkiran Styles */
+.lantai-card {
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.lantai-card:hover {
+    border-color: #6366f1;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
+}
+
+.lantai-card .lantai-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #f8fafc 0%, white 100%);
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.lantai-card .lantai-header h5 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 0;
+}
+
+.lantai-number {
+    background: #6366f1;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.lantai-card .lantai-body {
+    padding: 16px;
+}
+
+.btn-delete {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-delete:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-danger:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.btn-danger:disabled {
+    background: #cbd5e1;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 0;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    background: linear-gradient(135deg, #f8fafc 0%, white 100%);
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.close {
+    color: #64748b;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    background: none;
+    border: none;
+}
+
+.close:hover {
+    color: #ef4444;
+}
+
+.modal-body {
+    padding: 24px;
+    text-align: center;
+}
+
+.warning-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 16px;
+    color: #f59e0b;
+}
+
+.warning-text {
+    color: #ef4444;
+    font-weight: 600;
+    margin-top: 12px;
+}
+
+.confirmation-input {
+    margin-top: 20px;
+    text-align: left;
+}
+
+.confirmation-input label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.875rem;
+}
+
+.confirmation-input input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+}
+
+.confirmation-input input:focus {
+    outline: none;
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 20px 24px;
+    border-top: 1px solid #e2e8f0;
+    background: #f8fafc;
+    border-radius: 0 0 12px 12px;
+}
+
+.preview-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.preview-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.preview-stat .label {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.preview-stat .value {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.preview-lantai-list h6 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+}
+
+.preview-lantai-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 8px;
+    background: #f8fafc;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    margin-bottom: 4px;
+}
+
+.preview-lantai-item span:first-child {
+    font-weight: 600;
+    color: #374151;
+}
+
+.preview-lantai-item span:last-child {
+    color: #64748b;
+}
+
+.configuration-info {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 16px;
+}
+
+.configuration-info p {
+    color: #1e40af;
+    font-size: 0.875rem;
+    margin: 0;
 }

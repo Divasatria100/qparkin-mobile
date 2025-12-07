@@ -44,6 +44,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     
     Route::get('/tiket', [AdminController::class, 'tiket'])->name('tiket');
     Route::get('/tiket/{id}', [AdminController::class, 'tiketDetail'])->name('tiket.detail');
+    Route::get('/tiket/{id}/print', [AdminController::class, 'printTicket'])->name('tiket.print');
     
     Route::get('/tarif', [AdminController::class, 'tarif'])->name('tarif');
     Route::get('/tarif/{id}/edit', [AdminController::class, 'editTarif'])->name('tarif.edit');
@@ -51,8 +52,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     
     Route::get('/parkiran', [AdminController::class, 'parkiran'])->name('parkiran');
     Route::get('/parkiran/create', [AdminController::class, 'createParkiran'])->name('parkiran.create');
+    Route::post('/parkiran/store', [AdminController::class, 'storeParkiran'])->name('parkiran.store');
     Route::get('/parkiran/{id}', [AdminController::class, 'detailParkiran'])->name('parkiran.detail');
     Route::get('/parkiran/{id}/edit', [AdminController::class, 'editParkiran'])->name('parkiran.edit');
+    Route::post('/parkiran/{id}/update', [AdminController::class, 'updateParkiran'])->name('parkiran.update');
+    Route::delete('/parkiran/{id}', [AdminController::class, 'deleteParkiran'])->name('parkiran.delete');
 });
 
 // Super Admin Routes

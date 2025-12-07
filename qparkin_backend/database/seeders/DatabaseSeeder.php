@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             SuperAdminSeeder::class,
             MallSeeder::class,
+            TarifParkirSeeder::class,
             NotifikasiSeeder::class,
         ]);
     }

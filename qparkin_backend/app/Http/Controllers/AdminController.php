@@ -9,6 +9,8 @@ use App\Models\Mall;
 use App\Models\Parkiran;
 use App\Models\AdminMall;
 use App\Models\User;
+use App\Models\TarifParkir;
+use App\Models\RiwayatTarif;
 
 class AdminController extends Controller
 {
@@ -260,7 +262,7 @@ class AdminController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function tiket()
+    public function tiket(Request $request)
     {
         $user = Auth::user();
         $userId = $user->id_user ?? $user->id ?? null;
@@ -270,12 +272,75 @@ class AdminController extends Controller
             abort(404, 'Admin mall data not found.');
         }
 
-        $tickets = TransaksiParkir::where('id_mall', $adminMall->id_mall)
-            ->with('kendaraan')
-            ->orderBy('id_transaksi', 'DESC')
-            ->paginate(20);
+        $query = TransaksiParkir::where('id_mall', $adminMall->id_mall)
+            ->with(['kendaraan.customer']);
+
+        // Filter by status
+        if ($request->has('status')) {
+            if ($request->status === 'sedang_parkir') {
+                $query->whereNull('waktu_keluar');
+            } elseif ($request->status === 'selesai') {
+                $query->whereNotNull('waktu_keluar');
+            }
+        }
+
+        // Filter by date range
+        if ($request->has('start_date') && $request->has('end_date')) {
+            $query->whereBetween('waktu_masuk', [
+                $request->start_date . ' 00:00:00',
+                $request->end_date . ' 23:59:59'
+            ]);
+        }
+
+        // Search
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('id_transaksi', 'like', "%{$search}%")
+                  ->orWhereHas('kendaraan', function($q2) use ($search) {
+                      $q2->where('plat_nomor', 'like', "%{$search}%")
+                         ->orWhere('jenis_kendaraan', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $tickets = $query->orderBy('id_transaksi', 'DESC')->paginate(20);
+
+        // Export to Excel
+        if ($request->has('export') && $request->export === 'excel') {
+            return $this->exportTicketsToExcel($query->get());
+        }
 
         return view('admin.tiket', compact('tickets'));
+    }
+
+    private function exportTicketsToExcel($tickets)
+    {
+        $filename = 'tiket_' . date('Y-m-d_His') . '.csv';
+        
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        
+        $output = fopen('php://output', 'w');
+        
+        // Header
+        fputcsv($output, ['ID Transaksi', 'Plat Nomor', 'Jenis Kendaraan', 'Waktu Masuk', 'Waktu Keluar', 'Biaya', 'Status']);
+        
+        // Data
+        foreach ($tickets as $ticket) {
+            fputcsv($output, [
+                $ticket->id_transaksi,
+                $ticket->kendaraan->plat_nomor ?? '-',
+                $ticket->kendaraan->jenis_kendaraan ?? '-',
+                $ticket->waktu_masuk,
+                $ticket->waktu_keluar ?? '-',
+                $ticket->biaya ?? 0,
+                $ticket->waktu_keluar ? 'Selesai' : 'Sedang Parkir'
+            ]);
+        }
+        
+        fclose($output);
+        exit;
     }
 
     public function tiketDetail($id)
@@ -294,20 +359,61 @@ class AdminController extends Controller
             abort(404, 'Admin mall data not found.');
         }
 
-        $tariffs = \App\Models\Tarif::where('id_mall', $adminMall->id_mall)->get();
-        return view('admin.tarif', compact('tariffs'));
+        $tarifs = TarifParkir::where('id_mall', $adminMall->id_mall)->get();
+        
+        // Get riwayat perubahan tarif
+        $riwayat = collect([]);
+        try {
+            if (\Schema::hasTable('riwayat_tarif')) {
+                $riwayat = RiwayatTarif::with('user')
+                    ->where('id_mall', $adminMall->id_mall)
+                    ->orderBy('created_at', 'DESC')
+                    ->limit(10)
+                    ->get();
+            }
+        } catch (\Exception $e) {
+            \Log::error('Riwayat tarif error: ' . $e->getMessage());
+        }
+        
+        return view('admin.tarif', compact('tarifs', 'riwayat'));
     }
 
     public function editTarif($id)
     {
-        $tariff = \App\Models\Tarif::findOrFail($id);
+        $tariff = TarifParkir::findOrFail($id);
         return view('admin.edit-tarif', compact('tariff'));
     }
 
     public function updateTarif(Request $request, $id)
     {
-        // Logic untuk update tarif
-        return redirect()->route('admin.tarif')->with('success', 'Tarif updated successfully');
+        $request->validate([
+            'satu_jam_pertama' => 'required|numeric|min:0',
+            'tarif_parkir_per_jam' => 'required|numeric|min:0',
+        ]);
+
+        $tarif = TarifParkir::findOrFail($id);
+        $user = Auth::user();
+        
+        // Simpan riwayat perubahan
+        RiwayatTarif::create([
+            'id_tarif' => $tarif->id_tarif,
+            'id_mall' => $tarif->id_mall,
+            'id_user' => $user->id_user ?? $user->id ?? null,
+            'jenis_kendaraan' => $tarif->jenis_kendaraan,
+            'tarif_lama_jam_pertama' => $tarif->satu_jam_pertama,
+            'tarif_lama_per_jam' => $tarif->tarif_parkir_per_jam,
+            'tarif_baru_jam_pertama' => $request->satu_jam_pertama,
+            'tarif_baru_per_jam' => $request->tarif_parkir_per_jam,
+            'keterangan' => 'Perubahan tarif oleh admin',
+        ]);
+        
+        // Update tarif
+        $tarif->update([
+            'satu_jam_pertama' => $request->satu_jam_pertama,
+            'tarif_parkir_per_jam' => $request->tarif_parkir_per_jam,
+        ]);
+
+        return redirect()->route('admin.tarif')->with('success', 'Tarif berhasil diperbarui');
     }
 
     public function parkiran()
@@ -320,7 +426,15 @@ class AdminController extends Controller
             abort(404, 'Admin mall data not found.');
         }
 
-        $parkingAreas = Parkiran::where('id_mall', $adminMall->id_mall)->get();
+        $parkingAreas = Parkiran::with('floors.slots')
+            ->where('id_mall', $adminMall->id_mall)
+            ->get()
+            ->map(function($parkiran) {
+                $parkiran->total_available = $parkiran->floors->sum('available_slots');
+                $parkiran->total_occupied = $parkiran->kapasitas - $parkiran->total_available;
+                return $parkiran;
+            });
+        
         return view('admin.parkiran', compact('parkingAreas'));
     }
 
@@ -329,15 +443,176 @@ class AdminController extends Controller
         return view('admin.tambah-parkiran');
     }
 
+    public function storeParkiran(Request $request)
+    {
+        $user = Auth::user();
+        $userId = $user->id_user ?? $user->id ?? null;
+        $adminMall = $user->adminMall ?? AdminMall::where('id_user', $userId)->first();
+        
+        if (!$adminMall) {
+            return response()->json(['success' => false, 'message' => 'Admin mall data not found.'], 404);
+        }
+
+        $validated = $request->validate([
+            'nama_parkiran' => 'required|string|max:255',
+            'kode_parkiran' => 'required|string|max:10',
+            'status' => 'required|in:Tersedia,Ditutup,maintenance',
+            'jumlah_lantai' => 'required|integer|min:1|max:10',
+            'lantai' => 'required|array',
+            'lantai.*.nama' => 'required|string',
+            'lantai.*.jumlah_slot' => 'required|integer|min:1',
+        ]);
+
+        \DB::beginTransaction();
+        try {
+            // Calculate total capacity
+            $totalKapasitas = collect($validated['lantai'])->sum('jumlah_slot');
+
+            // Create parkiran
+            $parkiran = Parkiran::create([
+                'id_mall' => $adminMall->id_mall,
+                'nama_parkiran' => $validated['nama_parkiran'],
+                'kode_parkiran' => $validated['kode_parkiran'],
+                'status' => $validated['status'],
+                'jumlah_lantai' => $validated['jumlah_lantai'],
+                'kapasitas' => $totalKapasitas,
+            ]);
+
+            // Create floors and slots
+            foreach ($validated['lantai'] as $index => $lantaiData) {
+                $floor = ParkingFloor::create([
+                    'id_parkiran' => $parkiran->id_parkiran,
+                    'floor_name' => $lantaiData['nama'],
+                    'floor_number' => $index + 1,
+                    'total_slots' => $lantaiData['jumlah_slot'],
+                    'available_slots' => $lantaiData['jumlah_slot'],
+                    'status' => 'active',
+                ]);
+
+                // Create slots for this floor
+                for ($i = 1; $i <= $lantaiData['jumlah_slot']; $i++) {
+                    ParkingSlot::create([
+                        'id_floor' => $floor->id_floor,
+                        'slot_code' => $validated['kode_parkiran'] . '-L' . ($index + 1) . '-' . str_pad($i, 3, '0', STR_PAD_LEFT),
+                        'jenis_kendaraan' => 'Roda Empat',
+                        'status' => 'available',
+                        'position_x' => $i,
+                        'position_y' => $index + 1,
+                    ]);
+                }
+            }
+
+            \DB::commit();
+            return response()->json(['success' => true, 'message' => 'Parkiran berhasil ditambahkan']);
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return response()->json(['success' => false, 'message' => 'Gagal menambahkan parkiran: ' . $e->getMessage()], 500);
+        }
+    }
+
     public function detailParkiran($id)
     {
-        $parkiran = Parkiran::findOrFail($id);
+        $parkiran = Parkiran::with(['floors.slots'])->findOrFail($id);
+        
+        // Calculate statistics
+        $parkiran->total_available = $parkiran->floors->sum('available_slots');
+        $parkiran->total_occupied = $parkiran->kapasitas - $parkiran->total_available;
+        $parkiran->utilization = $parkiran->kapasitas > 0 ? round(($parkiran->total_occupied / $parkiran->kapasitas) * 100, 2) : 0;
+        
         return view('admin.detail-parkiran', compact('parkiran'));
     }
 
     public function editParkiran($id)
     {
-        $parkiran = Parkiran::findOrFail($id);
+        $parkiran = Parkiran::with('floors')->findOrFail($id);
         return view('admin.edit-parkiran', compact('parkiran'));
+    }
+
+    public function updateParkiran(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'nama_parkiran' => 'required|string|max:255',
+            'kode_parkiran' => 'required|string|max:10',
+            'status' => 'required|in:Tersedia,Ditutup,maintenance',
+            'jumlah_lantai' => 'required|integer|min:1|max:10',
+            'lantai' => 'required|array',
+            'lantai.*.nama' => 'required|string',
+            'lantai.*.jumlah_slot' => 'required|integer|min:1',
+        ]);
+
+        \DB::beginTransaction();
+        try {
+            $parkiran = Parkiran::findOrFail($id);
+            
+            // Calculate total capacity
+            $totalKapasitas = collect($validated['lantai'])->sum('jumlah_slot');
+
+            // Update parkiran
+            $parkiran->update([
+                'nama_parkiran' => $validated['nama_parkiran'],
+                'kode_parkiran' => $validated['kode_parkiran'],
+                'status' => $validated['status'],
+                'jumlah_lantai' => $validated['jumlah_lantai'],
+                'kapasitas' => $totalKapasitas,
+            ]);
+
+            // Delete old floors and slots
+            foreach ($parkiran->floors as $floor) {
+                $floor->slots()->delete();
+                $floor->delete();
+            }
+
+            // Create new floors and slots
+            foreach ($validated['lantai'] as $index => $lantaiData) {
+                $floor = ParkingFloor::create([
+                    'id_parkiran' => $parkiran->id_parkiran,
+                    'floor_name' => $lantaiData['nama'],
+                    'floor_number' => $index + 1,
+                    'total_slots' => $lantaiData['jumlah_slot'],
+                    'available_slots' => $lantaiData['jumlah_slot'],
+                    'status' => 'active',
+                ]);
+
+                // Create slots
+                for ($i = 1; $i <= $lantaiData['jumlah_slot']; $i++) {
+                    ParkingSlot::create([
+                        'id_floor' => $floor->id_floor,
+                        'slot_code' => $validated['kode_parkiran'] . '-L' . ($index + 1) . '-' . str_pad($i, 3, '0', STR_PAD_LEFT),
+                        'jenis_kendaraan' => 'Roda Empat',
+                        'status' => 'available',
+                        'position_x' => $i,
+                        'position_y' => $index + 1,
+                    ]);
+                }
+            }
+
+            \DB::commit();
+            return response()->json(['success' => true, 'message' => 'Parkiran berhasil diperbarui']);
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return response()->json(['success' => false, 'message' => 'Gagal memperbarui parkiran: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function deleteParkiran($id)
+    {
+        \DB::beginTransaction();
+        try {
+            $parkiran = Parkiran::findOrFail($id);
+            
+            // Delete floors and slots
+            foreach ($parkiran->floors as $floor) {
+                $floor->slots()->delete();
+                $floor->delete();
+            }
+            
+            $parkiran->delete();
+            
+            \DB::commit();
+            return response()->json(['success' => true, 'message' => 'Parkiran berhasil dihapus']);
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return response()->json(['success' => false, 'message' => 'Gagal menghapus parkiran: ' . $e->getMessage()], 500);
+        }
     }
 }
