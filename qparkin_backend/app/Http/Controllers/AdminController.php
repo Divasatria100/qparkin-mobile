@@ -113,34 +113,151 @@ class AdminController extends Controller
     public function profile()
     {
         $user = Auth::user();
+        $userId = $user->id_user ?? $user->id ?? null;
+        
+        // Load relasi adminMall dan mall
+        if (!isset($user->adminMall)) {
+            $user->load('adminMall.mall');
+        }
+        
         return view('admin.profile', compact('user'));
     }
 
     public function editProfile()
     {
-        return view('admin.edit-informasi');
+        $user = Auth::user();
+        $userId = $user->id_user ?? $user->id ?? null;
+        
+        // Load relasi adminMall dan mall
+        if (!isset($user->adminMall)) {
+            $user->load('adminMall.mall');
+        }
+        
+        return view('admin.edit-informasi', compact('user'));
     }
 
     public function updateProfile(Request $request)
     {
-        // Logic untuk update profile
-        return redirect()->route('admin.profile')->with('success', 'Profile updated successfully');
+        $user = Auth::user();
+        $userId = $user->id_user ?? $user->id;
+        
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:user,email,' . $userId . ',id_user',
+            'nomor_hp' => 'nullable|string|max:20',
+            'status' => 'nullable|in:aktif,nonaktif',
+            'current_password' => 'nullable|required_with:password',
+            'password' => 'nullable|min:8|confirmed',
+        ]);
+
+        // Update basic info
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        
+        if (isset($validated['nomor_hp'])) {
+            $user->nomor_hp = $validated['nomor_hp'];
+        }
+        
+        if (isset($validated['status'])) {
+            $user->status = $validated['status'];
+        }
+
+        // Update password if provided
+        if ($request->filled('password')) {
+            if (!\Hash::check($request->current_password, $user->password)) {
+                return back()->withErrors(['current_password' => 'Kata sandi saat ini tidak sesuai']);
+            }
+            $user->password = \Hash::make($validated['password']);
+        }
+
+        $user->save();
+
+        return redirect()->route('admin.profile')->with('success', 'Profil berhasil diperbarui');
     }
 
     public function editPhoto()
     {
-        return view('admin.ubah-foto');
+        $user = Auth::user();
+        return view('admin.ubah-foto', compact('user'));
     }
 
     public function editSecurity()
     {
-        return view('admin.ubah-keamanan');
+        $user = Auth::user();
+        return view('admin.ubah-keamanan', compact('user'));
     }
 
-    public function notifikasi()
+    public function notifikasi(Request $request)
     {
-        $notifications = [];
-        return view('admin.notifikasi', compact('notifications'));
+        $user = Auth::user();
+        $userId = $user->id_user ?? $user->id;
+        
+        $category = $request->get('category', 'all');
+        $notifications = collect([]);
+        $unreadCount = 0;
+        
+        try {
+            // Check if table exists
+            if (\Schema::hasTable('notifikasi')) {
+                // Query notifikasi dengan filter kategori
+                $query = \App\Models\Notifikasi::where('id_user', $userId)
+                    ->orderBy('created_at', 'DESC');
+                
+                if ($category && $category !== 'all') {
+                    $query->where('kategori', $category);
+                }
+                
+                $notifications = $query->get();
+                $unreadCount = \App\Models\Notifikasi::where('id_user', $userId)
+                    ->where('status', 'belum')
+                    ->count();
+            }
+        } catch (\Exception $e) {
+            \Log::error('Notifikasi error: ' . $e->getMessage());
+        }
+        
+        return view('admin.notifikasi', compact('notifications', 'unreadCount', 'category'));
+    }
+
+    public function markNotificationAsRead($id)
+    {
+        $notification = \App\Models\Notifikasi::findOrFail($id);
+        $notification->markAsRead();
+        
+        return response()->json(['success' => true]);
+    }
+
+    public function markAllNotificationsAsRead()
+    {
+        $user = Auth::user();
+        $userId = $user->id_user ?? $user->id;
+        
+        \App\Models\Notifikasi::where('id_user', $userId)
+            ->where('status', 'belum')
+            ->update([
+                'status' => 'sudah',
+                'dibaca_pada' => now()
+            ]);
+        
+        return response()->json(['success' => true]);
+    }
+
+    public function deleteNotification($id)
+    {
+        $notification = \App\Models\Notifikasi::findOrFail($id);
+        $notification->delete();
+        
+        return response()->json(['success' => true]);
+    }
+
+    public function clearAllNotifications()
+    {
+        $user = Auth::user();
+        $userId = $user->id_user ?? $user->id;
+        
+        \App\Models\Notifikasi::where('id_user', $userId)->delete();
+        
+        return response()->json(['success' => true]);
     }
 
     public function tiket()

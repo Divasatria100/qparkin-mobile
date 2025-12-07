@@ -42,9 +42,33 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Form will submit naturally to Laravel backend
             } else {
                 e.preventDefault();
-                showNotification('Please fix the errors before submitting', 'error');
+                gentleFeedback();
+                // Don't show notification, error messages are enough
             }
         });
+    }
+
+    // Gentle feedback for login card on error
+    function gentleFeedback() {
+        loginForm.classList.add('error-feedback');
+        setTimeout(() => {
+            loginForm.classList.remove('error-feedback');
+        }, 600);
+    }
+
+    // Check for Laravel validation errors and show gentle feedback
+    const alertError = document.querySelector('.alert-error');
+    if (alertError) {
+        gentleFeedback();
+        // Auto-hide alert after 6 seconds with smooth fade
+        setTimeout(() => {
+            alertError.style.transition = 'opacity 0.4s ease-out, transform 0.4s ease-out';
+            alertError.style.opacity = '0';
+            alertError.style.transform = 'translateY(-8px)';
+            setTimeout(() => {
+                alertError.style.display = 'none';
+            }, 400);
+        }, 6000);
     }
 
     // Validation functions
@@ -94,12 +118,30 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function showNotification(message, type) {
-        notification.textContent = message;
-        notification.className = `notification ${type} show`;
-        
-        setTimeout(() => {
-            notification.classList.remove('show');
-        }, 5000);
+        if (!notification) {
+            // Create notification element if it doesn't exist
+            const notif = document.createElement('div');
+            notif.id = 'notification';
+            notif.className = `notification ${type}`;
+            notif.textContent = message;
+            document.body.appendChild(notif);
+            
+            setTimeout(() => {
+                notif.classList.add('show');
+            }, 10);
+            
+            setTimeout(() => {
+                notif.classList.remove('show');
+                setTimeout(() => notif.remove(), 300);
+            }, 5000);
+        } else {
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+        }
     }
 
     // Initialize floating labels for pre-filled values

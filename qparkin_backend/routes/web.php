@@ -6,18 +6,22 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\AdminController;
 
-// Redirect root to signin
+// Redirect root to signin - FIX TYPO
 Route::get('/', function () {
-    return redirect()->route('signin');
+    return redirect()->route('signin'); // ← HAPUS SPASI
 });
 
 // Auth Routes
 Route::middleware('guest')->group(function () {
     Route::get('/signin', [WebAuthController::class, 'showLoginForm'])->name('signin');
     Route::post('/signin', [WebAuthController::class, 'login']);
-    Route::get('/register', function () { return view('auth.signup'); })->name('register');
+    Route::get('/register', function () { 
+        return view('auth.signup'); 
+    })->name('register');
     Route::post('/register', [RegisteredUserController::class, 'store']);
-    Route::get('/forgot-password', function () { return view('auth.forgot-password'); })->name('password.request');
+    Route::get('/forgot-password', function () { 
+        return view('auth.forgot-password'); 
+    })->name('password.request');
     Route::post('/forgot-password', [WebAuthController::class, 'sendResetLink'])->name('password.email');
 });
 
@@ -33,6 +37,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/profile/security', [AdminController::class, 'editSecurity'])->name('profile.security');
     
     Route::get('/notifikasi', [AdminController::class, 'notifikasi'])->name('notifikasi');
+    Route::post('/notifikasi/{id}/read', [AdminController::class, 'markNotificationAsRead'])->name('notifikasi.read');
+    Route::post('/notifikasi/read-all', [AdminController::class, 'markAllNotificationsAsRead'])->name('notifikasi.readAll');
+    Route::delete('/notifikasi/{id}', [AdminController::class, 'deleteNotification'])->name('notifikasi.delete');
+    Route::delete('/notifikasi/clear-all', [AdminController::class, 'clearAllNotifications'])->name('notifikasi.clearAll');
     
     Route::get('/tiket', [AdminController::class, 'tiket'])->name('tiket');
     Route::get('/tiket/{id}', [AdminController::class, 'tiketDetail'])->name('tiket.detail');
