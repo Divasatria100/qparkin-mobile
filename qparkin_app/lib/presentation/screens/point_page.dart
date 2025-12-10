@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../config/app_theme.dart';
 import '../../logic/providers/point_provider.dart';
 import '../../utils/responsive_helper.dart';
 import '../../utils/point_error_handler.dart';

@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import '../../config/app_theme.dart';
 import '../../data/models/point_history_model.dart';
-import '../../utils/responsive_helper.dart';
 
 /// A list item widget displaying a single point history entry
 /// Shows date, amount, and description with color-coding for additions/deductions
@@ -20,103 +17,102 @@ class PointHistoryItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Color-code based on transaction type
-    final amountColor = history.isAddition ? Colors.green : Colors.red;
-    final statusColor = history.isAddition ? Colors.green : Colors.red;
+    final amountColor = history.isAddition ? const Color(0xFF4CAF50) : const Color(0xFFF44336);
+    final statusColor = history.isAddition ? const Color(0xFF4CAF50) : const Color(0xFFF44336);
     final statusText = history.isAddition ? 'Diperoleh' : 'Digunakan';
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      elevation: 0,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200, width: 1),
+        border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
       ),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              // Icon indicator
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  history.isAddition ? Icons.add_circle : Icons.remove_circle,
-                  color: statusColor,
-                  size: 28,
-                ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Icon indicator
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F5F5),
+                shape: BoxShape.circle,
               ),
-              const SizedBox(width: 12),
+              child: Icon(
+                history.isAddition ? Icons.add_circle : Icons.remove_circle,
+                color: statusColor,
+                size: 28,
+              ),
+            ),
+            const SizedBox(width: 12),
 
-              // Content
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Title
+            // Content
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Title (keterangan) - Bold black
+                  Text(
+                    history.keterangan,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  // Status - Green/Red
+                  Text(
+                    statusText,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: statusColor,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  // Additional info (if available from keterangan)
+                  if (history.keterangan.contains('|'))
                     Text(
-                      history.title,
+                      history.keterangan.split('|').last.trim(),
                       style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    // Status
-                    Text(
-                      statusText,
-                      style: TextStyle(
                         fontSize: 13,
-                        color: statusColor,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    // Subtitle
-                    Text(
-                      history.subtitle,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
+                        color: Color(0xFF757575),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 2),
-                    // Date
-                    Text(
-                      DateFormat('dd MMM yyyy, HH:mm').format(history.date),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[500],
-                      ),
+                  const SizedBox(height: 2),
+                  // Date - Gray
+                  Text(
+                    history.formattedDate,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF9E9E9E),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 12),
+            ),
+            const SizedBox(width: 12),
 
-              // Amount
-              Text(
-                '${history.isAddition ? '+' : ''}${history.points}',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: amountColor,
-                ),
+            // Amount
+            Text(
+              history.formattedAmount,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: amountColor,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

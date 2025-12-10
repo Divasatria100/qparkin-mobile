@@ -30,17 +30,16 @@ class PointBalanceCard extends StatelessWidget {
       child: RepaintBoundary(
         child: Container(
           decoration: BoxDecoration(
-            gradient: AppTheme.heroGradient,
+            color: const Color.fromRGBO(87, 62, 209, 1),
             borderRadius: BorderRadius.circular(borderRadius),
             boxShadow: [
               BoxShadow(
-                color: AppTheme.brandIndigo.withOpacity(0.3),
+                color: const Color.fromRGBO(87, 62, 209, 0.3),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
             ],
           ),
-          padding: padding,
           child: _buildContent(context),
         ),
       ),
@@ -172,51 +171,68 @@ class PointBalanceCard extends StatelessWidget {
 
   Widget _buildBalanceDisplay(BuildContext context) {
     final titleFontSize = ResponsiveHelper.getResponsiveFontSize(context, 16);
-    final balanceFontSize = ResponsiveHelper.getResponsiveFontSize(context, 36);
-    final iconSize = ResponsiveHelper.getIconSize(context, 80);
+    final balanceFontSize = ResponsiveHelper.getResponsiveFontSize(context, 48);
 
     return ExcludeSemantics(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(height: 20),
-          // Star/coin icon as focal point
-          Container(
-            width: iconSize,
-            height: iconSize,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              shape: BoxShape.circle,
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Row(
+          children: [
+            // Star icon
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.stars,
+                size: 32,
+                color: Colors.white,
+              ),
             ),
-            child: Icon(
-              Icons.stars,
-              size: iconSize * 0.6,
-              color: Colors.amber,
+            const SizedBox(width: 16),
+            // Text content
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // "Total Poin" label
+                  Text(
+                    'Total Poin',
+                    style: TextStyle(
+                      fontSize: titleFontSize,
+                      color: Colors.white.withOpacity(0.9),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  // Balance amount
+                  Text(
+                    '${balance ?? 0}',
+                    style: TextStyle(
+                      fontSize: balanceFontSize,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      height: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  // Subtitle
+                  Text(
+                    'Poin dapat digunakan untuk booking',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.white.withOpacity(0.8),
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          // "Saldo Poin" label
-          Text(
-            'Saldo Poin',
-            style: TextStyle(
-              fontSize: titleFontSize,
-              color: Colors.white.withOpacity(0.9),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 8),
-          // Balance amount
-          Text(
-            _formatBalance(balance ?? 0),
-            style: TextStyle(
-              fontSize: balanceFontSize,
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.2,
-            ),
-          ),
-          const SizedBox(height: 20),
-        ],
+          ],
+        ),
       ),
     );
   }
