@@ -1,6 +1,6 @@
 // lib/screens/about_page.dart
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'login_screen.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
@@ -95,7 +95,7 @@ class AboutPage extends StatelessWidget {
                       height: isMobile ? 48 : 56,
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.pushReplacementNamed(context, '/login');
+                          Navigator.pushReplacementNamed(context, LoginScreen.routeName);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFEF4444),
@@ -110,35 +110,6 @@ class AboutPage extends StatelessWidget {
                             fontSize: isMobile ? 16 : 18,
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: isMobile ? 8 : 12),
-
-                    // Shortcut Button to Profile (for testing)
-                    SizedBox(
-                      width: double.infinity,
-                      height: isMobile ? 40 : 48,
-                      child: OutlinedButton(
-                        onPressed: () async {
-                          // Simulate login by saving a fake token
-                          final prefs = await SharedPreferences.getInstance();
-                          await prefs.setString('token', 'fake_token_for_testing');
-                          Navigator.pushReplacementNamed(context, '/profile');
-                        },
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Color(0xFFEF4444)),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        child: Text(
-                          'Skip to Profile (Test)',
-                          style: TextStyle(
-                            fontSize: isMobile ? 14 : 16,
-                            color: const Color(0xFFEF4444),
-                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),

@@ -11,6 +11,7 @@ class RiwayatPoin extends Model
 
     protected $table = 'riwayat_poin';
     protected $primaryKey = 'id_poin';
+    public $timestamps = false; // Using custom 'waktu' field instead
 
     protected $fillable = [
         'id_user',
@@ -19,6 +20,11 @@ class RiwayatPoin extends Model
         'perubahan',
         'keterangan',
         'waktu'
+    ];
+
+    protected $casts = [
+        'waktu' => 'datetime',
+        'poin' => 'integer',
     ];
 
     public function user()
