@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../logic/providers/point_provider.dart';
 import '../../utils/responsive_helper.dart';
 import '../../utils/point_error_handler.dart';
+import '../../utils/point_test_data.dart';
 import '../widgets/point_balance_card.dart';
 import '../widgets/point_history_item.dart';
 import '../widgets/filter_bottom_sheet.dart';
@@ -27,12 +28,38 @@ class _PointPageState extends State<PointPage>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final p = context.read<PointProvider>();
       p.invalidateStaleCache();
+      
+      // Try to fetch from API
       p.fetchBalance();
       p.fetchHistory();
+      
+      // Load test data for development (remove in production)
+      _loadTestDataIfNeeded();
+      
       p.markNotificationsAsRead();
     });
 
     _historyScrollController.addListener(_onHistoryScroll);
+  }
+
+  /// Load test data if API returns empty
+  /// This is for development/testing purposes only
+  void _loadTestDataIfNeeded() {
+    Future.delayed(const Duration(seconds: 1), () {
+      if (!mounted) return;
+      
+      final provider = context.read<PointProvider>();
+      
+      // If no data from API, use test data
+      if (provider.history.isEmpty) {
+        final testHistory = PointTestData.generateSampleHistory();
+        final testBalance = PointTestData.calculateBalance(testHistory);
+        
+        provider.addTestHistory(testHistory);
+        // Set balance to match calculated total (should be 201)
+        debugPrint('[PointPage] Loaded test data: ${testHistory.length} items, balance: $testBalance');
+      }
+    });
   }
 
   @override
