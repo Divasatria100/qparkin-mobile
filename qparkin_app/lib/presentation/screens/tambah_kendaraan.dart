@@ -1,6 +1,5 @@
 // 📄 lib/presentation/screens/tambah_kendaraan.dart
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class VehicleSelectionPage extends StatefulWidget {
   const VehicleSelectionPage({super.key});
@@ -141,33 +140,29 @@ class _VehicleSelectionPageState extends State<VehicleSelectionPage> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Expanded(
-                                  child: Center(
-                                    child: Image.asset(
-                                      vehicle["image"]!,
-                                      width: 35,
-                                      height: 35,
-                                      fit: BoxFit.contain,
-                                      errorBuilder: (context, error,
-                                              stackTrace) =>
-                                          Icon(Icons.directions_car,
-                                              size: 30,
-                                              color: isSelected
-                                                  ? const Color(0xFF3A0CA3)
-                                                  : Colors.grey.shade600),
-                                    ),
-                                  ),
+                                Image.asset(
+                                  vehicle["image"]!,
+                                  width: 35,
+                                  height: 35,
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      Icon(Icons.directions_car,
+                                          size: 30,
+                                          color: isSelected
+                                              ? const Color(0xFF3A0CA3)
+                                              : Colors.grey.shade600),
                                 ),
-                                const SizedBox(height: 2),
+                                const SizedBox(height: 4),
                                 Text(
                                   vehicle["name"]!,
                                   textAlign: TextAlign.center,
-                                  style: GoogleFonts.montserrat(
+                                  style: const TextStyle(
                                     fontWeight: FontWeight.w500,
+                                    fontSize: 12,
+                                  ).copyWith(
                                     color: isSelected
                                         ? const Color(0xFF3A0CA3)
                                         : const Color(0xFFA5AAB7),
-                                    fontSize: 12,
                                   ),
                                 ),
                               ],
@@ -264,7 +259,7 @@ class _VehicleSelectionPageState extends State<VehicleSelectionPage> {
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.08),
+                                    color: Colors.black.withValues(alpha: 0.08),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),
@@ -304,7 +299,7 @@ class _VehicleSelectionPageState extends State<VehicleSelectionPage> {
                                           boxShadow: [
                                             BoxShadow(
                                               color: Colors.black
-                                                  .withOpacity(0.03),
+                                                  .withValues(alpha: 0.03),
                                               blurRadius: 2,
                                               offset: const Offset(0, 1),
                                             ),
@@ -313,7 +308,7 @@ class _VehicleSelectionPageState extends State<VehicleSelectionPage> {
                                         child: Text(
                                           type,
                                           textAlign: TextAlign.center,
-                                          style: GoogleFonts.montserrat(
+                                          style: TextStyle(
                                             fontSize: 14,
                                             fontWeight: isSelected
                                                 ? FontWeight.w600

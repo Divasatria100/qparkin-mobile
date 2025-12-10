@@ -28,8 +28,9 @@ class _LoginPageState extends State<LoginPage> {
       });
 
       final result = await _authService.login(
-        _identifierController.text.trim(),
-        _passwordController.text,
+        phone: _identifierController.text.trim(),
+        pin: _passwordController.text,
+        rememberMe: true,
       );
 
       if (mounted) {
@@ -54,20 +55,14 @@ class _LoginPageState extends State<LoginPage> {
       _errorMessage = '';
     });
 
-    final result = await _authService.googleLogin();
-
+    // Google login belum diimplementasi
+    await Future.delayed(const Duration(milliseconds: 500));
+    
     if (mounted) {
       setState(() {
         _isLoading = false;
+        _errorMessage = 'Login dengan Google belum tersedia';
       });
-
-      if (result['success']) {
-        Navigator.pushReplacementNamed(context, '/home');
-      } else {
-        setState(() {
-          _errorMessage = result['message'];
-        });
-      }
     }
   }
 
