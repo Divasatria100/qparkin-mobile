@@ -4,7 +4,7 @@ import '../data/models/point_history_model.dart';
 /// Used for development and testing purposes
 class PointTestData {
   /// Generate sample point history with both additions and deductions
-  /// Total balance will be 201 points to match home page
+  /// Total balance will be 200 points to match home page
   static List<PointHistory> generateSampleHistory() {
     final now = DateTime.now();
     
@@ -193,7 +193,7 @@ class PointTestData {
         idPoin: 20,
         idUser: 1,
         idTransaksi: 120,
-        poin: 6,
+        poin: 5,
         perubahan: 'tambah',
         keterangan: 'BCS Mall | Jl. Raja Ali Haji, Batam',
         waktu: DateTime(2025, 11, 5, 15, 20),

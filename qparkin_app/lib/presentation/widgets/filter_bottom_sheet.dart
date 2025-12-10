@@ -22,7 +22,7 @@ class FilterBottomSheet extends StatefulWidget {
 class _FilterBottomSheetState extends State<FilterBottomSheet> {
   late PointFilterType _selectedType;
   late PointFilterPeriod _selectedPeriod;
-
+ 
   @override
   void initState() {
     super.initState();
@@ -95,7 +95,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: AppTheme.brandNavy,
+                          color: const Color.fromRGBO(87, 62, 209, 1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: ExcludeSemantics(
@@ -163,10 +163,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   side: const BorderSide(
-                                    color: AppTheme.brandNavy,
+                                    color: Color.fromRGBO(87, 62, 209, 1),
                                     width: 1.5,
                                   ),
-                                  foregroundColor: AppTheme.brandNavy,
+                                  foregroundColor: Color.fromRGBO(87, 62, 209, 1),
                                 ),
                                 child: const Text(
                                   'Reset',
@@ -192,7 +192,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
-                                  backgroundColor: AppTheme.brandNavy,
+                                  backgroundColor: Color.fromRGBO(87, 62, 209, 1),
                                   foregroundColor: Colors.white,
                                 ),
                                 child: const Text(
@@ -306,10 +306,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           decoration: BoxDecoration(
-            color: isSelected ? AppTheme.brandNavy : Colors.grey[100],
+            color: isSelected ? const Color.fromRGBO(87, 62, 209, 1) : Colors.grey[100],
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isSelected ? AppTheme.brandNavy : Colors.grey[300]!,
+              color: isSelected ? const Color.fromRGBO(87, 62, 209, 1) : Colors.grey[300]!,
               width: 1.5,
             ),
           ),
@@ -366,34 +366,30 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
-            color: isSelected ? AppTheme.brandNavy.withOpacity(0.1) : null,
+            color: isSelected ? const Color.fromRGBO(87, 62, 209, 0.1) : null,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isSelected ? AppTheme.brandNavy : Colors.grey[300]!,
+              color: isSelected ? const Color.fromRGBO(87, 62, 209, 1) : Colors.grey[300]!,
               width: isSelected ? 2 : 1,
             ),
           ),
           child: Row(
             children: [
               Expanded(
-                child: ExcludeSemantics(
-                  child: Text(
-                    label,
-                    style: TextStyle(
-                      color: isSelected ? AppTheme.brandNavy : Colors.black87,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                      fontSize: 15,
-                    ),
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: isSelected ? const Color.fromRGBO(87, 62, 209, 1) : Colors.black87,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                    fontSize: 15,
                   ),
                 ),
               ),
               if (isSelected)
-                const ExcludeSemantics(
-                  child: Icon(
-                    Icons.check_circle,
-                    color: AppTheme.brandNavy,
-                    size: 22,
-                  ),
+                const Icon(
+                  Icons.check_circle,
+                  color: Color.fromRGBO(87, 62, 209, 1),
+                  size: 22,
                 ),
             ],
           ),
