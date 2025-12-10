@@ -606,8 +606,13 @@ class PointProvider extends ChangeNotifier {
   }
 
   /// Add test history (for testing)
-  void addTestHistory(List<PointHistory> testHistory) {
+  void addTestHistory(List<PointHistory> testHistory, {int? balance}) {
     _history = testHistory;
+    if (balance != null) {
+      _balance = balance;
+    }
+    // Invalidate filter cache when history changes
+    _invalidateFilterCache();
     notifyListeners();
   }
 

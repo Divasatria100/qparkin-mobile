@@ -55,8 +55,9 @@ class _PointPageState extends State<PointPage>
         final testHistory = PointTestData.generateSampleHistory();
         final testBalance = PointTestData.calculateBalance(testHistory);
         
-        provider.addTestHistory(testHistory);
-        // Set balance to match calculated total (should be 201)
+        // Add test history with balance
+        provider.addTestHistory(testHistory, balance: testBalance);
+        
         debugPrint('[PointPage] Loaded test data: ${testHistory.length} items, balance: $testBalance');
       }
     });
