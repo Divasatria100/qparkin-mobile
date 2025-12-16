@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             SuperAdminSeeder::class,
             MallSeeder::class,
+            AdminMallSeeder::class, // Tambahkan setelah MallSeeder
             TarifParkirSeeder::class,
             NotifikasiSeeder::class,
         ]);

@@ -14,7 +14,7 @@
             <h3>Pendapatan Harian</h3>
         </div>
         <div class="card-body">
-            <div class="card-value">Rp {{ number_format($dailyRevenue ?? 0, 0, ',', '.') }}</div>
+            <div class="card-value">Rp {{ number_format($pendapatanHarian ?? 0, 0, ',', '.') }}</div>
             <div class="card-trend positive">
                 <span>+12.5%</span> dari kemarin
             </div>
@@ -25,7 +25,7 @@
             <h3>Pendapatan Mingguan</h3>
         </div>
         <div class="card-body">
-            <div class="card-value">Rp {{ number_format($weeklyRevenue ?? 0, 0, ',', '.') }}</div>
+            <div class="card-value">Rp {{ number_format($pendapatanMingguan ?? 0, 0, ',', '.') }}</div>
             <div class="card-trend positive">
                 <span>+8.3%</span> dari minggu lalu
             </div>
@@ -36,7 +36,7 @@
             <h3>Pendapatan Bulanan</h3>
         </div>
         <div class="card-body">
-            <div class="card-value">Rp {{ number_format($monthlyRevenue ?? 0, 0, ',', '.') }}</div>
+            <div class="card-value">Rp {{ number_format($pendapatanBulanan ?? 0, 0, ',', '.') }}</div>
             <div class="card-trend negative">
                 <span>-2.1%</span> dari bulan lalu
             </div>
@@ -47,7 +47,7 @@
             <h3>Tiket Masuk</h3>
         </div>
         <div class="card-body">
-            <div class="card-value">{{ $ticketsIn ?? 0 }}</div>
+            <div class="card-value">{{ $masuk ?? 0 }}</div>
         </div>
     </div>
     <div class="card">
@@ -55,7 +55,7 @@
             <h3>Tiket Keluar</h3>
         </div>
         <div class="card-body">
-            <div class="card-value">{{ $ticketsOut ?? 0 }}</div>
+            <div class="card-value">{{ $keluar ?? 0 }}</div>
         </div>
     </div>
     <div class="card">
@@ -63,7 +63,7 @@
             <h3>Sedang Parkir</h3>
         </div>
         <div class="card-body">
-            <div class="card-value">{{ $currentParking ?? 0 }}</div>
+            <div class="card-value">{{ $aktif ?? 0 }}</div>
         </div>
     </div>
 </div>
@@ -88,15 +88,21 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($recentTransactions ?? [] as $transaction)
+                @forelse($transaksiTerbaru ?? [] as $transaksi)
                 <tr>
-                    <td>{{ $transaction->id }}</td>
-                    <td>{{ $transaction->license_plate }}</td>
-                    <td>{{ $transaction->vehicle_type }}</td>
-                    <td>{{ $transaction->entry_time }}</td>
-                    <td>{{ $transaction->exit_time ?? '-' }}</td>
-                    <td>{{ $transaction->duration ?? '-' }}</td>
-                    <td>Rp {{ number_format($transaction->fee ?? 0, 0, ',', '.') }}</td>
+                    <td>{{ $transaksi->id_transaksi }}</td>
+                    <td>{{ $transaksi->kendaraan->plat_nomor ?? '-' }}</td>
+                    <td>{{ $transaksi->kendaraan->jenis_kendaraan ?? '-' }}</td>
+                    <td>{{ $transaksi->waktu_masuk ? \Carbon\Carbon::parse($transaksi->waktu_masuk)->format('d/m/Y H:i') : '-' }}</td>
+                    <td>{{ $transaksi->waktu_keluar ? \Carbon\Carbon::parse($transaksi->waktu_keluar)->format('d/m/Y H:i') : '-' }}</td>
+                    <td>
+                        @if($transaksi->waktu_masuk && $transaksi->waktu_keluar)
+                            {{ \Carbon\Carbon::parse($transaksi->waktu_masuk)->diffForHumans(\Carbon\Carbon::parse($transaksi->waktu_keluar), true) }}
+                        @else
+                            -
+                        @endif
+                    </td>
+                    <td>Rp {{ number_format($transaksi->biaya ?? 0, 0, ',', '.') }}</td>
                 </tr>
                 @empty
                 <tr>

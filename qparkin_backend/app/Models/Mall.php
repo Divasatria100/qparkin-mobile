@@ -11,6 +11,7 @@ class Mall extends Model
 
     protected $table = 'mall';
     protected $primaryKey = 'id_mall';
+    public $timestamps = false; // Tabel mall tidak punya created_at/updated_at
 
     protected $fillable = [
         'nama_mall',
