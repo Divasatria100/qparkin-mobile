@@ -149,10 +149,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: RefreshIndicator(
-          color: const Color(0xFF573ED1),
-          onRefresh: () async {
+      body: RefreshIndicator(
+        color: const Color(0xFF573ED1),
+        onRefresh: () async {
             // Announce refresh start
             if (mounted) {
               _announceToScreenReader('Memperbarui data profil');
@@ -221,7 +220,6 @@ class _ProfilePageState extends State<ProfilePage> {
               // 🔷 Header dengan gradient
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
@@ -232,9 +230,13 @@ class _ProfilePageState extends State<ProfilePage> {
                     end: Alignment.bottomCenter,
                   ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                child: SafeArea(
+                  bottom: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -373,6 +375,8 @@ class _ProfilePageState extends State<ProfilePage> {
                   ],
                 ),
               ),
+            ),
+          ),
 
               // 🔹 Konten utama
               Padding(
@@ -551,11 +555,10 @@ class _ProfilePageState extends State<ProfilePage> {
                     ],
                   ),
                 ),
-              ],
-            ),
-          ),
-        ),
-      ),
+              ], // Close Column children
+            ), // Close Column
+          ), // Close SingleChildScrollView
+        ), // Close RefreshIndicator
       bottomNavigationBar: Semantics(
         label: 'Navigasi bawah, halaman profil aktif',
         child: CurvedNavigationBar(
