@@ -126,4 +126,14 @@ class ResponsiveHelper {
     }
     return portraitSpacing;
   }
+
+  /// Check if device is a tablet (screen width >= 768dp)
+  static bool isTablet(BuildContext context) {
+    return MediaQuery.of(context).size.width >= tablet;
+  }
+
+  /// Check if user prefers reduced motion (accessibility)
+  static bool shouldReduceMotion(BuildContext context) {
+    return MediaQuery.of(context).disableAnimations;
+  }
 }

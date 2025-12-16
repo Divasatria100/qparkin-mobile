@@ -5,9 +5,11 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'data/services/auth_service.dart';
 import 'data/services/parking_service.dart';
 import 'data/services/profile_service.dart';
+import 'data/services/point_service.dart';
 import 'logic/providers/active_parking_provider.dart';
 import 'logic/providers/profile_provider.dart';
 import 'logic/providers/notification_provider.dart';
+import 'logic/providers/point_provider.dart';
 
 import 'presentation/screens/about_page.dart';
 import 'presentation/screens/login_screen.dart';
@@ -17,10 +19,8 @@ import 'presentation/screens/map_page.dart';
 import 'presentation/screens/activity_page.dart';
 import 'presentation/screens/profile_page.dart';
 import 'presentation/screens/list_kendaraan.dart';
-import 'pages/notification_screen.dart';
-import 'pages/scan_screen.dart';
-import 'pages/point_screen.dart';
-
+import 'presentation/screens/point_page.dart';
+import 'presentation/screens/notification_screen.dart';
 void main() async {
   // Ensure Flutter binding is initialized
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +38,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        // NotificationProvider - Created first so other providers can depend on it
+        ChangeNotifierProvider(
+          create: (_) => NotificationProvider(),
+        ),
         // ActiveParkingProvider untuk mengelola state parkir aktif
         ChangeNotifierProvider(
           create: (_) => ActiveParkingProvider(
@@ -48,9 +52,18 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => ProfileProvider(),
         ),
-        // NotificationProvider untuk mengelola state notifikasi
-        ChangeNotifierProvider(
-          create: (_) => NotificationProvider(),
+        // PointProvider untuk mengelola state poin pengguna
+        ChangeNotifierProxyProvider<NotificationProvider, PointProvider>(
+          create: (context) => PointProvider(
+            pointService: PointService(),
+            notificationProvider: context.read<NotificationProvider>(),
+          ),
+          update: (context, notificationProvider, previousPointProvider) =>
+              previousPointProvider ??
+              PointProvider(
+                pointService: PointService(),
+                notificationProvider: notificationProvider,
+              ),
         ),
       ],
       child: MaterialApp(
@@ -88,9 +101,8 @@ class MyApp extends StatelessWidget {
           '/activity': (context) => const ActivityPage(),
           '/profile': (context) => const ProfilePage(),
           '/list-kendaraan': (context) => const VehicleListPage(),
+          '/point': (context) => const PointPage(),
           '/notifikasi': (context) => const NotificationScreen(),
-          '/scan': (context) => const ScanScreen(),
-          '/point': (context) => const PointScreen(),
         },
       ),
     );

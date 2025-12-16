@@ -16,8 +16,8 @@ import '../widgets/common/notification_badge.dart';
 import '../widgets/common/cached_profile_image.dart';
 import '../widgets/profile/vehicle_card.dart';
 import '../widgets/premium_points_card.dart';
-import '../../pages/point_screen.dart';
-import '../../pages/notification_screen.dart';
+import 'point_page.dart';
+import 'notification_screen.dart';
 import '../../data/services/auth_service.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -366,7 +366,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         onTap: () {
                           Navigator.of(context).push(
                             PageTransitions.slideFromRight(
-                              page: const PointScreen(),
+                              page: const PointPage(),
                             ),
                           );
                         },
