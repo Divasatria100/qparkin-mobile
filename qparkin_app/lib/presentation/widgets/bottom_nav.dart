@@ -51,178 +51,109 @@ class CurvedNavigationBar extends StatefulWidget {
 }
 
 class CurvedNavigationBarState extends State<CurvedNavigationBar> {
+  // Cache decoration as a getter to avoid late initialization issues
+  BoxDecoration get _containerDecoration => BoxDecoration(
+    color: widget.backgroundColor,
+    borderRadius: const BorderRadius.only(
+      topLeft: Radius.circular(30),
+      topRight: Radius.circular(30),
+    ),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withOpacity(0.1),
+        blurRadius: 10,
+        offset: const Offset(0, -5),
+      ),
+    ],
+  );
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: widget.height,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              color: widget.backgroundColor,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(0),
-                topRight: Radius.circular(0),
+    return RepaintBoundary(
+      child: SizedBox(
+        height: widget.height,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              decoration: _containerDecoration,
+              child: BottomAppBar(
+                shape: const CircularNotchedRectangle(),
+                notchMargin: 8,
+                color: Colors.transparent,
+                padding: EdgeInsets.zero,
+                elevation: 0,
+                child: Row(
+                  children: [
+                    _buildNavItem(0),
+                    _buildNavItem(1),
+                    const SizedBox(width: 60),
+                    _buildNavItem(2),
+                    _buildNavItem(3),
+                  ],
+                ),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: Offset(0, -5),
+            ),
+            Positioned(
+              top: -12,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: RepaintBoundary(
+                  child: FloatingActionButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const QrScanScreen(),
+                        ),
+                      );
+                    },
+                    backgroundColor: widget.buttonBackgroundColor,
+                    elevation: 6,
+                    child: const Icon(Icons.qr_code_scanner, color: Colors.white, size: 32),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(int index) {
+    final isActive = index == widget.index;
+    final color = isActive ? widget.buttonBackgroundColor : Colors.black;
+    
+    return Expanded(
+      child: RepaintBoundary(
+        child: GestureDetector(
+          onTap: () => _buttonTap(index),
+          child: Container(
+            color: Colors.transparent,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  widget.icons[index],
+                  size: 24,
+                  color: color,
+                ),
+                const SizedBox(height: 4),
+                Flexible(
+                  child: Text(
+                    widget.labels[index],
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: color,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
-            child: BottomAppBar(
-              shape: const CircularNotchedRectangle(),
-              notchMargin: 8,
-              color: Colors.transparent,
-              padding: EdgeInsets.zero,
-              elevation: 0,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => _buttonTap(0),
-                      child: Container(
-                        color: Colors.transparent,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              widget.icons[0],
-                              size: 24,
-                              color: 0 == widget.index ? widget.buttonBackgroundColor : Colors.black,
-                            ),
-                            const SizedBox(height: 4),
-                            Flexible(
-                              child: Text(
-                                widget.labels[0],
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: 0 == widget.index ? widget.buttonBackgroundColor : Colors.black,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => _buttonTap(1),
-                      child: Container(
-                        color: Colors.transparent,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              widget.icons[1],
-                              size: 24,
-                              color: 1 == widget.index ? widget.buttonBackgroundColor : Colors.black,
-                            ),
-                            const SizedBox(height: 4),
-                            Flexible(
-                              child: Text(
-                                widget.labels[1],
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: 1 == widget.index ? widget.buttonBackgroundColor : Colors.black,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 60),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => _buttonTap(2),
-                      child: Container(
-                        color: Colors.transparent,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              widget.icons[2],
-                              size: 24,
-                              color: 2 == widget.index ? widget.buttonBackgroundColor : Colors.black,
-                            ),
-                            const SizedBox(height: 4),
-                            Flexible(
-                              child: Text(
-                                widget.labels[2],
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: 2 == widget.index ? widget.buttonBackgroundColor : Colors.black,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => _buttonTap(3),
-                      child: Container(
-                        color: Colors.transparent,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              widget.icons[3],
-                              size: 24,
-                              color: 3 == widget.index ? widget.buttonBackgroundColor : Colors.black,
-                            ),
-                            const SizedBox(height: 4),
-                            Flexible(
-                              child: Text(
-                                widget.labels[3],
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: 3 == widget.index ? widget.buttonBackgroundColor : Colors.black,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ),
-          Positioned(
-            top: -15,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: FloatingActionButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => QrScanScreen(),
-                    ),
-                  );
-                },
-                backgroundColor: widget.buttonBackgroundColor,
-                child: const Icon(Icons.qr_code_scanner, color: Colors.white, size: 32),
-                elevation: 6,
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

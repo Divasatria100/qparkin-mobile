@@ -106,7 +106,14 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildLoadingState() {
-    return const ProfilePageShimmer();
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: const ProfilePageShimmer(),
+      bottomNavigationBar: CurvedNavigationBar(
+        index: 3,
+        onTap: (index) => NavigationUtils.handleNavigation(context, index, 3),
+      ),
+    );
   }
 
   Widget _buildErrorState(ProfileProvider provider) {
