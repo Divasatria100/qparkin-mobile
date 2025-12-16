@@ -11,6 +11,7 @@ class Kendaraan extends Model
 
     protected $table = 'kendaraan';
     protected $primaryKey = 'id_kendaraan';
+    public $timestamps = false;
 
     protected $fillable = [
         'id_user',
