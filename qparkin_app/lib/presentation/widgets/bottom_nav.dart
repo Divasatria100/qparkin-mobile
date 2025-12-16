@@ -63,8 +63,8 @@ class CurvedNavigationBarState extends State<CurvedNavigationBar> {
             decoration: BoxDecoration(
               color: widget.backgroundColor,
               borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(30),
-                topRight: Radius.circular(30),
+                topLeft: Radius.circular(0),
+                topRight: Radius.circular(0),
               ),
               boxShadow: [
                 BoxShadow(
@@ -204,7 +204,7 @@ class CurvedNavigationBarState extends State<CurvedNavigationBar> {
             ),
           ),
           Positioned(
-            top: -28,
+            top: -15,
             left: 0,
             right: 0,
             child: Center(
@@ -217,7 +217,7 @@ class CurvedNavigationBarState extends State<CurvedNavigationBar> {
                   );
                 },
                 backgroundColor: widget.buttonBackgroundColor,
-                child: const Icon(Icons.qr_code_scanner, color: Colors.white, size: 36),
+                child: const Icon(Icons.qr_code_scanner, color: Colors.white, size: 32),
                 elevation: 6,
               ),
             ),
