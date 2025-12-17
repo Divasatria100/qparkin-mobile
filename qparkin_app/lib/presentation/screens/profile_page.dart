@@ -10,6 +10,7 @@ import '/utils/navigation_utils.dart';
 import '/utils/page_transitions.dart';
 import '../../logic/providers/profile_provider.dart';
 import '../../logic/providers/notification_provider.dart';
+import '../../logic/providers/point_provider.dart';
 import '../widgets/profile/profile_shimmer_loading.dart';
 import '../widgets/common/empty_state_widget.dart';
 import '../widgets/common/notification_badge.dart';
@@ -864,6 +865,10 @@ class _ProfilePageState extends State<ProfilePage> {
       // Clear provider data
       final provider = context.read<ProfileProvider>();
       provider.clearError();
+      
+      // Clear PointProvider data and cache
+      final pointProvider = context.read<PointProvider>();
+      await pointProvider.clear();
 
       // Announce logout to screen reader
       _announceToScreenReader('Berhasil keluar dari akun');

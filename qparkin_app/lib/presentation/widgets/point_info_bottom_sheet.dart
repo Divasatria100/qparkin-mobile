@@ -48,12 +48,12 @@ class PointInfoBottomSheet extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color.fromRGBO(87, 62, 209, 0.1),
+                      color: const Color(0xFF573ED1).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(
                       Icons.stars,
-                      color: Color.fromRGBO(87, 62, 209, 1),
+                      color: Color(0xFF573ED1),
                       size: 28,
                     ),
                   ),
@@ -86,23 +86,17 @@ class PointInfoBottomSheet extends StatelessWidget {
               _buildSection(
                 icon: Icons.add_circle_outline,
                 title: 'Cara Mendapatkan Poin',
-                content: null,
+                content: 'Dapatkan 1 poin untuk setiap Rp1.000 yang Anda bayarkan untuk parkir.',
                 isTablet: isTablet,
                 children: [
-                  _buildBulletPoint(
-                    '🎉 Bonus member baru: 25 poin',
+                  _buildExample(
+                    'Contoh:',
+                    'Parkir Rp50.000 = 50 poin',
                     isTablet: isTablet,
                   ),
-                  _buildBulletPoint(
-                    '🚗 Setiap booking parkir: 50-200 poin',
-                    isTablet: isTablet,
-                  ),
-                  _buildBulletPoint(
-                    '🎁 Promo spesial: Hingga 500 poin',
-                    isTablet: isTablet,
-                  ),
-                  _buildBulletPoint(
-                    '⭐ Referral teman: 100 poin per referral',
+                  _buildExample(
+                    '',
+                    'Parkir Rp100.000 = 100 poin',
                     isTablet: isTablet,
                   ),
                 ],
@@ -113,35 +107,37 @@ class PointInfoBottomSheet extends StatelessWidget {
               _buildSection(
                 icon: Icons.redeem,
                 title: 'Cara Menggunakan Poin',
-                content: null,
+                content: 'Tukarkan poin Anda untuk mendapatkan diskon saat booking parkir. 1 poin = Rp100 diskon.',
                 isTablet: isTablet,
                 children: [
                   _buildBulletPoint(
-                    '💰 1 poin = Rp 100 diskon',
+                    '✨ Minimum penggunaan: 10 poin (Rp1.000)',
                     isTablet: isTablet,
                   ),
                   _buildBulletPoint(
-                    '📱 Gunakan saat checkout booking',
+                    '🎯 Maksimum diskon: 30% dari total biaya',
                     isTablet: isTablet,
                   ),
-                  _buildBulletPoint(
-                    '✨ Minimum penggunaan: 10 poin',
+                  _buildExample(
+                    'Contoh:',
+                    'Biaya Rp50.000, gunakan 100 poin = diskon Rp10.000',
                     isTablet: isTablet,
                   ),
-                  _buildBulletPoint(
-                    '🎯 Maksimum per transaksi: 50% dari total',
+                  _buildExample(
+                    '',
+                    'Biaya Rp100.000, maksimal 300 poin = diskon Rp30.000',
                     isTablet: isTablet,
                   ),
                 ],
               ),
               const SizedBox(height: 20),
 
-              // Expiration policy
+              // Refund policy
               _buildSection(
-                icon: Icons.schedule,
-                title: 'Masa Berlaku Poin',
+                icon: Icons.refresh,
+                title: 'Kebijakan Refund',
                 content:
-                    'Poin QParkin berlaku selama 12 bulan sejak tanggal diperoleh. Poin yang tidak digunakan dalam periode tersebut akan hangus secara otomatis.',
+                    'Jika Anda membatalkan booking yang menggunakan poin, poin akan dikembalikan ke saldo Anda secara otomatis.',
                 isTablet: isTablet,
               ),
               const SizedBox(height: 20),
@@ -179,7 +175,7 @@ class PointInfoBottomSheet extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromRGBO(87, 62, 209, 1),
+                    backgroundColor: const Color(0xFF573ED1),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -187,10 +183,10 @@ class PointInfoBottomSheet extends StatelessWidget {
                     ),
                     elevation: 0,
                   ),
-                  child: Text(
+                  child: const Text(
                     'Mengerti',
                     style: TextStyle(
-                      fontSize: isTablet ? 18 : 16,
+                      fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -219,7 +215,7 @@ class PointInfoBottomSheet extends StatelessWidget {
             Icon(
               icon,
               size: isTablet ? 24 : 20,
-              color: const Color.fromRGBO(87, 62, 209, 1),
+              color: const Color(0xFF573ED1),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -268,6 +264,47 @@ class PointInfoBottomSheet extends StatelessWidget {
           fontSize: isTablet ? 16 : 14,
           color: Colors.grey[700],
           height: 1.5,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExample(String label, String text, {required bool isTablet}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8, top: 4),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFF573ED1).withOpacity(0.05),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: const Color(0xFF573ED1).withOpacity(0.1),
+          ),
+        ),
+        child: Row(
+          children: [
+            if (label.isNotEmpty) ...[
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: isTablet ? 15 : 13,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF573ED1),
+                ),
+              ),
+              const SizedBox(width: 8),
+            ],
+            Expanded(
+              child: Text(
+                text,
+                style: TextStyle(
+                  fontSize: isTablet ? 15 : 13,
+                  color: Colors.grey[800],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

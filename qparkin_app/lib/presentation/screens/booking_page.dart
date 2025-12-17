@@ -20,7 +20,9 @@ import '../widgets/booking_summary_card.dart';
 import '../widgets/error_retry_widget.dart';
 import '../widgets/slot_unavailable_widget.dart';
 import '../widgets/booking_conflict_dialog.dart';
+import '../widgets/point_usage_widget.dart';
 import '../dialogs/booking_confirmation_dialog.dart';
+import '../../logic/providers/point_provider.dart';
 
 /// Main booking page for reserving parking slots
 ///
@@ -329,6 +331,19 @@ class _BookingPageContentState extends State<_BookingPageContent> {
                   if (provider.bookingDuration != null && provider.costBreakdown != null)
                     SizedBox(height: spacing),
                   
+                  // Point Usage Widget
+                  if (provider.bookingDuration != null && provider.estimatedCost > 0)
+                    PointUsageWidget(
+                      parkingCost: provider.estimatedCost.toInt(),
+                      onPointsSelected: (points) {
+                        provider.setSelectedPoints(points);
+                      },
+                      initialPoints: provider.selectedPoints,
+                    ),
+                  
+                  if (provider.bookingDuration != null && provider.estimatedCost > 0)
+                    SizedBox(height: spacing),
+                  
                   // Booking Summary Card
                   if (_canShowSummary(provider))
                     BookingSummaryCard(
@@ -340,10 +355,14 @@ class _BookingPageContentState extends State<_BookingPageContent> {
                       startTime: provider.startTime!,
                       duration: provider.bookingDuration!,
                       endTime: provider.calculatedEndTime!,
-                      totalCost: provider.estimatedCost,
+                      totalCost: provider.finalCost, // Use finalCost which includes point discount
                       reservedSlotCode: provider.reservedSlot?.slotCode,
                       reservedFloorName: provider.reservedSlot?.floorName,
                       reservedSlotType: provider.reservedSlot?.typeLabel,
+                      // Point discount information
+                      pointsUsed: provider.selectedPoints > 0 ? provider.selectedPoints : null,
+                      pointDiscount: provider.pointDiscount > 0 ? provider.pointDiscount : null,
+                      originalCost: provider.selectedPoints > 0 ? provider.estimatedCost : null,
                     ),
                 ],
               ),

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../logic/providers/point_provider.dart';
+import '../../data/services/auth_service.dart';
 import '../../utils/responsive_helper.dart';
 import '../../utils/point_error_handler.dart';
-import '../../utils/point_test_data.dart';
 import '../widgets/point_balance_card.dart';
 import '../widgets/point_history_item.dart';
 import '../widgets/filter_bottom_sheet.dart';
@@ -25,18 +25,21 @@ class _PointPageState extends State<PointPage>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final p = context.read<PointProvider>();
-      p.invalidateStaleCache();
       
-      // Try to fetch from API
-      p.fetchBalance();
-      p.fetchHistory();
+      // Get token from auth service
+      final authService = AuthService();
+      final token = await authService.getToken();
+      
+      if (token != null) {
+        // Try to fetch from API
+        p.fetchBalance(token: token);
+        p.fetchHistory(token: token);
+      }
       
       // Load test data for development (remove in production)
       _loadTestDataIfNeeded();
-      
-      p.markNotificationsAsRead();
     });
 
     _historyScrollController.addListener(_onHistoryScroll);
@@ -51,14 +54,9 @@ class _PointPageState extends State<PointPage>
       final provider = context.read<PointProvider>();
       
       // If no data from API, use test data
-      if (provider.history.isEmpty) {
-        final testHistory = PointTestData.generateSampleHistory();
-        final testBalance = PointTestData.calculateBalance(testHistory);
-        
-        // Add test history with balance
-        provider.addTestHistory(testHistory, balance: testBalance);
-        
-        debugPrint('[PointPage] Loaded test data: ${testHistory.length} items, balance: $testBalance');
+      if (provider.filteredHistory.isEmpty) {
+        debugPrint('[PointPage] No data from API, consider adding test data');
+        // Test data loading can be implemented if needed
       }
     });
   }
@@ -75,8 +73,24 @@ class _PointPageState extends State<PointPage>
 
   Future<void> _handleRefresh() async {
     final provider = context.read<PointProvider>();
+    final authService = AuthService();
+    final token = await authService.getToken();
+    
+    if (token == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Sesi login telah berakhir'),
+            duration: Duration(seconds: 2),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
+    
     try {
-      await provider.refreshAll();
+      await provider.refresh(token: token);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -118,12 +132,16 @@ class _PointPageState extends State<PointPage>
     if (maxScroll <= 0) return;
 
     if (current >= maxScroll * 0.9) {
-      if (!provider.isLoadingHistory && provider.hasMoreHistory) {
-        Future.delayed(const Duration(milliseconds: 300), () {
+      if (!provider.isLoadingMore && provider.hasMorePages) {
+        Future.delayed(const Duration(milliseconds: 300), () async {
           if (mounted &&
-              !provider.isLoadingHistory &&
-              provider.hasMoreHistory) {
-            provider.fetchHistory(loadMore: true);
+              !provider.isLoadingMore &&
+              provider.hasMorePages) {
+            final authService = AuthService();
+            final token = await authService.getToken();
+            if (token != null) {
+              provider.fetchHistory(token: token, loadMore: true);
+            }
           }
         });
       }
@@ -138,7 +156,7 @@ class _PointPageState extends State<PointPage>
       backgroundColor: Colors.transparent,
       builder: (context) => FilterBottomSheet(
         currentFilter: provider.currentFilter,
-        onApply: (filter) => provider.setFilter(filter),
+        onApply: (filter) => provider.applyFilter(filter),
       ),
     );
   }
@@ -234,8 +252,9 @@ class _PointPageState extends State<PointPage>
                   child: Padding(
                     padding: EdgeInsets.all(isTablet ? 24.0 : 16.0),
                     child: PointBalanceCard(
-                      balance: provider.balance ?? 0,
-                      isLoading: provider.isLoadingBalance,
+                      balance: provider.balance,
+                      equivalentValue: provider.equivalentValue,
+                      isLoading: provider.isLoading,
                     ),
                   ),
                 ),
@@ -283,7 +302,7 @@ class _PointPageState extends State<PointPage>
                 ),
 
                 // History List
-                if (provider.isLoadingHistory && provider.history.isEmpty)
+                if (provider.isLoading && provider.filteredHistory.isEmpty)
                   SliverFillRemaining(
                     child: Center(
                       child: CircularProgressIndicator(
@@ -307,7 +326,7 @@ class _PointPageState extends State<PointPage>
                             return PointHistoryItem(
                               history: provider.filteredHistory[index],
                             );
-                          } else if (provider.isLoadingHistory) {
+                          } else if (provider.isLoadingMore) {
                             return Padding(
                               padding: const EdgeInsets.all(16.0),
                               child: Center(
@@ -316,7 +335,7 @@ class _PointPageState extends State<PointPage>
                                 ),
                               ),
                             );
-                          } else if (!provider.hasMoreHistory) {
+                          } else if (!provider.hasMorePages) {
                             return Padding(
                               padding: const EdgeInsets.all(16.0),
                               child: Center(

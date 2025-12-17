@@ -6,154 +6,158 @@ import '../data/models/point_statistics_model.dart';
 /// Provides mock data for development and testing purposes.
 /// This should be removed or disabled in production.
 ///
+/// Business Logic:
+/// - Uses 'earned' and 'used' terminology (not 'tambah'/'kurang')
+/// - 1 poin = Rp100 discount value
+///
 /// Requirements: Testing & Development
 class PointTestData {
   /// Generate sample point history with various transaction types
-  static List<PointHistory> generateSampleHistory() {
+  static List<PointHistoryModel> generateSampleHistory() {
     final now = DateTime.now();
     
     return [
       // Recent transactions
-      PointHistory(
-        idPoin: 1,
-        idUser: 1,
+      PointHistoryModel(
+        idPoin: '1',
+        idUser: '1',
         poin: 50,
-        perubahan: 'tambah',
-        keterangan: 'Booking parkir di Grand Mall',
+        perubahan: 'earned',
+        keterangan: 'Parkir di Grand Mall - Rp50.000',
         waktu: now.subtract(const Duration(hours: 2)),
       ),
-      PointHistory(
-        idPoin: 2,
-        idUser: 1,
+      PointHistoryModel(
+        idPoin: '2',
+        idUser: '1',
         poin: 100,
-        perubahan: 'kurang',
-        keterangan: 'Gunakan poin untuk pembayaran parkir',
+        perubahan: 'used',
+        keterangan: 'Diskon booking parkir - Rp10.000',
         waktu: now.subtract(const Duration(hours: 5)),
       ),
-      PointHistory(
-        idPoin: 3,
-        idUser: 1,
+      PointHistoryModel(
+        idPoin: '3',
+        idUser: '1',
         poin: 75,
-        perubahan: 'tambah',
-        keterangan: 'Booking parkir di Plaza Indonesia',
+        perubahan: 'earned',
+        keterangan: 'Parkir di Plaza Indonesia - Rp75.000',
         waktu: now.subtract(const Duration(days: 1)),
       ),
       
       // Yesterday
-      PointHistory(
-        idPoin: 4,
-        idUser: 1,
+      PointHistoryModel(
+        idPoin: '4',
+        idUser: '1',
         poin: 50,
-        perubahan: 'kurang',
-        keterangan: 'Gunakan poin untuk diskon parkir',
+        perubahan: 'used',
+        keterangan: 'Diskon parkir - Rp5.000',
         waktu: now.subtract(const Duration(days: 1, hours: 3)),
       ),
-      PointHistory(
-        idPoin: 5,
-        idUser: 1,
+      PointHistoryModel(
+        idPoin: '5',
+        idUser: '1',
         poin: 100,
-        perubahan: 'tambah',
-        keterangan: 'Booking parkir di Senayan City',
+        perubahan: 'earned',
+        keterangan: 'Parkir di Senayan City - Rp100.000',
         waktu: now.subtract(const Duration(days: 2)),
       ),
       
       // Last week
-      PointHistory(
-        idPoin: 6,
-        idUser: 1,
+      PointHistoryModel(
+        idPoin: '6',
+        idUser: '1',
         poin: 25,
-        perubahan: 'tambah',
-        keterangan: 'Bonus poin member baru',
+        perubahan: 'earned',
+        keterangan: 'Parkir di Central Park - Rp25.000',
         waktu: now.subtract(const Duration(days: 3)),
       ),
-      PointHistory(
-        idPoin: 7,
-        idUser: 1,
+      PointHistoryModel(
+        idPoin: '7',
+        idUser: '1',
         poin: 150,
-        perubahan: 'tambah',
-        keterangan: 'Booking parkir di Pacific Place',
+        perubahan: 'earned',
+        keterangan: 'Parkir di Pacific Place - Rp150.000',
         waktu: now.subtract(const Duration(days: 5)),
       ),
-      PointHistory(
-        idPoin: 8,
-        idUser: 1,
+      PointHistoryModel(
+        idPoin: '8',
+        idUser: '1',
         poin: 75,
-        perubahan: 'kurang',
-        keterangan: 'Gunakan poin untuk pembayaran',
+        perubahan: 'used',
+        keterangan: 'Diskon booking - Rp7.500',
         waktu: now.subtract(const Duration(days: 6)),
       ),
       
       // Last month
-      PointHistory(
-        idPoin: 9,
-        idUser: 1,
+      PointHistoryModel(
+        idPoin: '9',
+        idUser: '1',
         poin: 200,
-        perubahan: 'tambah',
-        keterangan: 'Booking parkir di Mall Taman Anggrek',
+        perubahan: 'earned',
+        keterangan: 'Parkir di Mall Taman Anggrek - Rp200.000',
         waktu: now.subtract(const Duration(days: 15)),
       ),
-      PointHistory(
-        idPoin: 10,
-        idUser: 1,
+      PointHistoryModel(
+        idPoin: '10',
+        idUser: '1',
         poin: 100,
-        perubahan: 'kurang',
-        keterangan: 'Gunakan poin untuk diskon',
+        perubahan: 'used',
+        keterangan: 'Diskon parkir - Rp10.000',
         waktu: now.subtract(const Duration(days: 20)),
       ),
-      PointHistory(
-        idPoin: 11,
-        idUser: 1,
+      PointHistoryModel(
+        idPoin: '11',
+        idUser: '1',
         poin: 50,
-        perubahan: 'tambah',
-        keterangan: 'Booking parkir di Central Park',
+        perubahan: 'earned',
+        keterangan: 'Parkir di Central Park - Rp50.000',
         waktu: now.subtract(const Duration(days: 25)),
       ),
-      PointHistory(
-        idPoin: 12,
-        idUser: 1,
+      PointHistoryModel(
+        idPoin: '12',
+        idUser: '1',
         poin: 125,
-        perubahan: 'tambah',
-        keterangan: 'Booking parkir di Pondok Indah Mall',
+        perubahan: 'earned',
+        keterangan: 'Parkir di Pondok Indah Mall - Rp125.000',
         waktu: now.subtract(const Duration(days: 28)),
       ),
       
       // Older transactions
-      PointHistory(
-        idPoin: 13,
-        idUser: 1,
+      PointHistoryModel(
+        idPoin: '13',
+        idUser: '1',
         poin: 50,
-        perubahan: 'kurang',
-        keterangan: 'Gunakan poin untuk pembayaran',
+        perubahan: 'used',
+        keterangan: 'Diskon parkir - Rp5.000',
         waktu: now.subtract(const Duration(days: 35)),
       ),
-      PointHistory(
-        idPoin: 14,
-        idUser: 1,
+      PointHistoryModel(
+        idPoin: '14',
+        idUser: '1',
         poin: 100,
-        perubahan: 'tambah',
-        keterangan: 'Booking parkir di Kota Kasablanka',
+        perubahan: 'earned',
+        keterangan: 'Parkir di Kota Kasablanka - Rp100.000',
         waktu: now.subtract(const Duration(days: 40)),
       ),
-      PointHistory(
-        idPoin: 15,
-        idUser: 1,
+      PointHistoryModel(
+        idPoin: '15',
+        idUser: '1',
         poin: 75,
-        perubahan: 'tambah',
-        keterangan: 'Booking parkir di Gandaria City',
+        perubahan: 'earned',
+        keterangan: 'Parkir di Gandaria City - Rp75.000',
         waktu: now.subtract(const Duration(days: 50)),
       ),
     ];
   }
 
   /// Calculate balance from history
-  static int calculateBalance(List<PointHistory> history) {
+  static int calculateBalance(List<PointHistoryModel> history) {
     int balance = 0;
     
     for (final item in history) {
-      if (item.isAddition) {
-        balance += item.poin;
+      if (item.isEarned) {
+        balance += item.absolutePoints;
       } else {
-        balance -= item.poin;
+        balance -= item.absolutePoints;
       }
     }
     
@@ -161,8 +165,8 @@ class PointTestData {
   }
 
   /// Generate sample statistics based on history
-  static PointStatistics generateSampleStatistics({
-    List<PointHistory>? history,
+  static PointStatisticsModel generateSampleStatistics({
+    List<PointHistoryModel>? history,
   }) {
     final historyList = history ?? generateSampleHistory();
     
@@ -171,10 +175,10 @@ class PointTestData {
     DateTime? lastTransaction;
     
     for (final item in historyList) {
-      if (item.isAddition) {
-        totalEarned += item.poin;
+      if (item.isEarned) {
+        totalEarned += item.absolutePoints;
       } else {
-        totalUsed += item.poin;
+        totalUsed += item.absolutePoints;
       }
       
       if (lastTransaction == null || item.waktu.isAfter(lastTransaction)) {
@@ -182,7 +186,7 @@ class PointTestData {
       }
     }
     
-    return PointStatistics(
+    return PointStatisticsModel(
       totalEarned: totalEarned,
       totalUsed: totalUsed,
       currentBalance: totalEarned - totalUsed,
@@ -192,45 +196,45 @@ class PointTestData {
   }
 
   /// Generate empty history for testing empty state
-  static List<PointHistory> generateEmptyHistory() {
+  static List<PointHistoryModel> generateEmptyHistory() {
     return [];
   }
 
   /// Generate single transaction for testing
-  static PointHistory generateSingleTransaction({
-    bool isAddition = true,
+  static PointHistoryModel generateSingleTransaction({
+    bool isEarned = true,
     int amount = 100,
   }) {
-    return PointHistory(
-      idPoin: 1,
-      idUser: 1,
+    return PointHistoryModel(
+      idPoin: '1',
+      idUser: '1',
       poin: amount,
-      perubahan: isAddition ? 'tambah' : 'kurang',
-      keterangan: isAddition
-          ? 'Booking parkir di Test Mall'
-          : 'Gunakan poin untuk pembayaran',
+      perubahan: isEarned ? 'earned' : 'used',
+      keterangan: isEarned
+          ? 'Parkir di Test Mall - Rp${amount * 1000}'
+          : 'Diskon parkir - Rp${amount * 100}',
       waktu: DateTime.now(),
     );
   }
 
   /// Generate large history for testing pagination
-  static List<PointHistory> generateLargeHistory({int count = 100}) {
-    final List<PointHistory> history = [];
+  static List<PointHistoryModel> generateLargeHistory({int count = 100}) {
+    final List<PointHistoryModel> history = [];
     final now = DateTime.now();
     
     for (int i = 0; i < count; i++) {
-      final isAddition = i % 3 != 0; // 2/3 additions, 1/3 deductions
+      final isEarned = i % 3 != 0; // 2/3 earned, 1/3 used
       final amount = (i % 5 + 1) * 25; // 25, 50, 75, 100, 125
       
       history.add(
-        PointHistory(
-          idPoin: i + 1,
-          idUser: 1,
+        PointHistoryModel(
+          idPoin: '${i + 1}',
+          idUser: '1',
           poin: amount,
-          perubahan: isAddition ? 'tambah' : 'kurang',
-          keterangan: isAddition
-              ? 'Booking parkir di Mall ${i + 1}'
-              : 'Gunakan poin untuk pembayaran ${i + 1}',
+          perubahan: isEarned ? 'earned' : 'used',
+          keterangan: isEarned
+              ? 'Parkir di Mall ${i + 1} - Rp${amount * 1000}'
+              : 'Diskon parkir ${i + 1} - Rp${amount * 100}',
           waktu: now.subtract(Duration(hours: i * 2)),
         ),
       );
@@ -240,24 +244,26 @@ class PointTestData {
   }
 
   /// Generate history with specific date range for testing filters
-  static List<PointHistory> generateHistoryInDateRange({
+  static List<PointHistoryModel> generateHistoryInDateRange({
     required DateTime startDate,
     required DateTime endDate,
     int count = 10,
   }) {
-    final List<PointHistory> history = [];
+    final List<PointHistoryModel> history = [];
     final daysDiff = endDate.difference(startDate).inDays;
     
     for (int i = 0; i < count; i++) {
       final daysOffset = (daysDiff / count * i).floor();
       final transactionDate = startDate.add(Duration(days: daysOffset));
+      final amount = (i % 4 + 1) * 50;
+      final isEarned = i % 2 == 0;
       
       history.add(
-        PointHistory(
-          idPoin: i + 1,
-          idUser: 1,
-          poin: (i % 4 + 1) * 50,
-          perubahan: i % 2 == 0 ? 'tambah' : 'kurang',
+        PointHistoryModel(
+          idPoin: '${i + 1}',
+          idUser: '1',
+          poin: amount,
+          perubahan: isEarned ? 'earned' : 'used',
           keterangan: 'Transaction ${i + 1}',
           waktu: transactionDate,
         ),
@@ -268,23 +274,24 @@ class PointTestData {
   }
 
   /// Generate history with specific amount range for testing filters
-  static List<PointHistory> generateHistoryInAmountRange({
+  static List<PointHistoryModel> generateHistoryInAmountRange({
     required int minAmount,
     required int maxAmount,
     int count = 10,
   }) {
-    final List<PointHistory> history = [];
+    final List<PointHistoryModel> history = [];
     final amountRange = maxAmount - minAmount;
     
     for (int i = 0; i < count; i++) {
       final amount = minAmount + (amountRange / count * i).floor();
+      final isEarned = i % 2 == 0;
       
       history.add(
-        PointHistory(
-          idPoin: i + 1,
-          idUser: 1,
+        PointHistoryModel(
+          idPoin: '${i + 1}',
+          idUser: '1',
           poin: amount,
-          perubahan: i % 2 == 0 ? 'tambah' : 'kurang',
+          perubahan: isEarned ? 'earned' : 'used',
           keterangan: 'Transaction $amount poin',
           waktu: DateTime.now().subtract(Duration(days: i)),
         ),
@@ -300,7 +307,7 @@ class PointTestData {
   }
 
   /// Generate mock statistics for testing
-  static PointStatistics generateMockStatistics() {
+  static PointStatisticsModel generateMockStatistics() {
     return generateSampleStatistics();
   }
 }

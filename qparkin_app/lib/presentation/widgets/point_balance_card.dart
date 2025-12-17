@@ -1,235 +1,233 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import '../../config/app_theme.dart';
-import '../../utils/responsive_helper.dart';
+import 'shimmer_loading.dart';
 
-/// A card widget displaying the user's current point balance
-/// Shows balance with star icon as focal point, with loading and error states
-/// Optimized with RepaintBoundary to isolate repaints
+/// A card widget for displaying point balance with equivalent Rupiah value
+///
+/// Features:
+/// - Displays current point balance
+/// - Shows equivalent Rupiah value (1 poin = Rp100)
+/// - Loading state with shimmer effect
+/// - Error state with retry button
+/// - Tap interaction for navigation
+/// - Accessibility support
+///
+/// Example usage:
+/// ```dart
+/// PointBalanceCard(
+///   balance: 150,
+///   equivalentValue: 'Rp15.000',
+///   isLoading: false,
+///   onTap: () => Navigator.pushNamed(context, '/points'),
+/// )
+/// ```
 class PointBalanceCard extends StatelessWidget {
-  final int? balance;
+  /// Current point balance
+  final int balance;
+
+  /// Equivalent Rupiah value (formatted string)
+  final String equivalentValue;
+
+  /// Whether the card is in loading state
   final bool isLoading;
+
+  /// Error message to display (null if no error)
   final String? error;
+
+  /// Callback when card is tapped
+  final VoidCallback? onTap;
+
+  /// Callback when retry button is tapped (in error state)
   final VoidCallback? onRetry;
 
   const PointBalanceCard({
     Key? key,
-    this.balance,
+    required this.balance,
+    required this.equivalentValue,
     this.isLoading = false,
     this.error,
+    this.onTap,
     this.onRetry,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final borderRadius = ResponsiveHelper.getBorderRadius(context);
-    final padding = ResponsiveHelper.getCardPadding(context);
-
-    return Semantics(
-      label: _getSemanticLabel(),
-      child: RepaintBoundary(
-        child: Container(
-          decoration: BoxDecoration(
-            color: const Color.fromRGBO(87, 62, 209, 1),
-            borderRadius: BorderRadius.circular(borderRadius),
-            boxShadow: [
-              BoxShadow(
-                color: const Color.fromRGBO(87, 62, 209, 0.3),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: _buildContent(context),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildContent(BuildContext context) {
     if (isLoading) {
-      return _buildLoadingState(context);
+      return _buildLoadingState();
     }
 
     if (error != null) {
       return _buildErrorState(context);
     }
 
-    return _buildBalanceDisplay(context);
+    return _buildNormalState(context);
   }
 
-  Widget _buildLoadingState(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const SizedBox(height: 20),
-        // Shimmer effect for icon
-        _ShimmerBox(
-          width: 80,
-          height: 80,
-          borderRadius: 40,
-        ),
-        const SizedBox(height: 16),
-        // Shimmer effect for text
-        _ShimmerBox(
-          width: 120,
-          height: 24,
-        ),
-        const SizedBox(height: 8),
-        _ShimmerBox(
-          width: 180,
-          height: 40,
-        ),
-        const SizedBox(height: 20),
-      ],
-    );
-  }
-
-  Widget _buildErrorState(BuildContext context) {
-    final bodyFontSize = ResponsiveHelper.getResponsiveFontSize(context, 14);
-    
-    return ExcludeSemantics(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(height: 20),
-          // Error icon
-          Container(
-            width: 80,
-            height: 80,
+  /// Build normal state with balance display
+  Widget _buildNormalState(BuildContext context) {
+    return Semantics(
+      label: 'Saldo poin Anda: $balance poin, setara dengan $equivalentValue. Ketuk untuk melihat detail',
+      button: true,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              shape: BoxShape.circle,
+              gradient: const LinearGradient(
+                colors: [Color(0xFF6B4FE0), Color(0xFF573ED1)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF573ED1).withOpacity(0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-            child: const Icon(
-              Icons.error_outline,
-              size: 48,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 16),
-          // Error message
-          Text(
-            error ?? 'Gagal memuat saldo',
-            style: TextStyle(
-              fontSize: bodyFontSize,
-              color: Colors.white,
-              fontWeight: FontWeight.w500,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          // Retry button with minimum 48x48dp touch target
-          if (onRetry != null)
-            Semantics(
-              label: 'Tombol coba lagi',
-              button: true,
-              child: Material(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                child: InkWell(
-                  onTap: onRetry,
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    constraints: const BoxConstraints(
-                      minWidth: 48,
-                      minHeight: 48,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header row with icon and label
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.stars,
+                        color: Colors.white,
+                        size: 20,
+                        semanticLabel: 'Ikon bintang poin',
+                      ),
                     ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 12,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.refresh,
-                          size: 20,
-                          color: AppTheme.brandIndigo,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Coba Lagi',
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: ExcludeSemantics(
+                        child: Text(
+                          'Saldo Poin',
                           style: TextStyle(
-                            fontSize: bodyFontSize,
+                            fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: AppTheme.brandIndigo,
+                            color: Colors.white,
                           ),
                         ),
-                      ],
+                      ),
+                    ),
+                    if (onTap != null)
+                      const Icon(
+                        Icons.chevron_right,
+                        color: Colors.white,
+                        size: 24,
+                        semanticLabel: 'Panah navigasi',
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                // Balance display
+                ExcludeSemantics(
+                  child: Text(
+                    '$balance Poin',
+                    style: const TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 0.5,
                     ),
                   ),
                 ),
-              ),
+                const SizedBox(height: 4),
+                // Equivalent value
+                ExcludeSemantics(
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.account_balance_wallet_outlined,
+                        color: Colors.white.withOpacity(0.8),
+                        size: 16,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Setara $equivalentValue',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white.withOpacity(0.9),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          const SizedBox(height: 20),
-        ],
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildBalanceDisplay(BuildContext context) {
-    final titleFontSize = ResponsiveHelper.getResponsiveFontSize(context, 16);
-    final balanceFontSize = ResponsiveHelper.getResponsiveFontSize(context, 48);
-
-    return ExcludeSemantics(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Row(
-          children: [
-            // Star icon
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.stars,
-                size: 32,
-                color: Colors.white,
-              ),
+  /// Build loading state with shimmer effect
+  Widget _buildLoadingState() {
+    return Semantics(
+      label: 'Memuat saldo poin',
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: const Color(0xFF573ED1).withOpacity(0.2),
+            width: 2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF573ED1).withOpacity(0.1),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
-            const SizedBox(width: 16),
-            // Text content
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // "Total Poin" label
-                  Text(
-                    'Total Poin',
-                    style: TextStyle(
-                      fontSize: titleFontSize,
-                      color: Colors.white.withOpacity(0.9),
-                      fontWeight: FontWeight.w500,
-                    ),
+          ],
+        ),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header shimmer
+            Row(
+              children: [
+                ShimmerLoading(
+                  width: 36,
+                  height: 36,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: ShimmerLoading(
+                    width: double.infinity,
+                    height: 16,
+                    borderRadius: BorderRadius.all(Radius.circular(4)),
                   ),
-                  const SizedBox(height: 4),
-                  // Balance amount
-                  Text(
-                    '${balance ?? 0}',
-                    style: TextStyle(
-                      fontSize: balanceFontSize,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      height: 1.2,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  // Subtitle
-                  Text(
-                    'Poin dapat digunakan untuk booking',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.white.withOpacity(0.8),
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            // Balance shimmer
+            ShimmerLoading(
+              width: 150,
+              height: 32,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            const SizedBox(height: 8),
+            // Equivalent value shimmer
+            ShimmerLoading(
+              width: 120,
+              height: 14,
+              borderRadius: BorderRadius.circular(4),
             ),
           ],
         ),
@@ -237,110 +235,94 @@ class PointBalanceCard extends StatelessWidget {
     );
   }
 
-  String _formatBalance(int balance) {
-    final formatter = NumberFormat('#,###', 'id_ID');
-    return formatter.format(balance);
-  }
-
-  String _getSemanticLabel() {
-    if (isLoading) {
-      return 'Memuat saldo poin';
-    }
-    if (error != null) {
-      return 'Error memuat saldo poin. $error. Tombol coba lagi tersedia';
-    }
-    return 'Saldo poin Anda. ${_formatBalance(balance ?? 0)} poin';
-  }
-}
-
-/// Simple shimmer loading effect widget
-class _ShimmerBox extends StatefulWidget {
-  final double width;
-  final double height;
-  final double borderRadius;
-
-  const _ShimmerBox({
-    required this.width,
-    required this.height,
-    this.borderRadius = 8,
-  });
-
-  @override
-  State<_ShimmerBox> createState() => _ShimmerBoxState();
-}
-
-class _ShimmerBoxState extends State<_ShimmerBox>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1500),
-    );
-    
-    _animation = Tween<double>(begin: -1.0, end: 2.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-    
-    // Only animate if motion is not reduced
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && !ResponsiveHelper.shouldReduceMotion(context)) {
-        _controller.repeat();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final shouldAnimate = !ResponsiveHelper.shouldReduceMotion(context);
-    
-    if (!shouldAnimate) {
-      // Static shimmer for reduced motion
-      return Container(
-        width: widget.width,
-        height: widget.height,
+  /// Build error state with retry button
+  Widget _buildErrorState(BuildContext context) {
+    return Semantics(
+      label: 'Gagal memuat saldo poin. $error. Ketuk tombol coba lagi untuk memuat ulang',
+      child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(widget.borderRadius),
-          color: Colors.white.withOpacity(0.2),
-        ),
-      );
-    }
-    
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) {
-        return Container(
-          width: widget.width,
-          height: widget.height,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(widget.borderRadius),
-            gradient: LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: [
-                Colors.white.withOpacity(0.1),
-                Colors.white.withOpacity(0.3),
-                Colors.white.withOpacity(0.1),
-              ],
-              stops: [
-                _animation.value - 0.3,
-                _animation.value,
-                _animation.value + 0.3,
-              ].map((e) => e.clamp(0.0, 1.0)).toList(),
-            ),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: Colors.red.withOpacity(0.3),
+            width: 2,
           ),
-        );
-      },
+          boxShadow: [
+            BoxShadow(
+              color: Colors.red.withOpacity(0.1),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Error icon and message
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.error_outline,
+                    color: Colors.red,
+                    size: 20,
+                    semanticLabel: 'Ikon error',
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ExcludeSemantics(
+                    child: Text(
+                      'Gagal Memuat',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade800,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Error message
+            ExcludeSemantics(
+              child: Text(
+                error ?? 'Terjadi kesalahan',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Retry button
+            if (onRetry != null)
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: onRetry,
+                  icon: const Icon(Icons.refresh, size: 18),
+                  label: const Text('Coba Lagi'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF573ED1),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }

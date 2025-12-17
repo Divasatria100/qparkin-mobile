@@ -5,16 +5,20 @@ import 'package:intl/intl.dart';
 /// This model represents a single point transaction, either earning or using points.
 /// It includes all necessary information for displaying transaction history to users.
 ///
-/// Requirements: 1.1, 2.1
-class PointHistory {
-  final int idPoin;
-  final int idUser;
+/// Business Logic:
+/// - 1 poin = Rp100 discount value
+/// - Points can be earned (perubahan: 'earned') or used (perubahan: 'used')
+///
+/// Requirements: 1.1, 1.4, 1.5
+class PointHistoryModel {
+  final String idPoin;
+  final String idUser;
   final int poin;
-  final String perubahan; // 'tambah' or 'kurang'
+  final String perubahan; // 'earned' or 'used'
   final String keterangan;
   final DateTime waktu;
 
-  PointHistory({
+  PointHistoryModel({
     required this.idPoin,
     required this.idUser,
     required this.poin,
@@ -23,11 +27,26 @@ class PointHistory {
     required this.waktu,
   });
 
-  /// Check if this is a point addition transaction
-  bool get isAddition => perubahan.toLowerCase() == 'tambah';
+  /// Check if this is a point earning transaction
+  bool get isEarned => perubahan.toLowerCase() == 'earned';
 
-  /// Check if this is a point deduction transaction
-  bool get isDeduction => perubahan.toLowerCase() == 'kurang';
+  /// Check if this is a point usage transaction
+  bool get isUsed => perubahan.toLowerCase() == 'used';
+  
+  /// Get absolute value of points (always positive)
+  int get absolutePoints => poin.abs();
+  
+  /// Get formatted Rupiah value (1 poin = Rp100)
+  /// Example: 100 poin = "Rp10.000"
+  String get formattedValue {
+    final rupiah = absolutePoints * 100;
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp',
+      decimalDigits: 0,
+    );
+    return formatter.format(rupiah);
+  }
 
   /// Get formatted date string (e.g., "15 Jan 2024, 10:30")
   String get formattedDate {
@@ -49,14 +68,20 @@ class PointHistory {
 
   /// Get formatted amount with sign (e.g., "+100" or "-50")
   String get formattedAmount {
-    final sign = isAddition ? '+' : '-';
-    return '$sign$poin';
+    final sign = isEarned ? '+' : '-';
+    return '$sign$absolutePoints';
   }
 
   /// Get formatted amount with sign and label (e.g., "+100 Poin")
   String get formattedAmountWithLabel {
-    final sign = isAddition ? '+' : '-';
-    return '$sign$poin Poin';
+    final sign = isEarned ? '+' : '-';
+    return '$sign$absolutePoints Poin';
+  }
+  
+  /// Get formatted amount with value (e.g., "+100 poin (Rp10.000)")
+  String get formattedAmountWithValue {
+    final sign = isEarned ? '+' : '-';
+    return '$sign$absolutePoints poin ($formattedValue)';
   }
 
   /// Get relative time string (e.g., "2 jam yang lalu", "Kemarin")
@@ -86,21 +111,27 @@ class PointHistory {
     }
   }
 
-  /// Create PointHistory from JSON
-  factory PointHistory.fromJson(Map<String, dynamic> json) {
-    return PointHistory(
-      idPoin: json['id_poin'] ?? json['idPoin'] ?? 0,
-      idUser: json['id_user'] ?? json['idUser'] ?? 0,
-      poin: json['poin'] ?? 0,
-      perubahan: json['perubahan'] ?? '',
-      keterangan: json['keterangan'] ?? '',
-      waktu: json['waktu'] != null
-          ? DateTime.parse(json['waktu'])
-          : DateTime.now(),
-    );
+  /// Create PointHistoryModel from JSON
+  /// Handles both snake_case and camelCase field names
+  /// Throws FormatException if required fields are missing or invalid
+  factory PointHistoryModel.fromJson(Map<String, dynamic> json) {
+    try {
+      return PointHistoryModel(
+        idPoin: (json['id_poin'] ?? json['idPoin'] ?? '').toString(),
+        idUser: (json['id_user'] ?? json['idUser'] ?? '').toString(),
+        poin: json['poin'] is int ? json['poin'] : int.parse(json['poin'].toString()),
+        perubahan: json['perubahan'] ?? '',
+        keterangan: json['keterangan'] ?? '',
+        waktu: json['waktu'] != null
+            ? DateTime.parse(json['waktu'])
+            : DateTime.now(),
+      );
+    } catch (e) {
+      throw FormatException('Invalid PointHistoryModel JSON: $e');
+    }
   }
 
-  /// Convert PointHistory to JSON
+  /// Convert PointHistoryModel to JSON
   Map<String, dynamic> toJson() {
     return {
       'id_poin': idPoin,
@@ -113,15 +144,15 @@ class PointHistory {
   }
 
   /// Create a copy with modified fields
-  PointHistory copyWith({
-    int? idPoin,
-    int? idUser,
+  PointHistoryModel copyWith({
+    String? idPoin,
+    String? idUser,
     int? poin,
     String? perubahan,
     String? keterangan,
     DateTime? waktu,
   }) {
-    return PointHistory(
+    return PointHistoryModel(
       idPoin: idPoin ?? this.idPoin,
       idUser: idUser ?? this.idUser,
       poin: poin ?? this.poin,
@@ -135,7 +166,7 @@ class PointHistory {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
 
-    return other is PointHistory &&
+    return other is PointHistoryModel &&
         other.idPoin == idPoin &&
         other.idUser == idUser &&
         other.poin == poin &&
@@ -156,6 +187,6 @@ class PointHistory {
 
   @override
   String toString() {
-    return 'PointHistory(idPoin: $idPoin, idUser: $idUser, poin: $poin, perubahan: $perubahan, keterangan: $keterangan, waktu: $waktu)';
+    return 'PointHistoryModel(idPoin: $idPoin, idUser: $idUser, poin: $poin, perubahan: $perubahan, keterangan: $keterangan, waktu: $waktu)';
   }
 }

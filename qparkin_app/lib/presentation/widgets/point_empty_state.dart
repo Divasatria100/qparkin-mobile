@@ -31,7 +31,7 @@ class PointEmptyState extends StatelessWidget {
               child: Icon(
                 Icons.stars_outlined,
                 size: isTablet ? 70 : 60,
-                color: const Color.fromRGBO(87, 62, 209, 1),
+                color: const Color(0xFF573ED1),
               ),
             ),
             SizedBox(height: isTablet ? 32 : 24),
@@ -64,21 +64,21 @@ class PointEmptyState extends StatelessWidget {
             _buildInfoCard(
               icon: Icons.local_parking,
               title: 'Booking Parkir',
-              description: 'Dapatkan 50-200 poin setiap booking',
+              description: 'Dapatkan 1 poin per Rp1.000 pembayaran',
               isTablet: isTablet,
             ),
             const SizedBox(height: 12),
             _buildInfoCard(
-              icon: Icons.card_giftcard,
-              title: 'Bonus Member',
-              description: 'Dapatkan 25 poin sebagai member baru',
+              icon: Icons.redeem,
+              title: 'Tukar Poin',
+              description: '1 poin = Rp100 diskon (maks 30%)',
               isTablet: isTablet,
             ),
             const SizedBox(height: 12),
             _buildInfoCard(
-              icon: Icons.people_outline,
-              title: 'Referral Teman',
-              description: 'Dapatkan 100 poin per referral',
+              icon: Icons.refresh,
+              title: 'Refund Otomatis',
+              description: 'Poin dikembalikan jika booking dibatalkan',
               isTablet: isTablet,
             ),
           ],
@@ -108,13 +108,13 @@ class PointEmptyState extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(isTablet ? 14 : 12),
             decoration: BoxDecoration(
-              color: const Color.fromRGBO(87, 62, 209, 0.1),
+              color: const Color(0xFF573ED1).withOpacity(0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
               icon,
               size: isTablet ? 26 : 24,
-              color: const Color.fromRGBO(87, 62, 209, 1),
+              color: const Color(0xFF573ED1),
             ),
           ),
           SizedBox(width: isTablet ? 16 : 12),
