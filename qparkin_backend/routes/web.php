@@ -6,18 +6,22 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\AdminController;
 
-// Redirect root to signin
+// Redirect root to signin - FIX TYPO
 Route::get('/', function () {
-    return redirect()->route('signin');
+    return redirect()->route('signin'); // ← HAPUS SPASI
 });
 
 // Auth Routes
 Route::middleware('guest')->group(function () {
     Route::get('/signin', [WebAuthController::class, 'showLoginForm'])->name('signin');
     Route::post('/signin', [WebAuthController::class, 'login']);
-    Route::get('/register', function () { return view('auth.signup'); })->name('register');
+    Route::get('/register', function () { 
+        return view('auth.signup'); 
+    })->name('register');
     Route::post('/register', [RegisteredUserController::class, 'store']);
-    Route::get('/forgot-password', function () { return view('auth.forgot-password'); })->name('password.request');
+    Route::get('/forgot-password', function () { 
+        return view('auth.forgot-password'); 
+    })->name('password.request');
     Route::post('/forgot-password', [WebAuthController::class, 'sendResetLink'])->name('password.email');
 });
 
@@ -33,9 +37,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/profile/security', [AdminController::class, 'editSecurity'])->name('profile.security');
     
     Route::get('/notifikasi', [AdminController::class, 'notifikasi'])->name('notifikasi');
+    Route::post('/notifikasi/{id}/read', [AdminController::class, 'markNotificationAsRead'])->name('notifikasi.read');
+    Route::post('/notifikasi/read-all', [AdminController::class, 'markAllNotificationsAsRead'])->name('notifikasi.readAll');
+    Route::delete('/notifikasi/{id}', [AdminController::class, 'deleteNotification'])->name('notifikasi.delete');
+    Route::delete('/notifikasi/clear-all', [AdminController::class, 'clearAllNotifications'])->name('notifikasi.clearAll');
     
     Route::get('/tiket', [AdminController::class, 'tiket'])->name('tiket');
     Route::get('/tiket/{id}', [AdminController::class, 'tiketDetail'])->name('tiket.detail');
+    Route::get('/tiket/{id}/print', [AdminController::class, 'printTicket'])->name('tiket.print');
     
     Route::get('/tarif', [AdminController::class, 'tarif'])->name('tarif');
     Route::get('/tarif/{id}/edit', [AdminController::class, 'editTarif'])->name('tarif.edit');
@@ -43,8 +52,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     
     Route::get('/parkiran', [AdminController::class, 'parkiran'])->name('parkiran');
     Route::get('/parkiran/create', [AdminController::class, 'createParkiran'])->name('parkiran.create');
+    Route::post('/parkiran/store', [AdminController::class, 'storeParkiran'])->name('parkiran.store');
     Route::get('/parkiran/{id}', [AdminController::class, 'detailParkiran'])->name('parkiran.detail');
     Route::get('/parkiran/{id}/edit', [AdminController::class, 'editParkiran'])->name('parkiran.edit');
+    Route::post('/parkiran/{id}/update', [AdminController::class, 'updateParkiran'])->name('parkiran.update');
+    Route::delete('/parkiran/{id}', [AdminController::class, 'deleteParkiran'])->name('parkiran.delete');
 });
 
 // Super Admin Routes

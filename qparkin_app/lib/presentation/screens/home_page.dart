@@ -39,22 +39,34 @@ class _HomePageState extends State<HomePage> {
   // TODO: Replace with actual API call to fetch real-time parking data
   final List<Map<String, dynamic>> nearbyLocations = [
     {
+      'id_mall': '1',
       'name': 'Mega Mall Batam Centre',
+      'nama_mall': 'Mega Mall Batam Centre',
       'distance': '1.3 km',
       'address': 'Jl. Engku Putri no.1, Batam Centre',
+      'alamat': 'Jl. Engku Putri no.1, Batam Centre',
       'available': 45,
+      'has_slot_reservation_enabled': true, // Slot reservation enabled
     },
     {
+      'id_mall': '2',
       'name': 'One Batam Mall',
+      'nama_mall': 'One Batam Mall',
       'distance': '1.5 km',
       'address': 'Jl. Raja H. Fisabilillah No. 9, Batam Center',
+      'alamat': 'Jl. Raja H. Fisabilillah No. 9, Batam Center',
       'available': 32,
+      'has_slot_reservation_enabled': true, // Slot reservation enabled
     },
     {
+      'id_mall': '3',
       'name': 'SNL Food Bengkong',
+      'nama_mall': 'SNL Food Bengkong',
       'distance': '7 km',
       'address': 'Garden Avenue Square, Bengkong, Batam',
+      'alamat': 'Garden Avenue Square, Bengkong, Batam',
       'available': 18,
+      'has_slot_reservation_enabled': false, // Slot reservation disabled for testing
     },
   ];
 

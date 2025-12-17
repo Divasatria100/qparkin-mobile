@@ -23,19 +23,36 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (confirm(`Apakah Anda yakin ingin menghapus semua notifikasi? Tindakan ini tidak dapat dibatalkan.`)) {
-            // Remove all notifications from DOM
-            allNotifications.forEach(item => {
-                item.remove();
-            });
+            // Submit to Laravel backend
+            fetch(clearAllUrl, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove all notifications from DOM
+                    allNotifications.forEach(item => {
+                        item.remove();
+                    });
 
-            // Update unread count to 0
-            unreadCount = 0;
-            updateBadgeCount();
-            
-            // Show empty state
-            checkEmptyState();
-            
-            showNotification('Semua notifikasi telah dihapus.', 'success');
+                    // Update unread count to 0
+                    unreadCount = 0;
+                    updateBadgeCount();
+                    
+                    // Show empty state
+                    checkEmptyState();
+                    
+                    showNotification('Semua notifikasi telah dihapus.', 'success');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Terjadi kesalahan. Silakan coba lagi.', 'error');
+            });
         }
     });
 
@@ -43,24 +60,38 @@ document.addEventListener('DOMContentLoaded', function() {
     markAllReadBtn.addEventListener('click', function() {
         // Show confirmation
         if (unreadCount === 0) {
-            showNotification('Semua notifikasi ditandai sudah dibaca.', 'success');
+            showNotification('Tidak ada notifikasi yang belum dibaca.', 'info');
             return;
         }
 
         if (confirm(`Tandai semua ${unreadCount} notifikasi sebagai sudah dibaca?`)) {
-            // Mark all notifications as read
-            notificationItems.forEach(item => {
-                item.classList.remove('unread');
-            });
+            // Submit form to Laravel backend
+            fetch(markAllReadUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Mark all notifications as read in UI
+                    notificationItems.forEach(item => {
+                        item.classList.remove('unread');
+                    });
 
-            // Update unread count
-            unreadCount = 0;
-            updateBadgeCount();
-            
-            // Check if all notifications are read
-            checkEmptyState();
-            
-            showNotification('Semua notifikasi telah ditandai sebagai sudah dibaca.');
+                    // Update unread count
+                    unreadCount = 0;
+                    updateBadgeCount();
+                    
+                    showNotification('Semua notifikasi telah ditandai sebagai sudah dibaca.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Terjadi kesalahan. Silakan coba lagi.', 'error');
+            });
         }
     });
 
@@ -253,10 +284,27 @@ document.addEventListener('DOMContentLoaded', function() {
             // Don't trigger if clicking on mark-read button
             if (!e.target.closest('.btn-mark-read')) {
                 if (this.classList.contains('unread')) {
-                    this.classList.remove('unread');
-                    unreadCount--;
-                    updateBadgeCount();
-                    checkEmptyState();
+                    const notificationId = this.getAttribute('data-id');
+                    
+                    // Mark as read in backend
+                    fetch(`/admin/notifikasi/${notificationId}/read`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            this.classList.remove('unread');
+                            unreadCount--;
+                            updateBadgeCount();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
                 }
             }
         });

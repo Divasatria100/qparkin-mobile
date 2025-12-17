@@ -15,6 +15,9 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class,
             SuperAdminSeeder::class,
+            MallSeeder::class,
+            AdminMallSeeder::class, // Tambahkan setelah MallSeeder
+            TarifParkirSeeder::class,
             NotifikasiSeeder::class,
         ]);
     }

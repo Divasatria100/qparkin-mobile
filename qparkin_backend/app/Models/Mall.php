@@ -11,12 +11,18 @@ class Mall extends Model
 
     protected $table = 'mall';
     protected $primaryKey = 'id_mall';
+    public $timestamps = false; // Tabel mall tidak punya created_at/updated_at
 
     protected $fillable = [
         'nama_mall',
         'lokasi',
         'kapasitas',
-        'alamat_gmaps'
+        'alamat_gmaps',
+        'has_slot_reservation_enabled'
+    ];
+
+    protected $casts = [
+        'has_slot_reservation_enabled' => 'boolean',
     ];
 
     public function adminMall()

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '/config/app_theme.dart';
+import 'package:provider/provider.dart';
 import '/utils/validators.dart';
 import '/presentation/widgets/phone_field.dart';
 import '/presentation/widgets/buttons.dart';
 import '/data/services/auth_service.dart';
+import '/logic/providers/point_provider.dart';
 import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -141,8 +142,16 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
 
       if (result['success']) {
-        // Login berhasil, navigate ke home
+        // Login berhasil, initialize PointProvider
         if (mounted) {
+          // Initialize PointProvider to load cached data and fetch fresh data
+          final pointProvider = Provider.of<PointProvider>(context, listen: false);
+          final token = result['token'] as String?;
+          if (token != null) {
+            await pointProvider.initialize(token: token);
+          }
+          
+          // Navigate to home
           Navigator.of(context).pushReplacementNamed('/home');
         }
       } else {

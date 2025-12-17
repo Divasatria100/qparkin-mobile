@@ -19,7 +19,299 @@ Authorization: Bearer <access_token>
 
 ## Endpoints
 
-### 1. Create Booking
+### 1. Get Parking Floors
+
+Retrieves the list of parking floors for a specific mall with availability information.
+
+**Endpoint:** `GET /api/parking/floors/{mallId}`
+
+**Headers:**
+```json
+{
+  "Authorization": "Bearer <access_token>"
+}
+```
+
+**Path Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| mallId | string | Yes | Unique identifier of the mall |
+
+**Example Request:**
+```
+GET /api/parking/floors/MALL001
+Headers:
+  Authorization: Bearer <access_token>
+```
+
+**Success Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id_floor": "f1",
+      "id_mall": "MALL001",
+      "floor_number": 1,
+      "floor_name": "Lantai 1",
+      "total_slots": 50,
+      "available_slots": 12,
+      "occupied_slots": 35,
+      "reserved_slots": 3,
+      "last_updated": "2025-01-15T14:30:00Z"
+    },
+    {
+      "id_floor": "f2",
+      "id_mall": "MALL001",
+      "floor_number": 2,
+      "floor_name": "Lantai 2",
+      "total_slots": 60,
+      "available_slots": 25,
+      "occupied_slots": 30,
+      "reserved_slots": 5,
+      "last_updated": "2025-01-15T14:30:00Z"
+    }
+  ]
+}
+```
+
+**Error Responses:**
+
+**404 Not Found:**
+```json
+{
+  "success": false,
+  "message": "Mall tidak ditemukan",
+  "error_code": "MALL_NOT_FOUND"
+}
+```
+
+**401 Unauthorized:**
+```json
+{
+  "success": false,
+  "message": "Token tidak valid atau telah kadaluarsa",
+  "error_code": "UNAUTHORIZED"
+}
+```
+
+---
+
+### 2. Get Slots for Visualization
+
+Retrieves parking slot data for visualization purposes (non-interactive display).
+
+**Endpoint:** `GET /api/parking/slots/{floorId}/visualization`
+
+**Headers:**
+```json
+{
+  "Authorization": "Bearer <access_token>"
+}
+```
+
+**Path Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| floorId | string | Yes | Unique identifier of the floor |
+
+**Query Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| vehicle_type | string | No | Filter by vehicle type (Roda Dua, Roda Empat, etc.) |
+
+**Example Request:**
+```
+GET /api/parking/slots/f1/visualization?vehicle_type=Roda%20Empat
+Headers:
+  Authorization: Bearer <access_token>
+```
+
+**Success Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id_slot": "s1",
+      "id_floor": "f1",
+      "slot_code": "A01",
+      "status": "available",
+      "slot_type": "regular",
+      "position_x": 0,
+      "position_y": 0,
+      "last_updated": "2025-01-15T14:30:00Z"
+    },
+    {
+      "id_slot": "s2",
+      "id_floor": "f1",
+      "slot_code": "A02",
+      "status": "occupied",
+      "slot_type": "regular",
+      "position_x": 1,
+      "position_y": 0,
+      "last_updated": "2025-01-15T14:30:00Z"
+    },
+    {
+      "id_slot": "s3",
+      "id_floor": "f1",
+      "slot_code": "A03",
+      "status": "available",
+      "slot_type": "disableFriendly",
+      "position_x": 2,
+      "position_y": 0,
+      "last_updated": "2025-01-15T14:30:00Z"
+    }
+  ],
+  "meta": {
+    "total_slots": 50,
+    "available_slots": 12,
+    "occupied_slots": 35,
+    "reserved_slots": 3
+  }
+}
+```
+
+**Slot Status Values:**
+- `available` - Slot is free and can be reserved
+- `occupied` - Slot is currently in use
+- `reserved` - Slot is reserved but not yet occupied
+- `disabled` - Slot is unavailable (maintenance, etc.)
+
+**Slot Type Values:**
+- `regular` - Standard parking slot
+- `disableFriendly` - Accessible parking slot for disabled persons
+
+**Error Responses:**
+
+**404 Not Found:**
+```json
+{
+  "success": false,
+  "message": "Lantai tidak ditemukan",
+  "error_code": "FLOOR_NOT_FOUND"
+}
+```
+
+---
+
+### 3. Reserve Random Slot
+
+Reserves a random available slot on the specified floor. The system automatically assigns a specific slot.
+
+**Endpoint:** `POST /api/parking/slots/reserve-random`
+
+**Headers:**
+```json
+{
+  "Authorization": "Bearer <access_token>",
+  "Content-Type": "application/json"
+}
+```
+
+**Request Body:**
+```json
+{
+  "id_floor": "f1",
+  "id_user": "u123",
+  "vehicle_type": "Roda Empat",
+  "duration_minutes": 5
+}
+```
+
+**Request Parameters:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| id_floor | string | Yes | Unique identifier of the floor |
+| id_user | string | Yes | Unique identifier of the user |
+| vehicle_type | string | Yes | Type of vehicle (Roda Dua, Roda Empat, etc.) |
+| duration_minutes | integer | No | Reservation duration in minutes (default: 5) |
+
+**Success Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Slot A15 berhasil direservasi untuk 5 menit",
+  "data": {
+    "reservation_id": "r123",
+    "slot_id": "s15",
+    "slot_code": "A15",
+    "floor_name": "Lantai 1",
+    "floor_number": "1",
+    "slot_type": "regular",
+    "reserved_at": "2025-01-15T14:30:00Z",
+    "expires_at": "2025-01-15T14:35:00Z",
+    "is_active": true
+  }
+}
+```
+
+**Error Responses:**
+
+**404 Not Found - No Slots Available:**
+```json
+{
+  "success": false,
+  "message": "Tidak ada slot tersedia di lantai ini",
+  "error_code": "NO_SLOTS_AVAILABLE",
+  "data": {
+    "floor_id": "f1",
+    "floor_name": "Lantai 1",
+    "suggested_floors": [
+      {
+        "id_floor": "f2",
+        "floor_name": "Lantai 2",
+        "available_slots": 15
+      },
+      {
+        "id_floor": "f3",
+        "floor_name": "Lantai 3",
+        "available_slots": 8
+      }
+    ]
+  }
+}
+```
+
+**409 Conflict - User Already Has Reservation:**
+```json
+{
+  "success": false,
+  "message": "Anda sudah memiliki reservasi slot aktif",
+  "error_code": "RESERVATION_CONFLICT",
+  "data": {
+    "existing_reservation_id": "r122",
+    "slot_code": "B10",
+    "expires_at": "2025-01-15T14:33:00Z"
+  }
+}
+```
+
+**400 Bad Request - Invalid Floor:**
+```json
+{
+  "success": false,
+  "message": "Lantai tidak valid atau tidak tersedia",
+  "error_code": "INVALID_FLOOR"
+}
+```
+
+**408 Request Timeout:**
+```json
+{
+  "success": false,
+  "message": "Waktu reservasi habis. Silakan coba lagi.",
+  "error_code": "RESERVATION_TIMEOUT"
+}
+```
+
+---
+
+### 4. Create Booking
 
 Creates a new parking booking for the authenticated user.
 
@@ -41,6 +333,8 @@ Creates a new parking booking for the authenticated user.
   "waktu_mulai": "2025-11-26T10:00:00Z",
   "durasi_jam": 2,
   "waktu_selesai": "2025-11-26T12:00:00Z",
+  "id_slot": "s15",
+  "reservation_id": "r123",
   "notes": "Optional booking notes"
 }
 ```
@@ -54,6 +348,8 @@ Creates a new parking booking for the authenticated user.
 | waktu_mulai | datetime | Yes | Booking start time (ISO 8601 format) |
 | durasi_jam | integer | Yes | Booking duration in hours (1-12) |
 | waktu_selesai | datetime | Yes | Calculated end time (ISO 8601 format) |
+| id_slot | string | No | Unique identifier of reserved slot (if using slot reservation) |
+| reservation_id | string | No | Reservation ID from random slot reservation |
 | notes | string | No | Optional notes for the booking |
 
 **Success Response (200 OK):**
@@ -68,6 +364,9 @@ Creates a new parking booking for the authenticated user.
     "id_mall": "MALL001",
     "id_parkiran": "P001",
     "id_kendaraan": "VEH001",
+    "id_slot": "s15",
+    "slot_code": "A15",
+    "floor_name": "Lantai 1",
     "waktu_mulai": "2025-11-26T10:00:00Z",
     "waktu_selesai": "2025-11-26T12:00:00Z",
     "durasi_booking": 2,
@@ -77,6 +376,8 @@ Creates a new parking booking for the authenticated user.
   }
 }
 ```
+
+**Note:** The `id_slot`, `slot_code`, and `floor_name` fields are included when booking is created with slot reservation. For backward compatibility, these fields are optional and bookings can still be created without slot reservation (automatic assignment).
 
 **Error Responses:**
 
@@ -101,6 +402,19 @@ Creates a new parking booking for the authenticated user.
   "error_code": "BOOKING_CONFLICT",
   "data": {
     "existing_booking_id": "BKG20251126000"
+  }
+}
+```
+
+**410 Gone - Reservation Expired:**
+```json
+{
+  "success": false,
+  "message": "Reservasi slot telah berakhir. Silakan reservasi ulang.",
+  "error_code": "RESERVATION_EXPIRED",
+  "data": {
+    "reservation_id": "r123",
+    "expired_at": "2025-01-15T14:35:00Z"
   }
 }
 ```
@@ -141,7 +455,7 @@ Creates a new parking booking for the authenticated user.
 
 ---
 
-### 2. Check Slot Availability
+### 5. Check Slot Availability
 
 Checks the number of available parking slots for a specific time period.
 
@@ -207,7 +521,7 @@ GET /api/booking/check-availability?mall_id=MALL001&vehicle_type=Roda%20Empat&st
 
 ---
 
-### 3. Check Active Booking
+### 6. Check Active Booking
 
 Checks if the authenticated user has an active booking.
 
@@ -256,7 +570,7 @@ Checks if the authenticated user has an active booking.
 
 ---
 
-### 4. Get Vehicles
+### 7. Get Vehicles
 
 Retrieves the list of vehicles registered by the authenticated user.
 
@@ -307,7 +621,7 @@ Retrieves the list of vehicles registered by the authenticated user.
 
 ---
 
-### 5. Get Tariff
+### 8. Get Tariff
 
 Retrieves parking tariff information for a specific mall and vehicle type.
 
@@ -369,8 +683,15 @@ GET /api/tariff?mall_id=MALL001&vehicle_type=Roda%20Empat
 | VALIDATION_ERROR | 400 | Request data validation failed |
 | UNAUTHORIZED | 401 | Invalid or expired authentication token |
 | NOT_FOUND | 404 | Requested resource not found |
+| MALL_NOT_FOUND | 404 | Mall not found |
+| FLOOR_NOT_FOUND | 404 | Floor not found |
+| NO_SLOTS_AVAILABLE | 404 | No parking slots available on the floor |
 | BOOKING_CONFLICT | 409 | User already has an active booking |
+| RESERVATION_CONFLICT | 409 | User already has an active slot reservation |
 | SLOT_UNAVAILABLE | 404 | No parking slots available for requested time |
+| RESERVATION_EXPIRED | 410 | Slot reservation has expired |
+| RESERVATION_TIMEOUT | 408 | Slot reservation request timed out |
+| INVALID_FLOOR | 400 | Floor is invalid or unavailable |
 | NETWORK_ERROR | - | Client-side network connection error |
 | TIMEOUT_ERROR | 408 | Request timeout |
 | SERVER_ERROR | 500 | Internal server error |
@@ -431,6 +752,15 @@ Token: test_token_12345
 ---
 
 ## Changelog
+
+### Version 2.0.0 (2025-12-05)
+- Added slot reservation endpoints
+- Added GET /api/parking/floors/{mallId} endpoint
+- Added GET /api/parking/slots/{floorId}/visualization endpoint
+- Added POST /api/parking/slots/reserve-random endpoint
+- Updated Create Booking endpoint to support optional slot reservation
+- Added new error codes for slot reservation
+- Documented backward compatibility for bookings without slot reservation
 
 ### Version 1.0.0 (2025-11-26)
 - Initial API documentation

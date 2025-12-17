@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\KendaraanController;
 use App\Http\Controllers\Api\MallController;
 use App\Http\Controllers\Api\ParkiranController;
+use App\Http\Controllers\Api\ParkingSlotController;
 use App\Http\Controllers\Api\TransaksiController;
 use App\Http\Controllers\Api\UserController;
 
@@ -69,6 +70,14 @@ Route::middleware('auth:sanctum')->group(function () {
     // Parking Slot Availability
     Route::prefix('parkiran')->group(function () {
         Route::get('/{id}/ketersediaan', [ParkiranController::class, 'checkAvailability']);
+    });
+
+    // Parking Slot Reservation (NEW)
+    Route::prefix('parking')->group(function () {
+        Route::get('/floors/{mallId}', [ParkingSlotController::class, 'getFloors']);
+        Route::get('/slots/{floorId}/visualization', [ParkingSlotController::class, 'getSlotsForVisualization']);
+        Route::post('/slots/reserve-random', [ParkingSlotController::class, 'reserveRandomSlot']);
+        Route::post('/slots/cleanup-expired', [ParkingSlotController::class, 'cleanupExpiredReservations']);
     });
 
     // Booking Management

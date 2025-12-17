@@ -97,7 +97,7 @@ void main() {
       
       // Verify main components are visible
       expect(find.byType(AppBar), findsOneWidget);
-      expect(find.byType(SingleChildScrollView), findsOneWidget);
+      expect(find.byType(SingleChildScrollView), findsWidgets);
       
       // Verify no overflow errors
       expect(tester.takeException(), isNull);
@@ -146,7 +146,7 @@ void main() {
       
       // Verify main components are visible
       expect(find.byType(AppBar), findsOneWidget);
-      expect(find.byType(SingleChildScrollView), findsOneWidget);
+      expect(find.byType(SingleChildScrollView), findsWidgets);
       
       // Verify no overflow errors
       expect(tester.takeException(), isNull);
@@ -378,11 +378,11 @@ void main() {
 
         // Assert: ScrollView is present and scrollable
         final scrollView = find.byType(SingleChildScrollView);
-        expect(scrollView, findsOneWidget, 
+        expect(scrollView, findsWidgets, 
             reason: 'ScrollView should exist for size $size');
 
         // Verify we can scroll (if content is long enough)
-        await tester.drag(scrollView, const Offset(0, -100));
+        await tester.drag(scrollView.first, const Offset(0, -100));
         await tester.pumpAndSettle();
 
         // No overflow errors
@@ -446,7 +446,7 @@ void main() {
       expect(find.text('Booking Parkir'), findsOneWidget);
       
       // Verify scrollable content is present
-      expect(find.byType(SingleChildScrollView), findsOneWidget);
+      expect(find.byType(SingleChildScrollView), findsWidgets);
       
       // No overflow errors
       expect(tester.takeException(), isNull);

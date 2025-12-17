@@ -11,6 +11,7 @@ class AdminMall extends Model
 
     protected $table = 'admin_mall';
     protected $primaryKey = 'id_user';
+    public $timestamps = false; // Tabel admin_mall tidak punya created_at/updated_at
 
     protected $fillable = [
         'id_user',

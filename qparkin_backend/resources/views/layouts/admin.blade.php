@@ -6,8 +6,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Dashboard Admin') - QPARKIN</title>
     
-    <!-- Styles -->
-    @stack('styles')
+    <!-- Base Styles -->
+    <link rel="stylesheet" href="{{ asset('css/admin-dashboard.css') }}">
+    @yield('styles')
 </head>
 <body>
     <div class="admin-container">
@@ -24,11 +25,6 @@
 
             <!-- Main Content - Scrollable -->
             <main class="admin-content">
-                <!-- Breadcrumb -->
-                <div class="breadcrumb">
-                    @yield('breadcrumb')
-                </div>
-
                 @yield('content')
 
                 <!-- Footer -->
@@ -37,7 +33,8 @@
         </div>
     </div>
 
-    <!-- Scripts -->
-    @stack('scripts')
+    <!-- Base Scripts -->
+    <script src="{{ asset('js/admin-dashboard.js') }}"></script>
+    @yield('scripts')
 </body>
 </html>

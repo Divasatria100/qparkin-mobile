@@ -56,6 +56,55 @@ In order to ensure that the Laravel community is welcoming to all, please review
 
 If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
+## QParkin Backend - Recent Updates
+
+### Slot Reservation System (December 2025)
+
+Added comprehensive slot reservation system with individual parking slot management:
+
+#### New Features
+- **Individual Slot Tracking**: Track each parking slot with unique codes (e.g., "A-101", "B-205")
+- **Floor Management**: Organize slots by parking floors/levels
+- **Hybrid Reservation**: Users select floor, system auto-assigns available slot
+- **5-Minute Timeout**: Reservations expire after 5 minutes if not confirmed
+- **Feature Flag**: Enable/disable per mall for gradual rollout
+
+#### Database Changes
+- New tables: `parking_floors`, `parking_slots`, `slot_reservations`
+- Updated tables: `booking`, `transaksi_parkir`, `mall`
+- Full backward compatibility maintained
+
+#### Quick Start
+```bash
+# Run migrations
+php artisan migrate
+
+# Seed sample data
+php artisan db:seed --class=ParkingFloorSeeder
+php artisan db:seed --class=ParkingSlotSeeder
+
+# Enable for a mall
+UPDATE mall SET has_slot_reservation_enabled = 1 WHERE id_mall = 1;
+```
+
+#### Documentation
+- 📖 [Migration Guide](docs/SLOT_RESERVATION_MIGRATION_GUIDE.md)
+- 🚀 [Quick Start Guide](docs/SLOT_RESERVATION_QUICK_START.md)
+- 📋 [Migration Summary](SLOT_RESERVATION_MIGRATION_SUMMARY.md)
+
+#### Models
+- `ParkingFloor` - Parking floor/level management
+- `ParkingSlot` - Individual slot tracking
+- `SlotReservation` - Reservation with auto-expiration
+
+#### Next Steps
+- [ ] Implement API endpoints (Task 15.3)
+- [ ] Add controllers and services
+- [ ] Write API tests
+- [ ] Update frontend integration
+
+---
+
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).

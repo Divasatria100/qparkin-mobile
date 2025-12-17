@@ -44,7 +44,153 @@ The Booking feature allows you to reserve parking slots at your favorite malls b
 - Fill in your vehicle details
 - Return to booking page
 
-### Step 3: Choose Booking Time
+### Step 3: Select Parking Floor (NEW!)
+
+**What's New:** You can now choose which floor you want to park on!
+
+1. After selecting your vehicle, you'll see **"Pilih Lokasi Parkir"** section
+2. Browse available parking floors:
+   - Each floor shows its name (e.g., "Lantai 1", "Lantai 2")
+   - Available slot count is displayed in real-time
+   - Floors with available slots are highlighted in green
+   - Unavailable floors are shown in grey
+
+3. Tap on a floor to select it
+4. The selected floor will be highlighted with a purple border
+
+**Floor Information:**
+- **Floor Number Badge:** Shows the floor level (1, 2, 3, etc.)
+- **Floor Name:** Descriptive name of the floor
+- **Availability:** "X slot tersedia" shows how many slots are free
+- **Status Indicator:** Green icon = available, Grey icon = full
+
+**Tips:**
+- Choose floors with more available slots for better chances
+- Lower floors are usually closer to mall entrances
+- Some malls have dedicated floors for different vehicle types
+
+### Step 4: View Slot Availability (NEW!)
+
+**What's New:** See real-time parking slot availability before booking!
+
+After selecting a floor, you'll see a visual representation of parking slots:
+
+**Slot Visualization:**
+- **Grid Layout:** Slots are displayed in a grid showing their positions
+- **Color Coding:**
+  - 🟢 **Green:** Available slots you can reserve
+  - ⚫ **Grey:** Occupied slots (currently in use)
+  - 🟡 **Yellow:** Reserved slots (locked by other users)
+  - 🔴 **Red:** Disabled slots (maintenance or unavailable)
+
+**Slot Information:**
+- Each slot shows its code (e.g., "A01", "B15")
+- Icons indicate slot type:
+  - 🅿️ Regular parking slot
+  - ♿ Accessible slot (disable-friendly)
+
+**Real-Time Updates:**
+- Slot availability refreshes automatically every 15 seconds
+- Tap the refresh button (🔄) for manual update
+- Last update time is shown at the top
+
+**Note:** This is a display-only view. You cannot manually select individual slots. The system will automatically assign you a slot when you reserve.
+
+### Step 5: Reserve Your Slot (NEW!)
+
+**What's New:** Lock in a specific parking slot before you arrive!
+
+**How Random Slot Reservation Works:**
+
+1. After viewing slot availability, tap the **"Pesan Slot Acak di [Nama Lantai]"** button
+2. The system automatically assigns you a specific available slot
+3. Your reserved slot is locked for 5 minutes
+4. A confirmation card appears showing:
+   - ✅ Success checkmark
+   - Slot code (e.g., "Lantai 2 - Slot A15")
+   - Slot type (Regular or Accessible)
+   - Expiration time
+
+**Why Random Assignment?**
+- **Faster:** No need to browse and choose individual slots
+- **Fair:** Equal opportunity for all users
+- **Optimized:** System assigns slots efficiently
+- **Guaranteed:** Your slot is locked and waiting for you
+
+**Important Notes:**
+- ⏱️ **5-Minute Timer:** Your reservation expires in 5 minutes if you don't complete the booking
+- 🔒 **Locked for You:** No one else can take your reserved slot during this time
+- 🔄 **Can Change:** You can cancel and reserve a different slot if needed
+- 📍 **Specific Location:** You'll know exactly where to park before you arrive
+
+**What If No Slots Available?**
+- The system will notify you: "Tidak ada slot tersedia di lantai ini"
+- Suggested alternative floors will be shown
+- Try selecting a different floor
+- Or wait a few minutes and try again
+
+### Step 6: Choose Booking Time (IMPROVED!)
+
+**What's New:** Modern, unified interface for time and duration selection!
+
+The **"Waktu & Durasi Booking"** card combines everything in one place:
+
+**Date & Time Selection:**
+
+1. Tap the date/time section to open the picker
+2. **Date Picker:**
+   - Select your arrival date (up to 7 days in advance)
+   - Calendar view with purple theme
+   - Today's date is highlighted
+   
+3. **Time Picker:**
+   - Opens automatically after date selection
+   - Select your arrival time
+   - 24-hour format (e.g., 14:30)
+   - Default: Current time + 15 minutes
+
+4. **Quick Action:**
+   - Tap "Sekarang + 15 menit" for instant selection
+   - Perfect for immediate bookings
+
+**Duration Selection (IMPROVED!):**
+
+**What's New:** Larger, easier-to-tap duration chips!
+
+1. Choose from preset durations:
+   - **1 Jam** - Quick errands
+   - **2 Jam** - Shopping trips
+   - **3 Jam** - Extended visits
+   - **4 Jam** - Half-day parking
+   - **> 4 Jam** - Custom duration
+
+2. **Interactive Chips:**
+   - Large buttons (80px wide) for easy tapping
+   - Selected chip turns purple with checkmark ✓
+   - Unselected chips are light purple
+   - Smooth animations when tapping
+
+3. **Custom Duration:**
+   - Tap "> 4 Jam" to open custom picker
+   - Set exact hours and minutes
+   - Minimum: 30 minutes
+   - Maximum: 12 hours
+
+**Calculated End Time:**
+
+The card automatically shows when your booking ends:
+- **Format:** "Selesai: Senin, 15 Jan 2025 - 16:30"
+- **Duration Summary:** "Total: 2 jam"
+- **Updates Instantly:** Changes when you adjust time or duration
+- **Visual Indicator:** Light purple background with clock icon 🕐
+
+**Validation:**
+- ❌ Cannot select past times
+- ❌ Cannot book more than 7 days ahead
+- ❌ Minimum 30-minute duration
+- ✅ Clear error messages if validation fails
+
+### Step 7: Check Slot Availability (Legacy)
 
 1. In the **"Waktu Mulai"** section:
    - Tap to open date/time picker
@@ -60,7 +206,7 @@ The Booking feature allows you to reserve parking slots at your favorite malls b
 
 3. The **"Waktu Selesai"** (end time) is calculated automatically
 
-### Step 4: Check Slot Availability
+**Note:** This general availability indicator is still shown for malls without floor-specific slot reservation.
 
 The **"Ketersediaan Slot"** indicator shows real-time availability:
 
@@ -78,7 +224,7 @@ The **"Ketersediaan Slot"** indicator shows real-time availability:
 - Reducing booking duration
 - Selecting a different mall
 
-### Step 5: Review Cost Estimate
+### Step 8: Review Cost Estimate
 
 The **"Estimasi Biaya"** card shows:
 
@@ -100,11 +246,12 @@ Total Estimasi:     Rp 11.000
 - If you stay longer, additional charges apply
 - If you leave early, you still pay the full booking amount
 
-### Step 6: Review Booking Summary
+### Step 9: Review Booking Summary
 
 Before confirming, review all details in the **"Ringkasan Booking"** card:
 
 - **Lokasi:** Mall name and address
+- **Slot Parkir (NEW!):** Your reserved slot (e.g., "Lantai 2 - Slot A15")
 - **Kendaraan:** Your vehicle details
 - **Waktu:**
   - Start time
@@ -114,24 +261,28 @@ Before confirming, review all details in the **"Ringkasan Booking"** card:
 
 **Double-check:**
 - ✓ Correct vehicle selected
+- ✓ Reserved slot is confirmed (if applicable)
 - ✓ Arrival time is accurate
 - ✓ Duration is sufficient
 - ✓ Cost is acceptable
 
-### Step 7: Confirm Booking
+### Step 10: Confirm Booking
 
 1. Tap the **"Konfirmasi Booking"** button at the bottom
 2. Wait for confirmation (usually takes 2-3 seconds)
 3. A success dialog will appear showing:
    - Booking confirmation number
    - QR code for entry
+   - **Your specific slot location (NEW!)** - e.g., "Lantai 2 - Slot A15"
    - Booking details
 
 **What happens next:**
 - Your booking is saved
-- Parking slot is reserved
-- QR code is generated
+- Parking slot is confirmed and locked
+- QR code is generated with slot information
 - You receive a notification
+
+**Important:** If you had a slot reservation, completing the booking confirms it permanently. If you don't complete the booking within 5 minutes, your slot reservation expires and becomes available to others.
 
 ---
 
@@ -143,6 +294,7 @@ Before confirming, review all details in the **"Ringkasan Booking"** card:
 2. Or navigate to **Activity** tab
 3. Your active booking is displayed with:
    - Mall location
+   - **Specific slot location (NEW!)** - e.g., "Lantai 2 - Slot A15"
    - Vehicle information
    - Booking time range
    - QR code for entry
@@ -156,13 +308,15 @@ Before confirming, review all details in the **"Ringkasan Booking"** card:
 3. Go to **Activity** tab
 4. Show your QR code to the scanner
 5. Gate opens automatically
-6. Park in your assigned slot
+6. **Navigate to your specific slot (NEW!)** - Look for the floor and slot code shown in your booking (e.g., "Lantai 2 - Slot A15")
+7. Park in your assigned slot
 
 **Important:**
 - Keep your phone charged
 - QR code works offline
 - Don't share your QR code
 - Arrive within your booking time
+- **Remember your slot location** - It's shown in the Activity tab
 
 ### Modifying Your Booking
 
@@ -185,16 +339,26 @@ Before confirming, review all details in the **"Ringkasan Booking"** card:
 - **Book in advance** during peak hours (weekends, holidays)
 - **Arrive on time** - your slot is reserved for your booking window
 - **Allow buffer time** - add 30 minutes to your expected duration
+- **Complete booking quickly (NEW!)** - Slot reservations expire in 5 minutes
 
 ### Cost Savings
 - **Book exact duration** - you pay for the full booking even if you leave early
 - **Extend if needed** - additional charges apply if you overstay
 - **Check rates** - different malls have different pricing
 
+### Slot Selection (NEW!)
+- **Choose less crowded floors** - Upper floors often have more availability
+- **Check slot visualization** - See real-time availability before reserving
+- **Reserve quickly** - Slots can be taken by others while you're browsing
+- **Trust the system** - Random assignment is fair and efficient
+- **Note your slot location** - Remember your floor and slot code
+
 ### Slot Availability
 - **Check real-time availability** before booking
 - **Be flexible** with timing if slots are limited
+- **Consider alternative floors (NEW!)** - Try different floors in the same mall
 - **Consider alternative malls** if your first choice is full
+- **Refresh regularly (NEW!)** - Slot availability updates every 15 seconds
 
 ### Vehicle Management
 - **Keep vehicle list updated** - remove sold vehicles
@@ -205,15 +369,36 @@ Before confirming, review all details in the **"Ringkasan Booking"** card:
 
 ## Troubleshooting
 
+### "Tidak ada slot tersedia di lantai ini" (NEW!)
+
+**Problem:** No parking slots available on the selected floor
+
+**Solutions:**
+1. **Try a different floor** - Check other floors in the same mall
+2. **View suggested alternatives** - The app will suggest floors with availability
+3. **Wait and refresh** - Slots may become available in a few minutes
+4. **Adjust timing** - Try a different arrival time
+5. **Select a different mall** - If all floors are full
+
+### "Reservasi slot telah berakhir" (NEW!)
+
+**Problem:** Your 5-minute slot reservation expired
+
+**Solutions:**
+1. **Reserve again** - Tap the reservation button to get a new slot
+2. **Complete booking faster** - You have 5 minutes from reservation to booking
+3. **Prepare information** - Have your time and duration ready before reserving
+
 ### "Slot tidak tersedia"
 
-**Problem:** No parking slots available for your selected time
+**Problem:** No parking slots available for your selected time (general)
 
 **Solutions:**
 1. Try a different time (earlier or later)
 2. Reduce booking duration
-3. Select a different mall
-4. Check again in a few minutes (slots may become available)
+3. Select a different floor (if available)
+4. Select a different mall
+5. Check again in a few minutes (slots may become available)
 
 ### "Anda sudah memiliki booking aktif"
 
@@ -296,6 +481,21 @@ Before confirming, review all details in the **"Ringkasan Booking"** card:
 ### Q: Can I book multiple slots?
 **A:** No, only one active booking per user at a time.
 
+### Q: How does random slot assignment work? (NEW!)
+**A:** When you tap "Pesan Slot Acak", the system automatically assigns you an available slot on your chosen floor. This ensures fair distribution and faster booking.
+
+### Q: Can I choose a specific slot number? (NEW!)
+**A:** No, the system automatically assigns slots to ensure fair and efficient distribution. You'll know your exact slot location after reservation.
+
+### Q: What happens if I don't complete booking after reserving? (NEW!)
+**A:** Your slot reservation expires after 5 minutes and becomes available to other users. You can reserve again if needed.
+
+### Q: Can I see which slot I'll get before reserving? (NEW!)
+**A:** No, but you can see the slot visualization to understand availability. The specific slot is assigned when you tap the reservation button.
+
+### Q: Do all malls have floor selection? (NEW!)
+**A:** Not yet. This feature is being rolled out gradually. Some malls still use automatic slot assignment without floor selection.
+
 ---
 
 ## Accessibility Features
@@ -361,7 +561,20 @@ Before confirming, review all details in the **"Ringkasan Booking"** card:
 
 We're constantly improving the booking experience. Recent updates include:
 
-**Version 1.0.0 (Current)**
+**Version 2.0.0 (Current - December 2025)**
+- ✨ **NEW:** Floor selection with real-time availability
+- ✨ **NEW:** Visual slot availability display
+- ✨ **NEW:** Random slot reservation system
+- ✨ **NEW:** Specific slot assignment (know exactly where to park!)
+- ✨ **NEW:** Modern unified time & duration card
+- ✨ **NEW:** Larger, easier-to-tap duration chips
+- ✨ **NEW:** Enhanced date/time picker with quick actions
+- ✨ **NEW:** 5-minute slot reservation with countdown
+- Improved user interface with purple theme
+- Better accessibility features
+- Faster booking flow
+
+**Version 1.0.0 (November 2025)**
 - Initial booking feature release
 - Real-time slot availability
 - Cost estimation
@@ -370,10 +583,11 @@ We're constantly improving the booking experience. Recent updates include:
 
 **Coming Soon:**
 - Booking modification
-- Favorite malls
+- Favorite malls and floors
 - Booking history export
 - Push notifications for booking reminders
 - Loyalty rewards integration
+- Slot preference settings
 
 ---
 

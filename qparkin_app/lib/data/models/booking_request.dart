@@ -6,6 +6,8 @@ class BookingRequest {
   final String? notes;
   final String? idSlot; // Optional: Reserved slot ID
   final String? reservationId; // Optional: Reservation ID
+  final int? pointsUsed; // Optional: Points used for discount
+  final int? pointDiscount; // Optional: Discount amount from points (in Rupiah)
 
   BookingRequest({
     required this.idMall,
@@ -15,6 +17,8 @@ class BookingRequest {
     this.notes,
     this.idSlot,
     this.reservationId,
+    this.pointsUsed,
+    this.pointDiscount,
   });
 
   /// Validate booking request data
@@ -63,6 +67,8 @@ class BookingRequest {
       if (notes != null && notes!.isNotEmpty) 'notes': notes,
       if (idSlot != null && idSlot!.isNotEmpty) 'id_slot': idSlot,
       if (reservationId != null && reservationId!.isNotEmpty) 'reservation_id': reservationId,
+      if (pointsUsed != null && pointsUsed! > 0) 'points_used': pointsUsed,
+      if (pointDiscount != null && pointDiscount! > 0) 'point_discount': pointDiscount,
     };
   }
 
@@ -78,6 +84,8 @@ class BookingRequest {
       notes: json['notes']?.toString(),
       idSlot: json['id_slot']?.toString(),
       reservationId: json['reservation_id']?.toString(),
+      pointsUsed: json['points_used'] != null ? _parseInt(json['points_used']) : null,
+      pointDiscount: json['point_discount'] != null ? _parseInt(json['point_discount']) : null,
     );
   }
 
@@ -99,6 +107,8 @@ class BookingRequest {
     String? notes,
     String? idSlot,
     String? reservationId,
+    int? pointsUsed,
+    int? pointDiscount,
   }) {
     return BookingRequest(
       idMall: idMall ?? this.idMall,
@@ -108,6 +118,8 @@ class BookingRequest {
       notes: notes ?? this.notes,
       idSlot: idSlot ?? this.idSlot,
       reservationId: reservationId ?? this.reservationId,
+      pointsUsed: pointsUsed ?? this.pointsUsed,
+      pointDiscount: pointDiscount ?? this.pointDiscount,
     );
   }
 
@@ -115,6 +127,7 @@ class BookingRequest {
   String toString() {
     return 'BookingRequest(idMall: $idMall, idKendaraan: $idKendaraan, '
         'waktuMulai: $waktuMulai, durasiJam: $durasiJam, notes: $notes, '
-        'idSlot: $idSlot, reservationId: $reservationId)';
+        'idSlot: $idSlot, reservationId: $reservationId, '
+        'pointsUsed: $pointsUsed, pointDiscount: $pointDiscount)';
   }
 }

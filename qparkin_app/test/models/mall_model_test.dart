@@ -34,6 +34,8 @@ void main() {
             reason: 'Available slots should be preserved in round trip');
         expect(restored.distance, equals(original.distance),
             reason: 'Distance should be preserved in round trip');
+        expect(restored.hasSlotReservationEnabled, equals(original.hasSlotReservationEnabled),
+            reason: 'Feature flag should be preserved in round trip');
 
         // Verify equality operator works
         expect(restored, equals(original),
@@ -58,6 +60,7 @@ void main() {
         'longitude': 104.0538,
         'available_slots': 45,
         'distance': '2.5 km',
+        'has_slot_reservation_enabled': true,
       };
 
       final model = MallModel.fromJson(json);
@@ -69,6 +72,7 @@ void main() {
       expect(model.longitude, equals(104.0538));
       expect(model.availableSlots, equals(45));
       expect(model.distance, equals('2.5 km'));
+      expect(model.hasSlotReservationEnabled, isTrue);
     });
 
     test('fromJson handles backend field names (id_mall, nama_mall, lokasi, kapasitas)', () {
@@ -135,6 +139,70 @@ void main() {
       final model = MallModel.fromJson(json);
 
       expect(model.distance, equals(''));
+      expect(model.hasSlotReservationEnabled, isFalse);
+    });
+
+    test('fromJson parses feature flag as boolean from true', () {
+      final json = {
+        'id': 'mall_027',
+        'name': 'Feature Flag Mall',
+        'address': 'Jl. Feature',
+        'latitude': 1.1191,
+        'longitude': 104.0538,
+        'available_slots': 45,
+        'has_slot_reservation_enabled': true,
+      };
+
+      final model = MallModel.fromJson(json);
+
+      expect(model.hasSlotReservationEnabled, isTrue);
+    });
+
+    test('fromJson parses feature flag as boolean from 1', () {
+      final json = {
+        'id': 'mall_028',
+        'name': 'Feature Flag Mall',
+        'address': 'Jl. Feature',
+        'latitude': 1.1191,
+        'longitude': 104.0538,
+        'available_slots': 45,
+        'has_slot_reservation_enabled': 1,
+      };
+
+      final model = MallModel.fromJson(json);
+
+      expect(model.hasSlotReservationEnabled, isTrue);
+    });
+
+    test('fromJson parses feature flag as false from 0', () {
+      final json = {
+        'id': 'mall_029',
+        'name': 'Feature Flag Mall',
+        'address': 'Jl. Feature',
+        'latitude': 1.1191,
+        'longitude': 104.0538,
+        'available_slots': 45,
+        'has_slot_reservation_enabled': 0,
+      };
+
+      final model = MallModel.fromJson(json);
+
+      expect(model.hasSlotReservationEnabled, isFalse);
+    });
+
+    test('fromJson defaults feature flag to false when missing', () {
+      final json = {
+        'id': 'mall_030',
+        'name': 'No Flag Mall',
+        'address': 'Jl. No Flag',
+        'latitude': 1.1191,
+        'longitude': 104.0538,
+        'available_slots': 45,
+      };
+
+      final model = MallModel.fromJson(json);
+
+      expect(model.hasSlotReservationEnabled, isFalse);
     });
 
     test('toJson creates correct JSON structure', () {
@@ -146,6 +214,7 @@ void main() {
         longitude: 104.0538,
         availableSlots: 45,
         distance: '3.2 km',
+        hasSlotReservationEnabled: true,
       );
 
       final json = model.toJson();
@@ -157,6 +226,7 @@ void main() {
       expect(json['longitude'], equals(104.0538));
       expect(json['available_slots'], equals(45));
       expect(json['distance'], equals('3.2 km'));
+      expect(json['has_slot_reservation_enabled'], isTrue);
     });
 
     test('geoPoint getter returns correct GeoPoint', () {
@@ -366,18 +436,22 @@ void main() {
         longitude: 104.0538,
         availableSlots: 45,
         distance: '2.5 km',
+        hasSlotReservationEnabled: false,
       );
 
       final updated = original.copyWith(
         availableSlots: 30,
         distance: '3.0 km',
+        hasSlotReservationEnabled: true,
       );
 
       expect(updated.id, equals('mall_021'));
       expect(updated.name, equals('Original Mall'));
       expect(updated.availableSlots, equals(30));
       expect(updated.distance, equals('3.0 km'));
+      expect(updated.hasSlotReservationEnabled, isTrue);
       expect(original.availableSlots, equals(45));
+      expect(original.hasSlotReservationEnabled, isFalse);
     });
 
     test('equality operator works correctly', () {
@@ -388,6 +462,7 @@ void main() {
         latitude: 1.1191,
         longitude: 104.0538,
         availableSlots: 45,
+        hasSlotReservationEnabled: true,
       );
 
       final mall2 = MallModel(
@@ -397,6 +472,7 @@ void main() {
         latitude: 1.1191,
         longitude: 104.0538,
         availableSlots: 45,
+        hasSlotReservationEnabled: true,
       );
 
       expect(mall1, equals(mall2));
@@ -432,6 +508,7 @@ void main() {
         latitude: 1.1191,
         longitude: 104.0538,
         availableSlots: 45,
+        hasSlotReservationEnabled: true,
       );
 
       final mall2 = MallModel(
@@ -441,6 +518,7 @@ void main() {
         latitude: 1.1191,
         longitude: 104.0538,
         availableSlots: 45,
+        hasSlotReservationEnabled: true,
       );
 
       expect(mall1.hashCode, equals(mall2.hashCode));
@@ -494,6 +572,9 @@ MallModel _generateRandomMall() {
   // Generate random distance (sometimes empty)
   final distance = random.nextBool() ? '${(random.nextDouble() * 10).toStringAsFixed(1)} km' : '';
 
+  // Generate random feature flag
+  final hasSlotReservationEnabled = random.nextBool();
+
   return MallModel(
     id: id,
     name: name,
@@ -502,5 +583,6 @@ MallModel _generateRandomMall() {
     longitude: longitude,
     availableSlots: availableSlots,
     distance: distance,
+    hasSlotReservationEnabled: hasSlotReservationEnabled,
   );
 }

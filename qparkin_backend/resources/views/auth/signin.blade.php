@@ -2,6 +2,10 @@
 
 @section('title', 'Login | Qparkin')
 
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/signin.css') }}">
+@endpush
+
 @section('content')
 <div class="login-container">
     <div class="login-card" id="loginForm">

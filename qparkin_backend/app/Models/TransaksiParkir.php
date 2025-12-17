@@ -17,6 +17,7 @@ class TransaksiParkir extends Model
         'id_kendaraan',
         'id_mall',
         'id_parkiran',
+        'id_slot',
         'jenis_transaksi',
         'waktu_masuk',
         'waktu_keluar',
@@ -53,5 +54,10 @@ class TransaksiParkir extends Model
     public function pembayaran()
     {
         return $this->hasOne(Pembayaran::class, 'id_transaksi', 'id_transaksi');
+    }
+
+    public function slot()
+    {
+        return $this->belongsTo(ParkingSlot::class, 'id_slot', 'id_slot');
     }
 }

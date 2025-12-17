@@ -1,16 +1,15 @@
 // Tambah Parkiran JavaScript
 document.addEventListener('DOMContentLoaded', function() {
-    // Elements
-    const tambahForm = document.getElementById('tambahParkiranForm');
-    const saveBtn = document.getElementById('saveParkiranBtn');
+    const form = document.getElementById('tambahParkiranForm');
+    const jumlahLantaiInput = document.getElementById('jumlahLantai');
     const lantaiContainer = document.getElementById('lantaiContainer');
+    const saveBtn = document.getElementById('saveParkiranBtn');
     
-    // Form elements
-    const namaParkiran = document.getElementById('namaParkiran');
-    const kodeParkiran = document.getElementById('kodeParkiran');
-    const statusParkiran = document.getElementById('statusParkiran');
-    const jumlahLantai = document.getElementById('jumlahLantai');
-    
+    // Form inputs for preview
+    const namaInput = document.getElementById('namaParkiran');
+    const kodeInput = document.getElementById('kodeParkiran');
+    const statusInput = document.getElementById('statusParkiran');
+
     // Preview elements
     const previewNama = document.getElementById('previewNama');
     const previewStatus = document.getElementById('previewStatus');
@@ -18,266 +17,166 @@ document.addEventListener('DOMContentLoaded', function() {
     const previewSlot = document.getElementById('previewSlot');
     const previewKode = document.getElementById('previewKode');
     const previewLantaiList = document.getElementById('previewLantaiList');
-    
-    // Initialize
-    function initialize() {
-        generateLantaiFields(3); // Default 3 lantai
-        updatePreview();
-        setupEventListeners();
-    }
-    
-    // Setup event listeners
-    function setupEventListeners() {
-        // Form input events
-        namaParkiran.addEventListener('input', updatePreview);
-        kodeParkiran.addEventListener('input', updatePreview);
-        statusParkiran.addEventListener('change', updatePreview);
-        jumlahLantai.addEventListener('change', handleJumlahLantaiChange);
-        
-        // Save button
-        saveBtn.addEventListener('click', saveParkiran);
-    }
-    
-    // Handle jumlah lantai change
-    function handleJumlahLantaiChange() {
-        const jumlah = parseInt(jumlahLantai.value) || 1;
+
+    // Generate lantai fields when jumlah lantai changes
+    jumlahLantaiInput.addEventListener('input', function() {
+        const jumlah = parseInt(this.value) || 0;
         generateLantaiFields(jumlah);
         updatePreview();
-    }
-    
-    // Generate lantai fields
+    });
+
     function generateLantaiFields(jumlah) {
         lantaiContainer.innerHTML = '';
         
         for (let i = 1; i <= jumlah; i++) {
-            const lantaiItem = document.createElement('div');
-            lantaiItem.className = 'lantai-item';
-            lantaiItem.innerHTML = `
+            const lantaiCard = document.createElement('div');
+            lantaiCard.className = 'lantai-card';
+            lantaiCard.innerHTML = `
                 <div class="lantai-header">
                     <h5>Lantai ${i}</h5>
+                    <span class="lantai-number">#${i}</span>
                 </div>
-                <div class="lantai-fields">
-                    <div class="lantai-field">
-                        <label for="slotLantai${i}">Jumlah Slot</label>
-                        <input type="number" id="slotLantai${i}" name="slotLantai${i}" 
-                               min="1" max="100" value="20" required 
-                               onchange="updatePreview()">
+                <div class="lantai-body">
+                    <div class="form-group">
+                        <label for="lantai_nama_${i}">Nama Lantai *</label>
+                        <input type="text" id="lantai_nama_${i}" name="lantai[${i-1}][nama]" 
+                               placeholder="Contoh: Lantai ${i}, Ground Floor" 
+                               value="Lantai ${i}" required>
                     </div>
-                    <div class="lantai-field">
-                        <label for="penamaanLantai${i}">Penamaan Slot</label>
-                        <select id="penamaanLantai${i}" name="penamaanLantai${i}" 
-                                onchange="updatePreview()">
-                            <option value="huruf">Huruf (A, B, C)</option>
-                            <option value="angka">Angka (1, 2, 3)</option>
-                            <option value="gabungan" selected>Gabungan (A1, A2)</option>
-                        </select>
+                    <div class="form-group">
+                        <label for="lantai_slot_${i}">Jumlah Slot *</label>
+                        <input type="number" id="lantai_slot_${i}" name="lantai[${i-1}][jumlah_slot]" 
+                               min="1" max="200" placeholder="Contoh: 50" required>
+                        <span class="form-hint">Maksimal 200 slot per lantai</span>
                     </div>
                 </div>
             `;
-            lantaiContainer.appendChild(lantaiItem);
+            lantaiContainer.appendChild(lantaiCard);
+            
+            // Add event listeners for preview update
+            const namaLantai = lantaiCard.querySelector(`#lantai_nama_${i}`);
+            const slotLantai = lantaiCard.querySelector(`#lantai_slot_${i}`);
+            namaLantai.addEventListener('input', updatePreview);
+            slotLantai.addEventListener('input', updatePreview);
         }
     }
-    
+
     // Update preview
     function updatePreview() {
-        // Update basic info
-        previewNama.textContent = namaParkiran.value || 'Nama Parkiran';
-        previewKode.textContent = kodeParkiran.value || '-';
+        // Update nama
+        previewNama.textContent = namaInput.value || 'Nama Parkiran';
         
         // Update status
-        const status = statusParkiran.value;
-        previewStatus.textContent = getStatusText(status);
-        previewStatus.className = `preview-status ${status}`;
-        
-        // Calculate totals
-        const jumlahLantaiValue = parseInt(jumlahLantai.value) || 0;
-        let totalSlot = 0;
-        const lantaiDetails = [];
-        
-        for (let i = 1; i <= jumlahLantaiValue; i++) {
-            const slotInput = document.getElementById(`slotLantai${i}`);
-            const penamaanSelect = document.getElementById(`penamaanLantai${i}`);
-            
-            if (slotInput && penamaanSelect) {
-                const slotCount = parseInt(slotInput.value) || 0;
-                totalSlot += slotCount;
-                
-                lantaiDetails.push({
-                    lantai: i,
-                    slot: slotCount,
-                    penamaan: penamaanSelect.value
-                });
-            }
+        const statusText = statusInput.options[statusInput.selectedIndex]?.text || 'Status';
+        previewStatus.textContent = statusText;
+        previewStatus.className = 'preview-status';
+        if (statusInput.value === 'Tersedia') {
+            previewStatus.classList.add('active');
+        } else if (statusInput.value === 'maintenance') {
+            previewStatus.classList.add('maintenance');
+        } else {
+            previewStatus.classList.add('closed');
         }
         
-        // Update preview numbers
-        previewLantai.textContent = jumlahLantaiValue;
-        previewSlot.textContent = totalSlot;
+        // Update kode
+        previewKode.textContent = kodeInput.value || '-';
+        
+        // Update jumlah lantai
+        const jumlah = parseInt(jumlahLantaiInput.value) || 0;
+        previewLantai.textContent = jumlah;
+        
+        // Calculate total slots
+        let totalSlots = 0;
+        const lantaiInputs = document.querySelectorAll('[name^="lantai"][name$="[jumlah_slot]"]');
+        lantaiInputs.forEach(input => {
+            totalSlots += parseInt(input.value) || 0;
+        });
+        previewSlot.textContent = totalSlots;
         
         // Update lantai list
-        updateLantaiListPreview(lantaiDetails);
-    }
-    
-    // Update lantai list preview
-    function updateLantaiListPreview(lantaiDetails) {
         previewLantaiList.innerHTML = '';
-        
-        lantaiDetails.forEach(detail => {
+        for (let i = 1; i <= jumlah; i++) {
+            const namaLantai = document.getElementById(`lantai_nama_${i}`)?.value || `Lantai ${i}`;
+            const slotLantai = document.getElementById(`lantai_slot_${i}`)?.value || 0;
+            
             const lantaiItem = document.createElement('div');
             lantaiItem.className = 'preview-lantai-item';
             lantaiItem.innerHTML = `
-                <span>Lantai ${detail.lantai}</span>
-                <span>${detail.slot} slot</span>
+                <span>${namaLantai}</span>
+                <span>${slotLantai} slot</span>
             `;
             previewLantaiList.appendChild(lantaiItem);
-        });
+        }
     }
-    
-    // Get status text
-    function getStatusText(status) {
-        const statusMap = {
-            'active': 'Aktif',
-            'maintenance': 'Maintenance',
-            'inactive': 'Tidak Aktif'
-        };
-        return statusMap[status] || 'Status';
-    }
-    
-    // Save parkiran
-    function saveParkiran() {
-        if (!tambahForm.checkValidity()) {
-            showNotification('Harap isi semua field yang diperlukan', 'error');
+
+    // Add event listeners for basic inputs
+    namaInput.addEventListener('input', updatePreview);
+    kodeInput.addEventListener('input', updatePreview);
+    statusInput.addEventListener('change', updatePreview);
+
+    // Form submission
+    saveBtn.addEventListener('click', async function(e) {
+        e.preventDefault();
+        
+        if (!form.checkValidity()) {
+            form.reportValidity();
             return;
         }
-        
-        const nama = namaParkiran.value.trim();
-        const kode = kodeParkiran.value.trim();
-        const status = statusParkiran.value;
-        const jumlahLantaiValue = parseInt(jumlahLantai.value);
-        
-        if (!nama || !kode || !status) {
-            showNotification('Harap isi semua field yang diperlukan', 'error');
-            return;
-        }
-        
-        if (kode.length < 2 || kode.length > 5) {
-            showNotification('Kode parkiran harus 2-5 karakter', 'error');
-            return;
-        }
-        
-        // Collect lantai data
-        const lantaiData = [];
-        let totalSlot = 0;
-        
-        for (let i = 1; i <= jumlahLantaiValue; i++) {
-            const slotInput = document.getElementById(`slotLantai${i}`);
-            const penamaanSelect = document.getElementById(`penamaanLantai${i}`);
+
+        // Show loading
+        saveBtn.disabled = true;
+        saveBtn.querySelector('.loading-spinner').style.display = 'inline-block';
+        saveBtn.querySelector('.btn-text').textContent = 'Menyimpan...';
+
+        try {
+            const formData = new FormData(form);
             
-            if (slotInput && penamaanSelect) {
-                const slotCount = parseInt(slotInput.value) || 0;
-                totalSlot += slotCount;
-                
-                lantaiData.push({
-                    lantai: i,
-                    totalSlot: slotCount,
-                    penamaan: penamaanSelect.value,
-                    tersedia: slotCount // Initially all available
+            // Convert FormData to JSON
+            const data = {
+                nama_parkiran: formData.get('nama_parkiran'),
+                kode_parkiran: formData.get('kode_parkiran'),
+                status: formData.get('status'),
+                jumlah_lantai: parseInt(formData.get('jumlah_lantai')),
+                lantai: []
+            };
+
+            // Collect lantai data
+            const jumlah = parseInt(jumlahLantaiInput.value);
+            for (let i = 0; i < jumlah; i++) {
+                data.lantai.push({
+                    nama: formData.get(`lantai[${i}][nama]`),
+                    jumlah_slot: parseInt(formData.get(`lantai[${i}][jumlah_slot]`))
                 });
             }
-        }
-        
-        if (totalSlot === 0) {
-            showNotification('Total slot parkir harus lebih dari 0', 'error');
-            return;
-        }
-        
-        // Set loading state
-        setSaveButtonLoading(true);
-        
-        // Simulate API call
-        setTimeout(() => {
-            try {
-                // Create parkiran data
-                const parkiranData = {
-                    id: 'parkiran_' + kode.toLowerCase(),
-                    name: nama,
-                    kode: kode,
-                    status: status,
-                    totalLantai: jumlahLantaiValue,
-                    totalSlot: totalSlot,
-                    tersedia: totalSlot,
-                    terisi: 0,
-                    lantaiDetail: lantaiData,
-                    createdAt: new Date().toISOString()
-                };
-                
-                // In real app, this would be API call to save data
-                console.log('Saving parkiran data:', parkiranData);
-                
+
+            const response = await fetch('/admin/parkiran/store', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
                 // Show success message
-                showNotification('Parkiran baru berhasil ditambahkan!', 'success');
-                
-                // Redirect to parkiran page after success
-                setTimeout(() => {
-                    window.location.href = 'parkiran.html';
-                }, 1500);
-                
-            } catch (error) {
-                showNotification('Terjadi kesalahan saat menyimpan parkiran', 'error');
-                setSaveButtonLoading(false);
+                alert('Parkiran berhasil ditambahkan!');
+                window.location.href = '/admin/parkiran';
+            } else {
+                alert('Gagal menambahkan parkiran: ' + result.message);
             }
-        }, 2000);
-    }
-    
-    // Set loading state for save button
-    function setSaveButtonLoading(loading) {
-        if (loading) {
-            saveBtn.classList.add('loading');
-            saveBtn.disabled = true;
-        } else {
-            saveBtn.classList.remove('loading');
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat menyimpan data');
+        } finally {
+            // Hide loading
             saveBtn.disabled = false;
+            saveBtn.querySelector('.loading-spinner').style.display = 'none';
+            saveBtn.querySelector('.btn-text').textContent = 'Simpan Parkiran';
         }
-    }
-    
-    // Show notification
-    function showNotification(message, type) {
-        // Remove existing notifications
-        const existingNotifications = document.querySelectorAll('.notification');
-        existingNotifications.forEach(notification => notification.remove());
-        
-        // Create notification element
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-        
-        const icon = type === 'success' ? 
-            `<svg class="notification-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>` :
-            `<svg class="notification-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>`;
-        
-        notification.innerHTML = `
-            ${icon}
-            <div class="notification-content">${message}</div>
-        `;
-        
-        document.body.appendChild(notification);
-        
-        // Auto remove after 3 seconds
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.remove();
-            }
-        }, 3000);
-    }
-    
-    // Make functions global for inline event handlers
-    window.updatePreview = updatePreview;
-    
-    // Initialize
-    initialize();
-    
-    console.log('Tambah parkiran page loaded successfully');
+    });
+
+    console.log('Tambah parkiran page loaded');
 });
