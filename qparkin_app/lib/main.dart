@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'data/services/auth_service.dart';
 import 'data/services/parking_service.dart';
 import 'data/services/point_service.dart';
 import 'logic/providers/active_parking_provider.dart';
 import 'logic/providers/profile_provider.dart';
 import 'logic/providers/notification_provider.dart';
 import 'logic/providers/point_provider.dart';
-
 import 'presentation/screens/about_page.dart';
 import 'presentation/screens/login_screen.dart';
 import 'presentation/screens/signup_screen.dart';
