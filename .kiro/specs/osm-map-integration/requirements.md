@@ -120,3 +120,20 @@ Integrasi peta OSM akan memungkinkan pengguna untuk:
 3. WHEN the map controller is created THEN the system SHALL expose methods for adding markers, drawing routes, and updating camera position
 4. WHEN the code is documented THEN the system SHALL include clear comments explaining integration points for API calls
 5. WHEN the architecture is designed THEN the system SHALL follow Flutter best practices for separation of concerns
+
+### Requirement 9
+
+**User Story:** As a driver, I want to search for locations by name or address on the map, so that I can quickly find and navigate to specific places or malls.
+
+#### Acceptance Criteria
+
+1. WHEN the driver opens the map tab THEN the system SHALL display a search bar at the top of the map with a clear placeholder text
+2. WHEN the driver types in the search bar THEN the system SHALL debounce input for 500 milliseconds before triggering search
+3. WHEN the driver types at least 3 characters THEN the system SHALL query OSM Nominatim API and display location suggestions in a dropdown
+4. WHEN search results are available THEN the system SHALL display up to 5 suggestions with location name and address
+5. WHEN the driver taps a search suggestion THEN the system SHALL center the map on that location, add a marker, and close the dropdown
+6. WHEN the driver taps the clear button (X) THEN the system SHALL clear the search text and hide suggestions
+7. WHEN search is in progress THEN the system SHALL display a loading indicator in the search bar
+8. IF no search results are found THEN the system SHALL display "Lokasi tidak ditemukan" message
+9. IF network error occurs during search THEN the system SHALL display "Koneksi internet bermasalah" error message
+10. WHEN a search result is selected THEN the system SHALL calculate and display route from current location to the searched location

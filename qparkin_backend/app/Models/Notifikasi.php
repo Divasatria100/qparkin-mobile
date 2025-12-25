@@ -11,18 +11,17 @@ class Notifikasi extends Model
 
     protected $table = 'notifikasi';
     protected $primaryKey = 'id_notifikasi';
+    public $timestamps = false;
 
     protected $fillable = [
         'id_user',
-        'judul',
         'pesan',
-        'kategori',
-        'status',
-        'dibaca_pada'
+        'waktu_kirim',
+        'status'
     ];
 
     protected $casts = [
-        'dibaca_pada' => 'datetime',
+        'waktu_kirim' => 'datetime',
     ];
 
     public function user()
@@ -37,22 +36,13 @@ class Notifikasi extends Model
 
     public function scopeRead($query)
     {
-        return $query->where('status', 'sudah');
-    }
-
-    public function scopeByCategory($query, $category)
-    {
-        if ($category && $category !== 'all') {
-            return $query->where('kategori', $category);
-        }
-        return $query;
+        return $query->where('status', 'terbaca');
     }
 
     public function markAsRead()
     {
         $this->update([
-            'status' => 'sudah',
-            'dibaca_pada' => now()
+            'status' => 'terbaca'
         ]);
     }
 }
