@@ -100,7 +100,8 @@ class VehicleApiService {
         if (warna != null && warna.isNotEmpty) {
           request.fields['warna'] = warna;
         }
-        request.fields['is_active'] = isActive.toString();
+        // Convert boolean to "1" or "0" for multipart form data
+        request.fields['is_active'] = isActive ? '1' : '0';
 
         // Add photo
         request.files.add(
@@ -219,7 +220,8 @@ class VehicleApiService {
         if (merk != null) request.fields['merk'] = merk;
         if (tipe != null) request.fields['tipe'] = tipe;
         if (warna != null) request.fields['warna'] = warna;
-        if (isActive != null) request.fields['is_active'] = isActive.toString();
+        // Convert boolean to "1" or "0" for multipart form data
+        if (isActive != null) request.fields['is_active'] = isActive ? '1' : '0';
 
         request.files.add(
           await http.MultipartFile.fromPath('foto', foto.path),

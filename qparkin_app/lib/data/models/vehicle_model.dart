@@ -8,6 +8,7 @@ class VehicleModel {
   final String merk;
   final String tipe;
   final String? warna;
+  final String? fotoUrl; // URL foto kendaraan dari backend
   final bool isActive;
   final VehicleStatistics? statistics;
 
@@ -18,6 +19,7 @@ class VehicleModel {
     required this.merk,
     required this.tipe,
     this.warna,
+    this.fotoUrl,
     this.isActive = false,
     this.statistics,
   });
@@ -25,11 +27,13 @@ class VehicleModel {
   factory VehicleModel.fromJson(Map<String, dynamic> json) {
     return VehicleModel(
       idKendaraan: json['id_kendaraan']?.toString() ?? '',
-      platNomor: json['plat_nomor']?.toString() ?? '',
-      jenisKendaraan: json['jenis_kendaraan']?.toString() ?? '',
+      platNomor: json['plat']?.toString() ?? json['plat_nomor']?.toString() ?? '',
+      // Backend sends 'jenis', Flutter expects 'jenis_kendaraan'
+      jenisKendaraan: json['jenis']?.toString() ?? json['jenis_kendaraan']?.toString() ?? '',
       merk: json['merk']?.toString() ?? '',
       tipe: json['tipe']?.toString() ?? '',
       warna: json['warna']?.toString(),
+      fotoUrl: json['foto_url']?.toString(), // Backend sends computed foto_url
       isActive: json['is_active'] == true || json['is_active'] == 1,
       statistics: json['statistics'] != null
           ? VehicleStatistics.fromJson(json['statistics'])
@@ -45,6 +49,7 @@ class VehicleModel {
       'merk': merk,
       'tipe': tipe,
       'warna': warna,
+      'foto_url': fotoUrl,
       'is_active': isActive,
       'statistics': statistics?.toJson(),
     };
@@ -57,6 +62,7 @@ class VehicleModel {
     String? merk,
     String? tipe,
     String? warna,
+    String? fotoUrl,
     bool? isActive,
     VehicleStatistics? statistics,
   }) {
@@ -67,6 +73,7 @@ class VehicleModel {
       merk: merk ?? this.merk,
       tipe: tipe ?? this.tipe,
       warna: warna ?? this.warna,
+      fotoUrl: fotoUrl ?? this.fotoUrl,
       isActive: isActive ?? this.isActive,
       statistics: statistics ?? this.statistics,
     );
