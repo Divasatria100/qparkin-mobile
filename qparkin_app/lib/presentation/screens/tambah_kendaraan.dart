@@ -5,12 +5,21 @@ import '../../logic/providers/profile_provider.dart';
 import '../../data/models/vehicle_model.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
-/// Add Vehicle Page
-/// Allows users to register a new vehicle with complete information
+/// Add/Edit Vehicle Page
+/// Allows users to register a new vehicle or edit existing vehicle information
+/// Supports dual-mode operation: add mode and edit mode
 /// Integrates with ProfileProvider for data persistence
 class VehicleSelectionPage extends StatefulWidget {
-  const VehicleSelectionPage({super.key});
+  final bool isEditMode;
+  final VehicleModel? vehicle;
+  
+  const VehicleSelectionPage({
+    super.key,
+    this.isEditMode = false,
+    this.vehicle,
+  });
 
   @override
   State<VehicleSelectionPage> createState() => _VehicleSelectionPageState();
@@ -28,6 +37,13 @@ class _VehicleSelectionPageState extends State<VehicleSelectionPage> {
   String? selectedVehicleStatus;
   File? selectedImage;
   bool isLoading = false;
+  
+  // Mode tracking
+  late bool _isEditMode;
+  late VehicleModel? _editingVehicle;
+  
+  // Track original photo URL for edit mode
+  String? _originalPhotoUrl;
   
   // Form key for validation
   final _formKey = GlobalKey<FormState>();
@@ -61,8 +77,42 @@ class _VehicleSelectionPageState extends State<VehicleSelectionPage> {
   @override
   void initState() {
     super.initState();
-    // Set default status
-    selectedVehicleStatus = vehicleStatuses[0];
+    
+    // Detect mode
+    _isEditMode = widget.isEditMode;
+    _editingVehicle = widget.vehicle;
+    
+    // Prefill data if in edit mode
+    if (_isEditMode && _editingVehicle != null) {
+      _prefillFormData();
+    }
+    
+    // Set default status if add mode
+    if (!_isEditMode) {
+      selectedVehicleStatus = vehicleStatuses[0];
+    }
+  }
+
+  /// Prefill form data when in edit mode
+  void _prefillFormData() {
+    final vehicle = _editingVehicle!;
+    
+    // Prefill text controllers
+    brandController.text = vehicle.merk;
+    typeController.text = vehicle.tipe;
+    plateController.text = vehicle.platNomor;
+    colorController.text = vehicle.warna ?? '';
+    
+    // Set selected vehicle type (read-only in edit mode)
+    selectedVehicleType = vehicle.jenisKendaraan;
+    
+    // Set vehicle status based on isActive flag
+    selectedVehicleStatus = vehicle.isActive 
+        ? "Kendaraan Utama" 
+        : "Kendaraan Tamu";
+    
+    // Store original photo URL for later use
+    _originalPhotoUrl = vehicle.fotoUrl;
   }
 
   @override
@@ -104,6 +154,10 @@ class _VehicleSelectionPageState extends State<VehicleSelectionPage> {
 
   /// Show image source selection dialog
   void _showImageSourceDialog() {
+    // Determine if there's a photo to remove (either new selection or existing photo)
+    final hasPhoto = selectedImage != null || 
+                     (_isEditMode && _originalPhotoUrl != null && _originalPhotoUrl!.isNotEmpty);
+    
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -147,7 +201,7 @@ class _VehicleSelectionPageState extends State<VehicleSelectionPage> {
                     _pickImage(ImageSource.gallery);
                   },
                 ),
-                if (selectedImage != null)
+                if (hasPhoto)
                   ListTile(
                     leading: const Icon(Icons.delete, color: Colors.red),
                     title: const Text(
@@ -158,6 +212,10 @@ class _VehicleSelectionPageState extends State<VehicleSelectionPage> {
                       Navigator.pop(context);
                       setState(() {
                         selectedImage = null;
+                        // In edit mode, also clear the original photo URL to indicate removal
+                        if (_isEditMode) {
+                          _originalPhotoUrl = null;
+                        }
                       });
                     },
                   ),
@@ -172,7 +230,8 @@ class _VehicleSelectionPageState extends State<VehicleSelectionPage> {
   /// Validate and submit form
   Future<void> _submitForm() async {
     // Validate required fields
-    if (selectedVehicleType == null) {
+    // In edit mode, vehicle type is already set and read-only
+    if (!_isEditMode && selectedVehicleType == null) {
       _showSnackbar('Pilih jenis kendaraan terlebih dahulu', isError: true);
       return;
     }
@@ -187,16 +246,19 @@ class _VehicleSelectionPageState extends State<VehicleSelectionPage> {
       return;
     }
 
-    if (plateController.text.trim().isEmpty) {
-      _showSnackbar('Masukkan plat nomor kendaraan', isError: true);
-      return;
-    }
+    // In add mode, validate plate number
+    if (!_isEditMode) {
+      if (plateController.text.trim().isEmpty) {
+        _showSnackbar('Masukkan plat nomor kendaraan', isError: true);
+        return;
+      }
 
-    // Validate plate number format (basic validation)
-    final plateRegex = RegExp(r'^[A-Z]{1,2}\s?\d{1,4}\s?[A-Z]{1,3}$', caseSensitive: false);
-    if (!plateRegex.hasMatch(plateController.text.trim())) {
-      _showSnackbar('Format plat nomor tidak valid (contoh: B 1234 XYZ)', isError: true);
-      return;
+      // Validate plate number format (basic validation)
+      final plateRegex = RegExp(r'^[A-Z]{1,2}\s?\d{1,4}\s?[A-Z]{1,3}$', caseSensitive: false);
+      if (!plateRegex.hasMatch(plateController.text.trim())) {
+        _showSnackbar('Format plat nomor tidak valid (contoh: B 1234 XYZ)', isError: true);
+        return;
+      }
     }
 
     // Validate color field (now required)
@@ -212,26 +274,44 @@ class _VehicleSelectionPageState extends State<VehicleSelectionPage> {
     try {
       final provider = context.read<ProfileProvider>();
       
-      // Add vehicle through provider with new API
-      await provider.addVehicle(
-        platNomor: plateController.text.trim().toUpperCase(),
-        jenisKendaraan: selectedVehicleType!,
-        merk: brandController.text.trim(),
-        tipe: typeController.text.trim(),
-        warna: colorController.text.trim(), // Now required, no null check needed
-        isActive: selectedVehicleStatus == "Kendaraan Utama",
-        foto: selectedImage,
-      );
-
-      if (mounted) {
-        _showSnackbar('Kendaraan berhasil ditambahkan!', isError: false);
+      if (_isEditMode) {
+        // Edit mode: use updateVehicle
+        await provider.updateVehicle(
+          id: _editingVehicle!.idKendaraan,
+          merk: brandController.text.trim(),
+          tipe: typeController.text.trim(),
+          warna: colorController.text.trim(),
+          isActive: selectedVehicleStatus == "Kendaraan Utama",
+          foto: selectedImage, // null if not changed
+        );
         
-        // Return to previous page with success
-        Navigator.of(context).pop(true);
+        if (mounted) {
+          _showSnackbar('Kendaraan berhasil diperbarui!', isError: false);
+          Navigator.of(context).pop(true);
+        }
+      } else {
+        // Add mode: use addVehicle (existing logic)
+        await provider.addVehicle(
+          platNomor: plateController.text.trim().toUpperCase(),
+          jenisKendaraan: selectedVehicleType!,
+          merk: brandController.text.trim(),
+          tipe: typeController.text.trim(),
+          warna: colorController.text.trim(),
+          isActive: selectedVehicleStatus == "Kendaraan Utama",
+          foto: selectedImage,
+        );
+        
+        if (mounted) {
+          _showSnackbar('Kendaraan berhasil ditambahkan!', isError: false);
+          Navigator.of(context).pop(true);
+        }
       }
     } catch (e) {
+      // Handle API errors gracefully with user-friendly messages
       if (mounted) {
-        _showSnackbar('Gagal menambahkan kendaraan: $e', isError: true);
+        final errorMessage = _getUserFriendlyErrorMessage(e.toString());
+        _showSnackbar(errorMessage, isError: true);
+        // Don't navigate away on error - allow user to retry
       }
     } finally {
       if (mounted) {
@@ -240,6 +320,58 @@ class _VehicleSelectionPageState extends State<VehicleSelectionPage> {
         });
       }
     }
+  }
+
+  /// Convert technical error messages to user-friendly messages
+  /// Provides specific guidance based on error type
+  String _getUserFriendlyErrorMessage(String error) {
+    final errorLower = error.toLowerCase();
+    final operationText = _isEditMode ? 'memperbarui' : 'menambahkan';
+
+    // Network/Connection errors
+    if (errorLower.contains('timeout') || errorLower.contains('connection')) {
+      return 'Koneksi internet bermasalah. Silakan periksa koneksi Anda dan coba lagi.';
+    }
+    
+    // Authentication errors
+    if (errorLower.contains('unauthorized') || errorLower.contains('401')) {
+      return 'Sesi Anda telah berakhir. Silakan login kembali.';
+    }
+    
+    // Not found errors
+    if (errorLower.contains('404') || errorLower.contains('not found')) {
+      return _isEditMode 
+          ? 'Kendaraan tidak ditemukan. Data mungkin sudah dihapus.'
+          : 'Gagal $operationText kendaraan. Silakan coba lagi.';
+    }
+    
+    // Validation errors (422)
+    if (errorLower.contains('422') || errorLower.contains('validation')) {
+      return 'Data yang dimasukkan tidak valid. Periksa kembali informasi kendaraan.';
+    }
+    
+    // Duplicate errors
+    if (errorLower.contains('duplicate') || errorLower.contains('already exists')) {
+      return 'Plat nomor sudah terdaftar. Gunakan plat nomor yang berbeda.';
+    }
+    
+    // Server errors
+    if (errorLower.contains('500') || errorLower.contains('server')) {
+      return 'Server sedang bermasalah. Silakan coba beberapa saat lagi.';
+    }
+    
+    // Network errors
+    if (errorLower.contains('network')) {
+      return 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.';
+    }
+    
+    // Photo upload errors
+    if (errorLower.contains('file') || errorLower.contains('upload')) {
+      return 'Gagal mengunggah foto. Pastikan ukuran foto tidak lebih dari 5MB.';
+    }
+    
+    // Generic error with operation context
+    return 'Gagal $operationText kendaraan. Silakan coba lagi.';
   }
 
   void _showSnackbar(String message, {required bool isError}) {
@@ -293,9 +425,9 @@ class _VehicleSelectionPageState extends State<VehicleSelectionPage> {
                           tooltip: 'Kembali',
                         ),
                         const SizedBox(width: 8),
-                        const Text(
-                          'Tambah Kendaraan',
-                          style: TextStyle(
+                        Text(
+                          _isEditMode ? 'Edit Kendaraan' : 'Tambah Kendaraan',
+                          style: const TextStyle(
                             fontFamily: 'Nunito',
                             color: Colors.white,
                             fontSize: 20,
@@ -387,33 +519,7 @@ class _VehicleSelectionPageState extends State<VehicleSelectionPage> {
                   width: 2,
                 ),
               ),
-              child: selectedImage != null
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(14),
-                      child: Image.file(
-                        selectedImage!,
-                        fit: BoxFit.cover,
-                      ),
-                    )
-                  : Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.add_a_photo,
-                          size: 40,
-                          color: Colors.grey.shade400,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Tambah Foto',
-                          style: TextStyle(
-                            fontFamily: 'Nunito',
-                            fontSize: 14,
-                            color: Colors.grey.shade600,
-                          ),
-                        ),
-                      ],
-                    ),
+              child: _buildPhotoContent(),
             ),
           ),
         ),
@@ -437,7 +543,170 @@ class _VehicleSelectionPageState extends State<VehicleSelectionPage> {
     );
   }
 
+  /// Build photo content based on current state
+  /// Handles: new photo selected, existing photo (edit mode), or placeholder
+  Widget _buildPhotoContent() {
+    // Priority 1: Show newly selected image (both add and edit mode)
+    if (selectedImage != null) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: Image.file(
+          selectedImage!,
+          fit: BoxFit.cover,
+        ),
+      );
+    }
+    
+    // Priority 2: Show existing photo from URL (edit mode only)
+    if (_isEditMode && _originalPhotoUrl != null && _originalPhotoUrl!.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: CachedNetworkImage(
+          imageUrl: _originalPhotoUrl!,
+          fit: BoxFit.cover,
+          placeholder: (context, url) => Center(
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                Colors.grey.shade400,
+              ),
+            ),
+          ),
+          errorWidget: (context, url, error) => Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.broken_image,
+                size: 40,
+                color: Colors.grey.shade400,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Gagal memuat foto',
+                style: TextStyle(
+                  fontFamily: 'Nunito',
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    
+    // Priority 3: Show placeholder (no photo)
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.add_a_photo,
+          size: 40,
+          color: Colors.grey.shade400,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Tambah Foto',
+          style: TextStyle(
+            fontFamily: 'Nunito',
+            fontSize: 14,
+            color: Colors.grey.shade600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Get icon for vehicle type
+  IconData _getVehicleIcon(String vehicleType) {
+    switch (vehicleType) {
+      case "Roda Dua":
+        return Icons.two_wheeler;
+      case "Roda Tiga":
+        return Icons.electric_rickshaw;
+      case "Roda Empat":
+        return Icons.directions_car;
+      case "Lebih dari Enam":
+        return Icons.local_shipping;
+      default:
+        return Icons.directions_car;
+    }
+  }
+
+  /// Build read-only vehicle type display for edit mode
+  Widget _buildReadOnlyVehicleType() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100, // Grey background for read-only
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            _getVehicleIcon(selectedVehicleType!),
+            size: 32,
+            color: Colors.grey.shade600,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Jenis Kendaraan',
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  selectedVehicleType!,
+                  style: const TextStyle(
+                    fontFamily: 'Nunito',
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(
+            Icons.lock,
+            color: Colors.grey.shade400,
+            size: 20,
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildVehicleTypeSection() {
+    // If in edit mode, show read-only display
+    if (_isEditMode) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Jenis Kendaraan *',
+            style: TextStyle(
+              fontFamily: 'Nunito',
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF2E3A8C),
+            ),
+          ),
+          const SizedBox(height: 16),
+          _buildReadOnlyVehicleType(),
+        ],
+      );
+    }
+    
+    // Otherwise, show interactive grid for add mode
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -590,6 +859,7 @@ class _VehicleSelectionPageState extends State<VehicleSelectionPage> {
         // Plate number
         TextField(
           controller: plateController,
+          enabled: !_isEditMode, // Disabled in edit mode
           textCapitalization: TextCapitalization.characters,
           decoration: InputDecoration(
             labelText: 'Plat Nomor *',
@@ -600,11 +870,19 @@ class _VehicleSelectionPageState extends State<VehicleSelectionPage> {
               fontSize: 14,
               color: Colors.grey.shade400,
             ),
+            filled: _isEditMode, // Add grey background when disabled
+            fillColor: _isEditMode ? Colors.grey.shade100 : null,
+            suffixIcon: _isEditMode 
+                ? Icon(Icons.lock, color: Colors.grey.shade400, size: 20)
+                : null,
             enabledBorder: UnderlineInputBorder(
               borderSide: BorderSide(color: Colors.grey.shade300),
             ),
             focusedBorder: const UnderlineInputBorder(
               borderSide: BorderSide(color: Color(0xFF573ED1), width: 2),
+            ),
+            disabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.grey.shade300),
             ),
           ),
           style: const TextStyle(fontFamily: 'Nunito'),
@@ -807,9 +1085,9 @@ class _VehicleSelectionPageState extends State<VehicleSelectionPage> {
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
               )
-            : const Text(
-                'Tambahkan Kendaraan',
-                style: TextStyle(
+            : Text(
+                _isEditMode ? 'Simpan Perubahan' : 'Tambahkan Kendaraan',
+                style: const TextStyle(
                   fontFamily: 'Nunito',
                   fontSize: 16,
                   fontWeight: FontWeight.w700,

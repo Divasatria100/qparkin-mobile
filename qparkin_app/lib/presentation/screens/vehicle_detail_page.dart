@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../data/models/vehicle_model.dart';
 import '../../logic/providers/profile_provider.dart';
+import 'tambah_kendaraan.dart';
 
 /// Vehicle Detail Page
 /// Displays detailed information about a specific vehicle
@@ -475,17 +476,21 @@ class VehicleDetailPage extends StatelessWidget {
   }
 
   Future<void> _handleEdit(BuildContext context) async {
-    // TODO: Navigate to edit vehicle page when implemented
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Fitur edit kendaraan akan segera tersedia',
-          style: TextStyle(fontFamily: 'Nunito'),
+    // Navigate to VehicleSelectionPage in edit mode
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => VehicleSelectionPage(
+          isEditMode: true,
+          vehicle: vehicle,
         ),
-        behavior: SnackBarBehavior.floating,
-        duration: Duration(seconds: 2),
       ),
     );
+    
+    // If edit was successful, pop back to previous page
+    if (result == true && context.mounted) {
+      Navigator.of(context).pop();
+    }
   }
 
   Future<void> _handleDelete(BuildContext context) async {
