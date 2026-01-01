@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\ParkiranController;
 use App\Http\Controllers\Api\ParkingSlotController;
 use App\Http\Controllers\Api\TransaksiController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\NotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -95,6 +96,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/masuk', [TransaksiController::class, 'masuk']);
         Route::post('/keluar', [TransaksiController::class, 'keluar']);
         Route::get('/{id}', [TransaksiController::class, 'show']);
+        Route::put('/{id}', [TransaksiController::class, 'update']);
+        Route::delete('/{id}', [TransaksiController::class, 'destroy']);
         Route::get('/active', [TransaksiController::class, 'getActive']);
+    });
+
+    // Notifications
+    Route::prefix('notifications')->group(function () {
+        Route::get('/', [NotificationController::class, 'index']);
+        Route::post('/send', [NotificationController::class, 'send']);
+        Route::put('/{id}/read', [NotificationController::class, 'markAsRead']);
+        Route::get('/unread-count', [NotificationController::class, 'unreadCount']);
     });
 });

@@ -11,6 +11,7 @@ class TransaksiParkir extends Model
 
     protected $table = 'transaksi_parkir';
     protected $primaryKey = 'id_transaksi';
+    public $timestamps = false;
 
     protected $fillable = [
         'id_user',

@@ -4,8 +4,10 @@ import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../data/models/mall_model.dart';
 import '../../data/models/route_data.dart';
+import '../../data/models/search_result_model.dart';
 import '../../data/services/location_service.dart';
 import '../../data/services/route_service.dart';
+import '../../data/services/search_service.dart' as search;
 import '../../data/dummy/mall_data.dart';
 import '../../utils/map_logger.dart';
 
@@ -24,6 +26,7 @@ import '../../utils/map_logger.dart';
 class MapProvider extends ChangeNotifier {
   final LocationService _locationService;
   final RouteService _routeService;
+  final search.SearchService _searchService;
 
   // State properties - Map controller
   MapController? _mapController;
@@ -38,6 +41,12 @@ class MapProvider extends ChangeNotifier {
   // State properties - Route
   RouteData? _currentRoute;
 
+  // State properties - Search
+  List<SearchResultModel> _searchResults = [];
+  bool _isSearching = false;
+  String? _searchErrorMessage;
+  SearchResultModel? _selectedSearchResult;
+
   // State properties - Loading and errors
   bool _isLoading = false;
   String? _errorMessage;
@@ -48,6 +57,10 @@ class MapProvider extends ChangeNotifier {
   List<MallModel> get malls => List.unmodifiable(_malls);
   GeoPoint? get currentLocation => _currentLocation;
   RouteData? get currentRoute => _currentRoute;
+  List<SearchResultModel> get searchResults => List.unmodifiable(_searchResults);
+  bool get isSearching => _isSearching;
+  String? get searchErrorMessage => _searchErrorMessage;
+  SearchResultModel? get selectedSearchResult => _selectedSearchResult;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
@@ -63,8 +76,10 @@ class MapProvider extends ChangeNotifier {
   MapProvider({
     LocationService? locationService,
     RouteService? routeService,
+    search.SearchService? searchService,
   })  : _locationService = locationService ?? LocationService(),
-        _routeService = routeService ?? RouteService();
+        _routeService = routeService ?? RouteService(),
+        _searchService = searchService ?? search.SearchService();
 
   /// Initialize the map controller.
   ///
@@ -116,7 +131,7 @@ class MapProvider extends ChangeNotifier {
 
       _isLoading = false;
       notifyListeners();
-    } catch (e, stackTrace) {
+    } catch (e) {
       _isLoading = false;
       _errorMessage = 'Gagal menginisialisasi peta: ${e.toString()}';
       
@@ -199,7 +214,7 @@ class MapProvider extends ChangeNotifier {
 
       _isLoading = false;
       notifyListeners();
-    } catch (e, stackTrace) {
+    } catch (e) {
       _isLoading = false;
       _errorMessage = 'Gagal memuat data mall: ${e.toString()}';
       
@@ -208,7 +223,6 @@ class MapProvider extends ChangeNotifier {
         'MALL_LOAD_ERROR',
         e.toString(),
         'MapProvider.loadMalls',
-        stackTrace: stackTrace,
       );
       
       notifyListeners();
@@ -263,7 +277,7 @@ class MapProvider extends ChangeNotifier {
 
       _isLoading = false;
       notifyListeners();
-    } on QParkinLocationServiceDisabledException catch (e, stackTrace) {
+    } on QParkinLocationServiceDisabledException catch (e) {
       _isLoading = false;
       _errorMessage = e.message;
       
@@ -276,7 +290,7 @@ class MapProvider extends ChangeNotifier {
       
       notifyListeners();
       rethrow;
-    } on QParkinPermissionDeniedException catch (e, stackTrace) {
+    } on QParkinPermissionDeniedException catch (e) {
       _isLoading = false;
       _errorMessage = e.message;
       
@@ -289,7 +303,7 @@ class MapProvider extends ChangeNotifier {
       
       notifyListeners();
       rethrow;
-    } catch (e, stackTrace) {
+    } catch (e) {
       _isLoading = false;
       _errorMessage = 'Gagal mendapatkan lokasi: ${e.toString()}';
       
@@ -298,7 +312,6 @@ class MapProvider extends ChangeNotifier {
         'LOCATION_ERROR',
         e.toString(),
         'MapProvider.getCurrentLocation',
-        stackTrace: stackTrace,
       );
       
       notifyListeners();
@@ -377,7 +390,7 @@ class MapProvider extends ChangeNotifier {
       }
 
       debugPrint('[MapProvider] Map centered successfully');
-    } catch (e, stackTrace) {
+    } catch (e) {
       debugPrint('[MapProvider] Error centering map: $e');
       _logger.logStateManagementError(
         e.toString(),
@@ -459,7 +472,7 @@ class MapProvider extends ChangeNotifier {
       }
 
       debugPrint('[MapProvider] Mall selected successfully');
-    } catch (e, stackTrace) {
+    } catch (e) {
       debugPrint('[MapProvider] Error selecting mall: $e');
       _logger.logStateManagementError(
         e.toString(),
@@ -528,7 +541,7 @@ class MapProvider extends ChangeNotifier {
 
       _isLoading = false;
       notifyListeners();
-    } on RouteCalculationException catch (e, stackTrace) {
+    } on RouteCalculationException catch (e) {
       _isLoading = false;
       _errorMessage = 'Gagal menghitung rute: ${e.message}';
       _currentRoute = null;
@@ -541,19 +554,6 @@ class MapProvider extends ChangeNotifier {
         originLng: origin.longitude,
         destLat: destination.latitude,
         destLng: destination.longitude,
-      );
-      
-      notifyListeners();
-      rethrow;
-    } on NetworkException catch (e, stackTrace) {
-      _isLoading = false;
-      _errorMessage = 'Koneksi internet bermasalah. Periksa koneksi Anda.';
-      _currentRoute = null;
-      
-      debugPrint('[MapProvider] Network error during route calculation: $e');
-      _logger.logNetworkError(
-        e.toString(),
-        'MapProvider.calculateRoute',
       );
       
       notifyListeners();
@@ -593,10 +593,124 @@ class MapProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Search for locations using OSM Nominatim API
+  ///
+  /// Performs location search with debouncing to avoid excessive API calls.
+  /// Updates searchResults state with found locations.
+  ///
+  /// Parameters:
+  ///   - [query]: Search query string (minimum 3 characters)
+  ///
+  /// Requirements: 9.2, 9.3, 9.4, 9.7, 9.8, 9.9
+  void searchLocation(String query) {
+    debugPrint('[MapProvider] Searching for: $query');
+
+    // Clear previous error
+    _searchErrorMessage = null;
+
+    // If query is too short, clear results
+    if (query.trim().length < 3) {
+      _searchResults = [];
+      _isSearching = false;
+      notifyListeners();
+      return;
+    }
+
+    // Set searching state
+    _isSearching = true;
+    notifyListeners();
+
+    // Use SearchService with debouncing
+    _searchService.searchWithDebounce(
+      query,
+      onResults: (results) {
+        debugPrint('[MapProvider] Search completed with ${results.length} results');
+        _searchResults = results;
+        _isSearching = false;
+        _searchErrorMessage = null;
+        notifyListeners();
+      },
+      onError: (error) {
+        debugPrint('[MapProvider] Search error: $error');
+        _searchResults = [];
+        _isSearching = false;
+        _searchErrorMessage = error;
+        
+        _logger.logError(
+          'SEARCH_ERROR',
+          error,
+          'MapProvider.searchLocation',
+          additionalData: {'query': query},
+        );
+        
+        notifyListeners();
+      },
+      countryCode: 'id', // Limit to Indonesia
+      // Viewbox for Batam area to prioritize local results
+      viewbox: '103.8,1.0,104.2,1.3',
+    );
+  }
+
+  /// Select a search result and navigate to it
+  ///
+  /// Centers the map on the selected search result, adds a marker,
+  /// and calculates route if current location is available.
+  ///
+  /// Parameters:
+  ///   - [result]: The [SearchResultModel] to select
+  ///
+  /// Requirements: 9.5, 9.10
+  Future<void> selectSearchResult(SearchResultModel result) async {
+    debugPrint('[MapProvider] Selecting search result: ${result.displayName}');
+
+    try {
+      _selectedSearchResult = result;
+      _searchResults = []; // Clear search results
+      notifyListeners();
+
+      // Center map on selected location
+      await centerOnLocation(result.geoPoint, zoom: 16.0);
+
+      // Calculate route if current location is available
+      if (_currentLocation != null) {
+        await calculateRoute(_currentLocation!, result.geoPoint);
+      }
+
+      debugPrint('[MapProvider] Search result selected successfully');
+    } catch (e) {
+      debugPrint('[MapProvider] Error selecting search result: $e');
+      _logger.logStateManagementError(
+        e.toString(),
+        'MapProvider.selectSearchResult',
+        currentState: 'selecting search result',
+        attemptedAction: 'select: ${result.displayName}',
+      );
+      // Don't rethrow - partial success is acceptable
+    }
+  }
+
+  /// Clear search results and selected search result
+  ///
+  /// Requirements: 9.6
+  void clearSearch() {
+    debugPrint('[MapProvider] Clearing search');
+    
+    _searchResults = [];
+    _isSearching = false;
+    _searchErrorMessage = null;
+    _selectedSearchResult = null;
+    
+    // Cancel any pending search
+    _searchService.cancelPendingSearch();
+    
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     debugPrint('[MapProvider] Disposing provider');
     _mapController?.dispose();
+    _searchService.dispose();
     super.dispose();
   }
 

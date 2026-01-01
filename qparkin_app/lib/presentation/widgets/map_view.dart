@@ -9,6 +9,7 @@ import '../../utils/map_error_utils.dart';
 import '../dialogs/map_error_dialog.dart';
 import 'map_controls.dart';
 import 'map_mall_info_card.dart';
+import 'map_search_bar.dart';
 
 /// MapView widget that displays the OpenStreetMap
 /// 
@@ -69,6 +70,7 @@ class _MapViewState extends State<MapView> {
   GeoPoint? _lastLocationMarker;
   RoadInfo? _currentRoadInfo;
   GeoPoint? _selectedMarkerPoint;
+  GeoPoint? _searchResultMarkerPoint; // Track search result marker
   
   // Debouncing for location updates
   Timer? _locationUpdateDebounceTimer;
@@ -89,6 +91,8 @@ class _MapViewState extends State<MapView> {
     _updateRoutePolyline();
     // Listen for mall selection changes and update marker highlight
     _updateSelectedMarkerHighlight();
+    // Listen for search result selection and update marker
+    _updateSearchResultMarker();
   }
 
   /// Initialize the map when widget is created
@@ -391,7 +395,7 @@ class _MapViewState extends State<MapView> {
       
       // Use default location as fallback
       mapProvider.useDefaultLocation();
-    } on QParkinPermissionDeniedException catch (e) {
+    } on QParkinPermissionDeniedException {
       if (!mounted) return;
       
       // Check if permanently denied
@@ -607,6 +611,62 @@ class _MapViewState extends State<MapView> {
     }
   }
 
+  /// Update search result marker on the map
+  ///
+  /// Adds a marker for the selected search result with a distinct green color.
+  /// Removes previous search result marker if exists.
+  ///
+  /// Requirements: 9.5
+  Future<void> _updateSearchResultMarker() async {
+    final mapProvider = context.read<MapProvider>();
+    
+    if (mapProvider.mapController == null || !_markersAdded) {
+      return;
+    }
+
+    final searchResult = mapProvider.selectedSearchResult;
+    
+    // If there's a new search result
+    if (searchResult != null && _searchResultMarkerPoint != searchResult.geoPoint) {
+      // Remove old search result marker if exists
+      if (_searchResultMarkerPoint != null) {
+        try {
+          await mapProvider.mapController!.removeMarker(_searchResultMarkerPoint!);
+        } catch (e) {
+          debugPrint('[MapView] Error removing old search result marker: $e');
+        }
+      }
+
+      // Add new search result marker with green color
+      try {
+        await mapProvider.mapController!.addMarker(
+          searchResult.geoPoint,
+          markerIcon: const MarkerIcon(
+            icon: Icon(
+              Icons.place,
+              color: Colors.green,
+              size: 56,
+            ),
+          ),
+        );
+
+        _searchResultMarkerPoint = searchResult.geoPoint;
+        debugPrint('[MapView] Search result marker added at: ${searchResult.displayName}');
+      } catch (e) {
+        debugPrint('[MapView] Error adding search result marker: $e');
+      }
+    } else if (searchResult == null && _searchResultMarkerPoint != null) {
+      // Search result was cleared, remove marker
+      try {
+        await mapProvider.mapController!.removeMarker(_searchResultMarkerPoint!);
+        _searchResultMarkerPoint = null;
+        debugPrint('[MapView] Search result marker removed');
+      } catch (e) {
+        debugPrint('[MapView] Error removing search result marker: $e');
+      }
+    }
+  }
+
   @override
   void dispose() {
     // Cancel debounce timer to prevent memory leaks
@@ -790,10 +850,29 @@ class _MapViewState extends State<MapView> {
           ),
         ),
 
+        // Search Bar (at the top)
+        Positioned(
+          top: 16,
+          left: 16,
+          right: 16,
+          child: MapSearchBar(
+            onSearchChanged: (query) {
+              mapProvider.searchLocation(query);
+            },
+            onResultSelected: (result) async {
+              await mapProvider.selectSearchResult(result);
+            },
+            searchResults: mapProvider.searchResults,
+            isSearching: mapProvider.isSearching,
+            errorMessage: mapProvider.searchErrorMessage,
+          ),
+        ),
+
         // Mall Info Card (if mall is selected)
+        // Positioned below search bar
         if (mapProvider.selectedMall != null)
           Positioned(
-            top: 16,
+            top: 90, // Below search bar
             left: 16,
             right: 16,
             child: MapMallInfoCard(
