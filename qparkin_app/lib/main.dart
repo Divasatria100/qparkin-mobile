@@ -43,8 +43,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get API base URL from environment
-    const String apiBaseUrl = String.fromEnvironment('API_URL', defaultValue: 'http://localhost:8000/api');
+    // Get API base URL from environment (WITHOUT /api suffix)
+    // Service layer will add /api prefix
+    const String apiBaseUrl = String.fromEnvironment('API_URL', defaultValue: 'http://localhost:8000');
     
     return MultiProvider(
       providers: [

@@ -31,18 +31,19 @@ class VehicleApiService {
   Future<List<VehicleModel>> getVehicles() async {
     try {
       final headers = await _getHeaders();
-      final uri = Uri.parse('$baseUrl/kendaraan');
+      final uri = Uri.parse('$baseUrl/api/kendaraan');
       
       // DEBUG: Log the full URL being called
       print('[VehicleApiService] GET URL: $uri');
       print('[VehicleApiService] Base URL: $baseUrl');
+      print('[VehicleApiService] Method: GET');
       
       final response = await http.get(
         uri,
         headers: headers,
       );
 
-      print('[VehicleApiService] GET Response status: ${response.statusCode}');
+      print('[VehicleApiService] Response status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -73,11 +74,12 @@ class VehicleApiService {
   }) async {
     try {
       final token = await _getToken();
-      final uri = Uri.parse('$baseUrl/kendaraan');
+      final uri = Uri.parse('$baseUrl/api/kendaraan');
 
       // DEBUG: Log the full URL being called
       print('[VehicleApiService] POST URL: $uri');
       print('[VehicleApiService] Base URL: $baseUrl');
+      print('[VehicleApiService] Method: POST');
       print('[VehicleApiService] Token present: ${token != null && token.isNotEmpty}');
       print('[VehicleApiService] Has photo: ${foto != null}');
 
@@ -166,7 +168,7 @@ class VehicleApiService {
     try {
       final headers = await _getHeaders();
       final response = await http.get(
-        Uri.parse('$baseUrl/kendaraan/$id'),
+        Uri.parse('$baseUrl/api/kendaraan/$id'),
         headers: headers,
       );
 
@@ -201,7 +203,7 @@ class VehicleApiService {
   }) async {
     try {
       final token = await _getToken();
-      final uri = Uri.parse('$baseUrl/kendaraan/$id');
+      final uri = Uri.parse('$baseUrl/api/kendaraan/$id');
 
       // Use multipart if photo is provided
       if (foto != null) {
@@ -271,7 +273,7 @@ class VehicleApiService {
     try {
       final headers = await _getHeaders();
       final response = await http.delete(
-        Uri.parse('$baseUrl/kendaraan/$id'),
+        Uri.parse('$baseUrl/api/kendaraan/$id'),
         headers: headers,
       );
 
@@ -303,7 +305,7 @@ class VehicleApiService {
     try {
       final headers = await _getHeaders();
       final response = await http.put(
-        Uri.parse('$baseUrl/kendaraan/$id/set-active'),
+        Uri.parse('$baseUrl/api/kendaraan/$id/set-active'),
         headers: headers,
       );
 
