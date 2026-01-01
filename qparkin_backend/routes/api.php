@@ -58,6 +58,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{id}', [KendaraanController::class, 'show']);
         Route::put('/{id}', [KendaraanController::class, 'update']);
         Route::delete('/{id}', [KendaraanController::class, 'destroy']);
+        Route::put('/{id}/set-active', [KendaraanController::class, 'setActive']);
     });
 
     // Mall Information

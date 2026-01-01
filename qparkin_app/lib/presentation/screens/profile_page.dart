@@ -403,36 +403,40 @@ class _ProfilePageState extends State<ProfilePage> {
                       vehicles.isEmpty
                           ? Semantics(
                               label: 'Daftar kendaraan kosong',
-                              child: Container(
-                                height: 200,
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: Colors.grey.shade200,
-                                    width: 1,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.05),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 2),
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    PageTransitions.slideFromRight(
+                                      page: const VehicleListPage(),
                                     ),
-                                  ],
-                                ),
-                                child: EmptyStateWidget(
-                                  icon: Icons.directions_car_outlined,
-                                  title: 'Tidak ada kendaraan terdaftar',
-                                  description: 'Anda belum memiliki kendaraan terdaftar. Tambahkan kendaraan untuk memulai parkir.',
-                                  actionText: 'Tambah Kendaraan',
-                                  onAction: () {
-                                    Navigator.of(context).push(
-                                      PageTransitions.slideFromRight(
-                                        page: const VehicleListPage(),
+                                  );
+                                },
+                                child: Container(
+                                  height: 200,
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: Colors.grey.shade200,
+                                      width: 1,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.05),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
                                       ),
-                                    );
-                                  },
+                                    ],
+                                  ),
+                                  child: const EmptyStateWidget(
+                                    icon: Icons.directions_car_outlined,
+                                    title: 'Tidak ada kendaraan',
+                                    description: 'Tambahkan kendaraan pertama Anda',
+                                    actionText: 'Tambah Kendaraan',
+                                    compact: true,
+                                    onAction: null, // Navigation handled by GestureDetector
+                                  ),
                                 ),
                               ),
                             )

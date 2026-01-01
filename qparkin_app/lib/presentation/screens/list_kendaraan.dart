@@ -1,8 +1,15 @@
 // 📄 lib/presentation/screens/list_kendaraan.dart
 import 'package:flutter/material.dart';
-import 'tambah_kendaraan.dart'; // ✅ import halaman tambah kendaraan
+import 'package:provider/provider.dart';
+import '../../logic/providers/profile_provider.dart';
+import '../../data/models/vehicle_model.dart';
+import 'tambah_kendaraan.dart';
+import 'vehicle_detail_page.dart';
 import '../../utils/page_transitions.dart';
 
+/// Vehicle List Page
+/// Displays all registered vehicles with ability to add, view, and delete
+/// Integrates with ProfileProvider for state management
 class VehicleListPage extends StatefulWidget {
   const VehicleListPage({super.key});
 
@@ -11,29 +18,39 @@ class VehicleListPage extends StatefulWidget {
 }
 
 class _VehicleListPageState extends State<VehicleListPage> {
-  int selectedIndex = 0;
+  @override
+  void initState() {
+    super.initState();
+    // Fetch vehicles when page loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ProfileProvider>().fetchVehicles();
+    });
+  }
 
-  final List<Map<String, dynamic>> vehicles = [
-    {
-      'name': 'Suzuki',
-      'plate': 'AB 123 ABL',
-      'icon': Icons.two_wheeler,
-    },
-    {
-      'name': 'Mercedes G 63',
-      'plate': 'A 61026',
-      'icon': Icons.directions_car,
-    },
-  ];
+  IconData _getVehicleIcon(String jenisKendaraan) {
+    switch (jenisKendaraan.toLowerCase()) {
+      case 'roda dua':
+        return Icons.two_wheeler;
+      case 'roda tiga':
+        return Icons.electric_rickshaw;
+      case 'roda empat':
+        return Icons.directions_car;
+      default:
+        return Icons.local_shipping;
+    }
+  }
 
-  void showSnackbar(String message) {
+  void _showSnackbar(String message, {bool isError = false}) {
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
+        content: Text(
+          message,
+          style: const TextStyle(fontFamily: 'Nunito'),
+        ),
         duration: const Duration(seconds: 3),
         behavior: SnackBarBehavior.floating,
-        backgroundColor: const Color(0xFF323232),
+        backgroundColor: isError ? Colors.red[400] : const Color(0xFF4CAF50),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
@@ -42,14 +59,7 @@ class _VehicleListPageState extends State<VehicleListPage> {
     );
   }
 
-  void _addNewVehicle(Map<String, dynamic> newVehicle) {
-    setState(() {
-      vehicles.add(newVehicle);
-    });
-    showSnackbar("${newVehicle['name']} berhasil ditambahkan!");
-  }
-
-  void _showDeleteConfirmation(BuildContext context, int index, Map<String, dynamic> vehicle) {
+  void _showDeleteConfirmation(BuildContext context, VehicleModel vehicle) {
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
@@ -68,6 +78,7 @@ class _VehicleListPageState extends State<VehicleListPage> {
               const Text(
                 'Hapus Kendaraan',
                 style: TextStyle(
+                  fontFamily: 'Nunito',
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
                 ),
@@ -75,8 +86,9 @@ class _VehicleListPageState extends State<VehicleListPage> {
             ],
           ),
           content: Text(
-            'Apakah Anda yakin ingin menghapus ${vehicle['name']} (${vehicle['plate']})?',
+            'Apakah Anda yakin ingin menghapus ${vehicle.merk} ${vehicle.tipe} (${vehicle.platNomor})?',
             style: const TextStyle(
+              fontFamily: 'Nunito',
               fontSize: 14,
               height: 1.5,
             ),
@@ -87,6 +99,7 @@ class _VehicleListPageState extends State<VehicleListPage> {
               child: const Text(
                 'Batal',
                 style: TextStyle(
+                  fontFamily: 'Nunito',
                   color: Color(0xFF8E8E93),
                   fontWeight: FontWeight.w600,
                 ),
@@ -95,7 +108,7 @@ class _VehicleListPageState extends State<VehicleListPage> {
             TextButton(
               onPressed: () {
                 Navigator.of(dialogContext).pop();
-                _deleteVehicle(index, vehicle);
+                _deleteVehicle(vehicle);
               },
               style: TextButton.styleFrom(
                 backgroundColor: Colors.red[50],
@@ -110,6 +123,7 @@ class _VehicleListPageState extends State<VehicleListPage> {
               child: Text(
                 'Hapus',
                 style: TextStyle(
+                  fontFamily: 'Nunito',
                   color: Colors.red[600],
                   fontWeight: FontWeight.bold,
                 ),
@@ -121,229 +135,310 @@ class _VehicleListPageState extends State<VehicleListPage> {
     );
   }
 
-  void _deleteVehicle(int index, Map<String, dynamic> vehicle) {
-    setState(() {
-      vehicles.removeAt(index);
-      if (selectedIndex >= vehicles.length) {
-        selectedIndex = vehicles.length - 1;
-      }
-      if (selectedIndex < 0) selectedIndex = 0;
-    });
-    showSnackbar("${vehicle['name']} berhasil dihapus!");
+  Future<void> _deleteVehicle(VehicleModel vehicle) async {
+    try {
+      await context.read<ProfileProvider>().deleteVehicle(vehicle.idKendaraan);
+      _showSnackbar('${vehicle.merk} ${vehicle.tipe} berhasil dihapus!');
+    } catch (e) {
+      _showSnackbar('Gagal menghapus kendaraan', isError: true);
+    }
+  }
+
+  Future<void> _navigateToAddVehicle() async {
+    final result = await Navigator.of(context).push<bool>(
+      PageTransitions.slideFromRight(
+        page: const VehicleSelectionPage(),
+      ),
+    );
+
+    // Refresh vehicle list if vehicle was added
+    if (result == true && mounted) {
+      context.read<ProfileProvider>().fetchVehicles();
+    }
+  }
+
+  void _navigateToVehicleDetail(VehicleModel vehicle) {
+    Navigator.of(context).push(
+      PageTransitions.slideFromRight(
+        page: VehicleDetailPage(vehicle: vehicle),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          Column(
+      body: Consumer<ProfileProvider>(
+        builder: (context, provider, child) {
+          return Stack(
             children: [
-              // 🔹 Header
-              Container(
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Color(0xFF7C5ED1),
-                      Color(0xFF573ED1),
-                    ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
-                ),
-                child: SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                    child: Row(
-                      children: [
-                        // Tombol Back
-                        IconButton(
-                          icon: const Icon(
-                            Icons.arrow_back,
-                            color: Colors.white,
-                            size: 24,
-                          ),
-                          onPressed: () => Navigator.of(context).pop(),
-                          tooltip: 'Kembali',
-                        ),
-                        const SizedBox(width: 8),
-                        // Title
-                        const Text(
-                          'List Kendaraan',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+              Column(
+                children: [
+                  // Header - consistent with other pages
+                  Container(
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0xFF7C5ED1),
+                          Color(0xFF573ED1),
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
                     ),
-                  ),
-                ),
-              ),
-
-              // 🔹 Konten
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Kendaraan Terdaftar',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                    child: SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                        child: Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(
+                                Icons.arrow_back,
+                                color: Colors.white,
+                                size: 24,
+                              ),
+                              onPressed: () => Navigator.of(context).pop(),
+                              tooltip: 'Kembali',
+                            ),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'List Kendaraan',
+                              style: TextStyle(
+                                fontFamily: 'Nunito',
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      ...List.generate(vehicles.length, (index) {
-                        final vehicle = vehicles[index];
-                        final isSelected = selectedIndex == index;
+                    ),
+                  ),
 
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              selectedIndex = index;
-                            });
-                            showSnackbar('${vehicle['name']} diklik');
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            margin: const EdgeInsets.only(bottom: 12),
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: isSelected 
-                                    ? const Color(0xFF573ED1)
-                                    : Colors.grey.shade200,
-                                width: isSelected ? 2 : 1,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: isSelected
-                                      ? const Color(0xFF573ED1).withOpacity(0.2)
-                                      : Colors.black.withOpacity(0.05),
-                                  blurRadius: isSelected ? 16 : 8,
-                                  offset: Offset(0, isSelected ? 4 : 2),
-                                ),
-                              ],
+                  // Content
+                  Expanded(
+                    child: provider.isLoading
+                        ? const Center(
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF573ED1)),
                             ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 44,
-                                  height: 44,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF573ED1).withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Icon(
-                                    vehicle['icon'],
-                                    color: const Color(0xFF573ED1),
-                                    size: 24,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        vehicle['name']!,
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black87,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        vehicle['plate']!,
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.grey.shade600,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                // Tombol Hapus
-                                IconButton(
-                                  icon: Icon(
-                                    Icons.delete_outline,
-                                    color: Colors.red[600],
-                                    size: 24,
-                                  ),
-                                  onPressed: () {
-                                    _showDeleteConfirmation(context, index, vehicle);
-                                  },
-                                  tooltip: 'Hapus kendaraan',
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }),
-                    ],
+                          )
+                        : provider.vehicles.isEmpty
+                            ? _buildEmptyState()
+                            : _buildVehicleList(provider.vehicles),
+                  ),
+                ],
+              ),
+
+              // Floating action button
+              Positioned(
+                bottom: 24,
+                right: 24,
+                child: FloatingActionButton(
+                  onPressed: _navigateToAddVehicle,
+                  backgroundColor: const Color(0xFF573ED1),
+                  child: const Icon(
+                    Icons.add,
+                    color: Colors.white,
+                    size: 28,
                   ),
                 ),
               ),
             ],
-          ),
+          );
+        },
+      ),
+    );
+  }
 
-          // 🔹 Tombol tambah kendaraan
-          Positioned(
-            bottom: 24,
-            right: 24,
-            child: GestureDetector(
-              onTap: () async {
-                final newVehicle = await Navigator.of(context).push<Map<String, dynamic>>(
-                  PageTransitions.slideFromRight(
-                    page: const VehicleSelectionPage(),
-                  ),
-                );
-
-                if (newVehicle != null) {
-                  _addNewVehicle(newVehicle);
-                }
-              },
-              child: Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFF7C5ED1),
-                      Color(0xFF573ED1),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF573ED1).withOpacity(0.4),
-                      blurRadius: 20,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.add,
-                  color: Colors.white,
-                  size: 28,
-                ),
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.directions_car_outlined,
+              size: 80,
+              color: Colors.grey.shade300,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Belum Ada Kendaraan',
+              style: TextStyle(
+                fontFamily: 'Nunito',
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: Colors.grey.shade600,
               ),
             ),
+            const SizedBox(height: 8),
+            Text(
+              'Tambahkan kendaraan pertama Anda dengan menekan tombol + di bawah',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'Nunito',
+                fontSize: 14,
+                color: Colors.grey.shade500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVehicleList(List<VehicleModel> vehicles) {
+    return RefreshIndicator(
+      onRefresh: () => context.read<ProfileProvider>().fetchVehicles(),
+      color: const Color(0xFF573ED1),
+      child: ListView(
+        padding: const EdgeInsets.all(24),
+        children: [
+          const Text(
+            'Kendaraan Terdaftar',
+            style: TextStyle(
+              fontFamily: 'Nunito',
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
           ),
+          const SizedBox(height: 16),
+          ...vehicles.map((vehicle) => _buildVehicleCard(vehicle)).toList(),
         ],
       ),
     );
   }
+
+  Widget _buildVehicleCard(VehicleModel vehicle) {
+    return GestureDetector(
+      onTap: () => _navigateToVehicleDetail(vehicle),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: vehicle.isActive 
+                ? const Color(0xFF573ED1)
+                : Colors.grey.shade200,
+            width: vehicle.isActive ? 2 : 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: vehicle.isActive
+                  ? const Color(0xFF573ED1).withOpacity(0.2)
+                  : Colors.black.withOpacity(0.05),
+              blurRadius: vehicle.isActive ? 16 : 8,
+              offset: Offset(0, vehicle.isActive ? 4 : 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Vehicle icon
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: const Color(0xFF573ED1).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                _getVehicleIcon(vehicle.jenisKendaraan),
+                color: const Color(0xFF573ED1),
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 16),
+            
+            // Vehicle info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '${vehicle.merk} ${vehicle.tipe}',
+                          style: const TextStyle(
+                            fontFamily: 'Nunito',
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                      if (vehicle.isActive)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF4CAF50),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Text(
+                            'Aktif',
+                            style: TextStyle(
+                              fontFamily: 'Nunito',
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    vehicle.platNomor,
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
+                      fontSize: 14,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  if (vehicle.warna != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      vehicle.warna!,
+                      style: TextStyle(
+                        fontFamily: 'Nunito',
+                        fontSize: 12,
+                        color: Colors.grey.shade500,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            
+            // Delete button
+            IconButton(
+              icon: Icon(
+                Icons.delete_outline,
+                color: Colors.red[600],
+                size: 24,
+              ),
+              onPressed: () {
+                _showDeleteConfirmation(context, vehicle);
+              },
+              tooltip: 'Hapus kendaraan',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
+

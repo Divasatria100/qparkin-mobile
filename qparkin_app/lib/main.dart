@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'data/services/auth_service.dart';
 import 'data/services/parking_service.dart';
 import 'data/services/point_service.dart';
+import 'data/services/vehicle_api_service.dart';
 import 'logic/providers/active_parking_provider.dart';
 import 'logic/providers/profile_provider.dart';
 import 'logic/providers/notification_provider.dart';
@@ -42,6 +43,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get API base URL from environment
+    const String apiBaseUrl = String.fromEnvironment('API_URL', defaultValue: 'http://localhost:8000/api');
+    
     return MultiProvider(
       providers: [
         // NotificationProvider - Created first so other providers can depend on it
@@ -55,8 +59,11 @@ class MyApp extends StatelessWidget {
           ),
         ),
         // ProfileProvider untuk mengelola state profil pengguna
+        // Now integrated with VehicleApiService for real backend data
         ChangeNotifierProvider(
-          create: (_) => ProfileProvider(),
+          create: (_) => ProfileProvider(
+            vehicleApiService: VehicleApiService(baseUrl: apiBaseUrl),
+          ),
         ),
         // PointProvider untuk mengelola state poin pengguna
         ChangeNotifierProxyProvider<NotificationProvider, PointProvider>(
