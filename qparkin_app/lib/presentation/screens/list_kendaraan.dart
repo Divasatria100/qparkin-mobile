@@ -6,6 +6,7 @@ import '../../data/models/vehicle_model.dart';
 import 'tambah_kendaraan.dart';
 import 'vehicle_detail_page.dart';
 import '../../utils/page_transitions.dart';
+import '../../utils/vehicle_icon_helper.dart';
 
 /// Vehicle List Page
 /// Displays all registered vehicles with ability to add, view, and delete
@@ -25,19 +26,6 @@ class _VehicleListPageState extends State<VehicleListPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ProfileProvider>().fetchVehicles();
     });
-  }
-
-  IconData _getVehicleIcon(String jenisKendaraan) {
-    switch (jenisKendaraan.toLowerCase()) {
-      case 'roda dua':
-        return Icons.two_wheeler;
-      case 'roda tiga':
-        return Icons.electric_rickshaw;
-      case 'roda empat':
-        return Icons.directions_car;
-      default:
-        return Icons.local_shipping;
-    }
   }
 
   void _showSnackbar(String message, {bool isError = false}) {
@@ -348,12 +336,12 @@ class _VehicleListPageState extends State<VehicleListPage> {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: const Color(0xFF573ED1).withOpacity(0.1),
+                color: VehicleIconHelper.getBackgroundColor(vehicle.jenisKendaraan),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
-                _getVehicleIcon(vehicle.jenisKendaraan),
-                color: const Color(0xFF573ED1),
+                VehicleIconHelper.getIcon(vehicle.jenisKendaraan),
+                color: VehicleIconHelper.getColor(vehicle.jenisKendaraan),
                 size: 24,
               ),
             ),

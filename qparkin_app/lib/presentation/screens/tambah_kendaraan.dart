@@ -199,6 +199,12 @@ class _VehicleSelectionPageState extends State<VehicleSelectionPage> {
       return;
     }
 
+    // Validate color field (now required)
+    if (colorController.text.trim().isEmpty) {
+      _showSnackbar('Warna kendaraan wajib diisi', isError: true);
+      return;
+    }
+
     setState(() {
       isLoading = true;
     });
@@ -212,9 +218,7 @@ class _VehicleSelectionPageState extends State<VehicleSelectionPage> {
         jenisKendaraan: selectedVehicleType!,
         merk: brandController.text.trim(),
         tipe: typeController.text.trim(),
-        warna: colorController.text.trim().isNotEmpty 
-            ? colorController.text.trim() 
-            : null,
+        warna: colorController.text.trim(), // Now required, no null check needed
         isActive: selectedVehicleStatus == "Kendaraan Utama",
         foto: selectedImage,
       );
@@ -413,6 +417,22 @@ class _VehicleSelectionPageState extends State<VehicleSelectionPage> {
             ),
           ),
         ),
+        const SizedBox(height: 12),
+        
+        // Disclaimer for photo upload
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            'Foto kendaraan bersifat opsional dan digunakan untuk membantu identifikasi visual. Pastikan foto yang diunggah adalah kendaraan yang sesuai.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'Nunito',
+              fontSize: 12,
+              height: 1.4,
+              color: Colors.grey.shade600,
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -589,13 +609,49 @@ class _VehicleSelectionPageState extends State<VehicleSelectionPage> {
           ),
           style: const TextStyle(fontFamily: 'Nunito'),
         ),
+        const SizedBox(height: 12),
+        
+        // Warning disclaimer for plate number
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFF3E0), // Light orange background
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: const Color(0xFFFF9800).withOpacity(0.3),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                Icons.warning_amber_rounded,
+                size: 20,
+                color: Colors.orange[700],
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Pastikan plat nomor kendaraan diinput sesuai dengan kendaraan yang digunakan. Data yang tidak sesuai dapat menyebabkan kendala saat proses parkir.',
+                  style: TextStyle(
+                    fontFamily: 'Nunito',
+                    fontSize: 12,
+                    height: 1.4,
+                    color: Colors.orange[900],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
         const SizedBox(height: 20),
 
-        // Color (optional)
+        // Color (required)
         TextField(
           controller: colorController,
           decoration: InputDecoration(
-            labelText: 'Warna Kendaraan (Opsional)',
+            labelText: 'Warna Kendaraan *',
             labelStyle: const TextStyle(fontFamily: 'Nunito'),
             hintText: 'Contoh: Hitam, Putih, Merah',
             hintStyle: TextStyle(
@@ -611,6 +667,21 @@ class _VehicleSelectionPageState extends State<VehicleSelectionPage> {
             ),
           ),
           style: const TextStyle(fontFamily: 'Nunito'),
+        ),
+        const SizedBox(height: 8),
+        
+        // Helper text for color field
+        Padding(
+          padding: const EdgeInsets.only(left: 0),
+          child: Text(
+            'Sesuai dengan warna kendaraan pada STNK.',
+            style: TextStyle(
+              fontFamily: 'Nunito',
+              fontSize: 12,
+              color: Colors.grey.shade600,
+              height: 1.3,
+            ),
+          ),
         ),
       ],
     );
