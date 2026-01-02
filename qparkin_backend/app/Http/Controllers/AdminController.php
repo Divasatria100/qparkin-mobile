@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\TransaksiParkir;
 use App\Models\Mall;
 use App\Models\Parkiran;
+use App\Models\ParkingFloor;
+use App\Models\ParkingSlot;
 use App\Models\AdminMall;
 use App\Models\User;
 use App\Models\TarifParkir;

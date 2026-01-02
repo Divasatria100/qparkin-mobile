@@ -23,7 +23,7 @@ class ParkingSlotController extends Controller
         try {
             // Get all parkiran for this mall
             $parkiranIds = Parkiran::where('id_mall', $mallId)
-                ->where('status', 'active')
+                ->where('status', 'Tersedia')
                 ->pluck('id_parkiran');
 
             if ($parkiranIds->isEmpty()) {
