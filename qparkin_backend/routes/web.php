@@ -70,6 +70,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/parkiran/{id}', [AdminController::class, 'detailParkiran'])->name('parkiran.detail');
     Route::get('/parkiran/{id}/edit', [AdminController::class, 'editParkiran'])->name('parkiran.edit');
     Route::post('/parkiran/{id}/update', [AdminController::class, 'updateParkiran'])->name('parkiran.update');
+    Route::put('/parkiran/{id}', [AdminController::class, 'updateParkiran'])->name('parkiran.update.put');
     Route::delete('/parkiran/{id}', [AdminController::class, 'deleteParkiran'])->name('parkiran.delete');
 });
 

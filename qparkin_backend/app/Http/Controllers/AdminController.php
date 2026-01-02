@@ -462,11 +462,12 @@ class AdminController extends Controller
         $validated = $request->validate([
             'nama_parkiran' => 'required|string|max:255',
             'kode_parkiran' => 'required|string|max:10',
-            'status' => 'required|in:Tersedia,Ditutup,maintenance',
+            'status' => 'required|in:Tersedia,Ditutup',
             'jumlah_lantai' => 'required|integer|min:1|max:10',
             'lantai' => 'required|array',
             'lantai.*.nama' => 'required|string',
             'lantai.*.jumlah_slot' => 'required|integer|min:1',
+            'lantai.*.status' => 'nullable|in:active,maintenance,inactive',
         ]);
 
         \DB::beginTransaction();
@@ -486,13 +487,15 @@ class AdminController extends Controller
 
             // Create floors and slots
             foreach ($validated['lantai'] as $index => $lantaiData) {
+                $floorStatus = $lantaiData['status'] ?? 'active';
+                
                 $floor = ParkingFloor::create([
                     'id_parkiran' => $parkiran->id_parkiran,
                     'floor_name' => $lantaiData['nama'],
                     'floor_number' => $index + 1,
                     'total_slots' => $lantaiData['jumlah_slot'],
                     'available_slots' => $lantaiData['jumlah_slot'],
-                    'status' => 'active',
+                    'status' => $floorStatus,
                 ]);
 
                 // Create slots for this floor
@@ -539,11 +542,12 @@ class AdminController extends Controller
         $validated = $request->validate([
             'nama_parkiran' => 'required|string|max:255',
             'kode_parkiran' => 'required|string|max:10',
-            'status' => 'required|in:Tersedia,Ditutup,maintenance',
+            'status' => 'required|in:Tersedia,Ditutup',
             'jumlah_lantai' => 'required|integer|min:1|max:10',
             'lantai' => 'required|array',
             'lantai.*.nama' => 'required|string',
             'lantai.*.jumlah_slot' => 'required|integer|min:1',
+            'lantai.*.status' => 'nullable|in:active,maintenance,inactive',
         ]);
 
         \DB::beginTransaction();
@@ -570,13 +574,15 @@ class AdminController extends Controller
 
             // Create new floors and slots
             foreach ($validated['lantai'] as $index => $lantaiData) {
+                $floorStatus = $lantaiData['status'] ?? 'active';
+                
                 $floor = ParkingFloor::create([
                     'id_parkiran' => $parkiran->id_parkiran,
                     'floor_name' => $lantaiData['nama'],
                     'floor_number' => $index + 1,
                     'total_slots' => $lantaiData['jumlah_slot'],
                     'available_slots' => $lantaiData['jumlah_slot'],
-                    'status' => 'active',
+                    'status' => $floorStatus,
                 ]);
 
                 // Create slots

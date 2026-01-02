@@ -117,7 +117,18 @@
                 <div class="lantai-card">
                     <div class="lantai-card-header">
                         <h4>{{ $floor->floor_name }}</h4>
-                        <span class="lantai-badge">Lantai {{ $floor->floor_number }}</span>
+                        <div class="lantai-header-badges">
+                            <span class="lantai-badge">Lantai {{ $floor->floor_number }}</span>
+                            <span class="status-badge-small {{ $floor->status == 'active' ? 'active' : ($floor->status == 'maintenance' ? 'maintenance' : 'inactive') }}">
+                                @if($floor->status == 'active')
+                                    Aktif
+                                @elseif($floor->status == 'maintenance')
+                                    Maintenance
+                                @else
+                                    Tidak Aktif
+                                @endif
+                            </span>
+                        </div>
                     </div>
                     <div class="lantai-card-body">
                         <div class="lantai-stats">
@@ -134,6 +145,14 @@
                                 <span class="value occupied">{{ $floor->total_slots - $floor->available_slots }}</span>
                             </div>
                         </div>
+                        @if($floor->status == 'maintenance')
+                        <div class="lantai-warning">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-1.964-1.333-2.732 0L4.082 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <span>Lantai sedang maintenance - tidak bisa di-booking</span>
+                        </div>
+                        @endif
                         <div class="lantai-progress">
                             <div class="progress-bar">
                                 <div class="progress-fill" style="width: {{ $floor->total_slots > 0 ? round((($floor->total_slots - $floor->available_slots) / $floor->total_slots) * 100, 2) : 0 }}%"></div>
@@ -173,9 +192,14 @@
             <div class="slot-grid" id="slotGrid">
                 @foreach($parkiran->floors as $floor)
                     @foreach($floor->slots as $slot)
-                    <div class="slot-item {{ $slot->status }}" data-floor="{{ $floor->id_floor }}" data-status="{{ $slot->status }}">
+                    @php
+                        // Derive display status from parent floor
+                        $displayStatus = $floor->status == 'maintenance' ? 'maintenance' : $slot->status;
+                        $displayStatusText = $floor->status == 'maintenance' ? 'Maintenance' : ucfirst($slot->status);
+                    @endphp
+                    <div class="slot-item {{ $displayStatus }}" data-floor="{{ $floor->id_floor }}" data-status="{{ $displayStatus }}" data-floor-status="{{ $floor->status }}">
                         <div class="slot-code">{{ $slot->slot_code }}</div>
-                        <div class="slot-status">{{ ucfirst($slot->status) }}</div>
+                        <div class="slot-status">{{ $displayStatusText }}</div>
                     </div>
                     @endforeach
                 @endforeach
@@ -199,7 +223,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         slots.forEach(slot => {
             const floorMatch = selectedFloor === 'all' || slot.dataset.floor === selectedFloor;
-            const statusMatch = selectedStatus === 'all' || slot.dataset.status === selectedStatus;
+            // Use the derived display status (which includes floor maintenance)
+            const displayStatus = slot.dataset.status;
+            const statusMatch = selectedStatus === 'all' || displayStatus === selectedStatus;
 
             if (floorMatch && statusMatch) {
                 slot.style.display = 'flex';
@@ -211,6 +237,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     filterLantai.addEventListener('change', filterSlots);
     filterStatus.addEventListener('change', filterSlots);
+    
+    console.log('Detail parkiran loaded - Floor maintenance status is derived to slots');
 });
 </script>
 @endsection

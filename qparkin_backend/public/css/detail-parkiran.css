@@ -975,3 +975,58 @@
         min-width: 100%;
     }
 }
+
+
+/* Floor Status Badge Styles */
+.lantai-header-badges {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.status-badge-small {
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.status-badge-small.active {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-badge-small.maintenance {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-badge-small.inactive {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* Floor Maintenance Warning */
+.lantai-warning {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.lantai-warning svg {
+    flex-shrink: 0;
+    color: #f59e0b;
+}
+
+.lantai-warning span {
+    font-size: 0.8rem;
+    color: #92400e;
+    font-weight: 500;
+}
