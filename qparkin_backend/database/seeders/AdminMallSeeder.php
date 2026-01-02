@@ -9,10 +9,20 @@ class AdminMallSeeder extends Seeder
 {
     public function run(): void
     {
-        // Link user id_user=3 (Admin Mall) dengan mall id_mall=1
+        // Get first available mall
+        $firstMall = \App\Models\Mall::first();
+        
+        if (!$firstMall) {
+            $this->command->warn('No mall found. Please run MallSeeder first.');
+            return;
+        }
+        
+        // Link user id_user=3 (Admin Mall) dengan mall pertama yang tersedia
         DB::table('admin_mall')->insert([
             'id_user' => 3,
-            'id_mall' => 1, // Pastikan mall dengan id=1 sudah ada dari MallSeeder
+            'id_mall' => $firstMall->id_mall,
         ]);
+        
+        $this->command->info("Admin Mall linked to: {$firstMall->nama_mall} (ID: {$firstMall->id_mall})");
     }
 }

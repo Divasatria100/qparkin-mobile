@@ -40,12 +40,16 @@ class AdminController extends Controller
         $adminMall = $user->adminMall ?? AdminMall::where('id_user', $userId)->first();
 
         if (! $adminMall) {
-            abort(404, 'Admin mall data not found.');
+            // Admin belum memiliki mall, redirect ke halaman setup
+            return redirect()->route('admin.profile.edit')
+                ->with('warning', 'Silakan lengkapi data mall Anda terlebih dahulu.');
         }
 
         $mall = Mall::find($adminMall->id_mall);
         if (! $mall) {
-            abort(404, 'Mall not found.');
+            // Mall tidak ditemukan, redirect ke halaman setup
+            return redirect()->route('admin.profile.edit')
+                ->with('error', 'Data mall tidak ditemukan. Silakan hubungi administrator.');
         }
 
         $mallId = $mall->id_mall;
