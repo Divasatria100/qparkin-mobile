@@ -17,6 +17,9 @@ class BookingSummaryCard extends StatelessWidget {
   final String? reservedSlotCode;
   final String? reservedFloorName;
   final String? reservedSlotType;
+  final int? pointsUsed;
+  final int? pointDiscount;
+  final double? originalCost;
 
   const BookingSummaryCard({
     Key? key,
@@ -32,6 +35,9 @@ class BookingSummaryCard extends StatelessWidget {
     this.reservedSlotCode,
     this.reservedFloorName,
     this.reservedSlotType,
+    this.pointsUsed,
+    this.pointDiscount,
+    this.originalCost,
   }) : super(key: key);
 
   String _formatCurrency(double amount) {
@@ -235,54 +241,163 @@ class BookingSummaryCard extends StatelessWidget {
                 height: 24,
               ),
               
-              // Cost Section
-              Semantics(
-                label: 'Total estimasi biaya $costText',
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Flexible(
+              // Cost Section with Point Discount
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Original Cost (if points are used)
+                  if (pointsUsed != null && pointsUsed! > 0 && originalCost != null) ...[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Biaya Parkir',
+                          style: TextStyle(
+                            fontSize: bodyFontSize,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                        Text(
+                          _formatCurrency(originalCost!),
+                          style: TextStyle(
+                            fontSize: bodyFontSize,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    
+                    // Point Discount
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.stars,
+                              color: const Color(0xFF4CAF50),
+                              size: iconSize * 0.8,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Diskon Poin ($pointsUsed poin)',
+                              style: TextStyle(
+                                fontSize: bodyFontSize,
+                                color: const Color(0xFF4CAF50),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Text(
+                          '- ${_formatCurrency(pointDiscount!.toDouble())}',
+                          style: TextStyle(
+                            fontSize: bodyFontSize,
+                            color: const Color(0xFF4CAF50),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Divider(
+                      color: Colors.grey.shade300,
+                      height: 1,
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  
+                  // Total Cost
+                  Semantics(
+                    label: pointsUsed != null && pointsUsed! > 0
+                        ? 'Total setelah diskon poin $costText'
+                        : 'Total estimasi biaya $costText',
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Flexible(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Semantics(
+                                label: 'Ikon pembayaran',
+                                child: Icon(
+                                  Icons.payments,
+                                  color: const Color(0xFF573ED1),
+                                  size: iconSize,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  pointsUsed != null && pointsUsed! > 0
+                                      ? 'Total Bayar'
+                                      : 'Total Estimasi',
+                                  style: TextStyle(
+                                    fontSize: titleFontSize * 0.9,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            _formatCurrency(totalCost),
+                            style: TextStyle(
+                              fontSize: costFontSize,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF573ED1),
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.right,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  // Savings indicator
+                  if (pointsUsed != null && pointsUsed! > 0 && pointDiscount != null) ...[
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE8F5E9),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: const Color(0xFF4CAF50).withOpacity(0.3),
+                        ),
+                      ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Semantics(
-                            label: 'Ikon pembayaran',
-                            child: Icon(
-                              Icons.payments,
-                              color: const Color(0xFF573ED1),
-                              size: iconSize,
-                            ),
+                          Icon(
+                            Icons.check_circle,
+                            color: const Color(0xFF4CAF50),
+                            size: captionFontSize + 2,
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 6),
                           Flexible(
                             child: Text(
-                              'Total Estimasi',
+                              'Anda hemat ${_formatCurrency(pointDiscount!.toDouble())} dengan poin!',
                               style: TextStyle(
-                                fontSize: titleFontSize * 0.9,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
+                                fontSize: captionFontSize,
+                                color: const Color(0xFF2E7D32),
+                                fontWeight: FontWeight.w600,
                               ),
-                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        _formatCurrency(totalCost),
-                        style: TextStyle(
-                          fontSize: costFontSize,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF573ED1),
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.right,
-                      ),
-                    ),
                   ],
-                ),
+                ],
               ),
             ],
             ),

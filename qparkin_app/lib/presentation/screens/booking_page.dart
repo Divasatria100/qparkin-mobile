@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../logic/providers/booking_provider.dart';
 import '../../logic/providers/active_parking_provider.dart';
 import '../../data/services/vehicle_service.dart';
@@ -20,7 +21,9 @@ import '../widgets/booking_summary_card.dart';
 import '../widgets/error_retry_widget.dart';
 import '../widgets/slot_unavailable_widget.dart';
 import '../widgets/booking_conflict_dialog.dart';
+import '../widgets/point_usage_widget.dart';
 import '../dialogs/booking_confirmation_dialog.dart';
+import '../../logic/providers/point_provider.dart';
 
 /// Main booking page for reserving parking slots
 ///
@@ -64,9 +67,11 @@ class _BookingPageContent extends StatefulWidget {
 }
 
 class _BookingPageContentState extends State<_BookingPageContent> {
-  late VehicleService _vehicleService;
+  VehicleService? _vehicleService;
   String? _authToken;
+  String? _baseUrl;
   BookingProvider? _bookingProvider;
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
   
   // Track orientation to detect changes
   Orientation? _previousOrientation;
@@ -75,25 +80,69 @@ class _BookingPageContentState extends State<_BookingPageContent> {
   void initState() {
     super.initState();
     
-    // TODO: Get baseUrl from config and auth token from secure storage
-    const baseUrl = 'http://192.168.1.1:8000'; // Placeholder
-    _authToken = 'dummy_token'; // Placeholder
-    
-    _vehicleService = VehicleService(
-      baseUrl: baseUrl,
-      authToken: _authToken,
-    );
-    
-    // Initialize provider with mall data
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _bookingProvider = Provider.of<BookingProvider>(context, listen: false);
-      _bookingProvider!.initialize(widget.mall);
+    // Initialize and fetch auth data
+    _initializeAuthData();
+  }
+  
+  /// Initialize authentication data from secure storage and config
+  Future<void> _initializeAuthData() async {
+    try {
+      // Get auth token from secure storage
+      final token = await _storage.read(key: 'auth_token');
       
-      // Fetch floors for slot reservation
-      if (_authToken != null) {
-        _bookingProvider!.fetchFloors(token: _authToken!);
+      // Get base URL from environment variable (same as main.dart)
+      const baseUrl = String.fromEnvironment('API_URL', defaultValue: 'http://localhost:8000');
+      
+      debugPrint('[BookingPage] Initializing with baseUrl: $baseUrl');
+      debugPrint('[BookingPage] Auth token available: ${token != null}');
+      
+      if (!mounted) return;
+      
+      setState(() {
+        _authToken = token;
+        _baseUrl = baseUrl;
+      });
+      
+      // Initialize vehicle service with real credentials
+      _vehicleService = VehicleService(
+        baseUrl: baseUrl,
+        authToken: token,
+      );
+      
+      // Initialize provider with mall data
+      if (mounted) {
+        _bookingProvider = Provider.of<BookingProvider>(context, listen: false);
+        _bookingProvider!.initialize(widget.mall);
+        
+        // Fetch floors for slot reservation
+        if (_authToken != null) {
+          _bookingProvider!.fetchFloors(token: _authToken!);
+        }
       }
-    });
+    } catch (e) {
+      debugPrint('[BookingPage] Error initializing auth data: $e');
+      
+      // Fallback to default values if secure storage fails
+      const baseUrl = String.fromEnvironment('API_URL', defaultValue: 'http://localhost:8000');
+      
+      if (!mounted) return;
+      
+      setState(() {
+        _baseUrl = baseUrl;
+        _authToken = null;
+      });
+      
+      _vehicleService = VehicleService(
+        baseUrl: baseUrl,
+        authToken: null,
+      );
+      
+      // Initialize provider with mall data
+      if (mounted) {
+        _bookingProvider = Provider.of<BookingProvider>(context, listen: false);
+        _bookingProvider!.initialize(widget.mall);
+      }
+    }
   }
 
   @override
@@ -200,29 +249,30 @@ class _BookingPageContentState extends State<_BookingPageContent> {
                   
                   SizedBox(height: spacing),
                   
-                  // Vehicle Selector
-                  VehicleSelector(
-                    selectedVehicle: provider.selectedVehicle != null
-                        ? VehicleModel.fromJson(provider.selectedVehicle!)
-                        : null,
-                    onVehicleSelected: (vehicle) {
-                      if (vehicle != null) {
-                        provider.selectVehicle(vehicle.toJson());
-                        
-                        // Clear validation error when user selects vehicle
-                        provider.clearValidationErrors();
-                        
-                        // Start periodic availability check if all data is set
-                        if (provider.startTime != null &&
-                            provider.bookingDuration != null &&
-                            _authToken != null) {
-                          provider.startPeriodicAvailabilityCheck(token: _authToken!);
+                  // Vehicle Selector - only show when service is initialized
+                  if (_vehicleService != null)
+                    VehicleSelector(
+                      selectedVehicle: provider.selectedVehicle != null
+                          ? VehicleModel.fromJson(provider.selectedVehicle!)
+                          : null,
+                      onVehicleSelected: (vehicle) {
+                        if (vehicle != null) {
+                          provider.selectVehicle(vehicle.toJson());
+                          
+                          // Clear validation error when user selects vehicle
+                          provider.clearValidationErrors();
+                          
+                          // Start periodic availability check if all data is set
+                          if (provider.startTime != null &&
+                              provider.bookingDuration != null &&
+                              _authToken != null) {
+                            provider.startPeriodicAvailabilityCheck(token: _authToken!);
+                          }
                         }
-                      }
-                    },
-                    vehicleService: _vehicleService,
-                    validationError: provider.validationErrors['vehicleId'],
-                  ),
+                      },
+                      vehicleService: _vehicleService!,
+                      validationError: provider.validationErrors['vehicleId'],
+                    ),
                   
                   SizedBox(height: spacing),
                   
@@ -329,6 +379,19 @@ class _BookingPageContentState extends State<_BookingPageContent> {
                   if (provider.bookingDuration != null && provider.costBreakdown != null)
                     SizedBox(height: spacing),
                   
+                  // Point Usage Widget
+                  if (provider.bookingDuration != null && provider.estimatedCost > 0)
+                    PointUsageWidget(
+                      parkingCost: provider.estimatedCost.toInt(),
+                      onPointsSelected: (points) {
+                        provider.setSelectedPoints(points);
+                      },
+                      initialPoints: provider.selectedPoints,
+                    ),
+                  
+                  if (provider.bookingDuration != null && provider.estimatedCost > 0)
+                    SizedBox(height: spacing),
+                  
                   // Booking Summary Card
                   if (_canShowSummary(provider))
                     BookingSummaryCard(
@@ -340,10 +403,14 @@ class _BookingPageContentState extends State<_BookingPageContent> {
                       startTime: provider.startTime!,
                       duration: provider.bookingDuration!,
                       endTime: provider.calculatedEndTime!,
-                      totalCost: provider.estimatedCost,
+                      totalCost: provider.finalCost, // Use finalCost which includes point discount
                       reservedSlotCode: provider.reservedSlot?.slotCode,
                       reservedFloorName: provider.reservedSlot?.floorName,
                       reservedSlotType: provider.reservedSlot?.typeLabel,
+                      // Point discount information
+                      pointsUsed: provider.selectedPoints > 0 ? provider.selectedPoints : null,
+                      pointDiscount: provider.pointDiscount > 0 ? provider.pointDiscount : null,
+                      originalCost: provider.selectedPoints > 0 ? provider.estimatedCost : null,
                     ),
                 ],
               ),

@@ -4,15 +4,105 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:qparkin_app/data/models/user_model.dart';
 import 'package:qparkin_app/data/models/vehicle_model.dart';
 import 'package:qparkin_app/logic/providers/profile_provider.dart';
+import 'package:qparkin_app/data/services/vehicle_api_service.dart';
+
+/// Mock VehicleApiService for testing
+class MockVehicleApiService extends VehicleApiService {
+  MockVehicleApiService() : super(baseUrl: 'http://test.com/api');
+
+  final List<VehicleModel> _mockVehicles = [];
+
+  @override
+  Future<List<VehicleModel>> getVehicles() async {
+    await Future.delayed(const Duration(milliseconds: 100));
+    return List.from(_mockVehicles);
+  }
+
+  @override
+  Future<VehicleModel> addVehicle({
+    required String platNomor,
+    required String jenisKendaraan,
+    required String merk,
+    required String tipe,
+    String? warna,
+    bool isActive = false,
+    dynamic foto,
+  }) async {
+    await Future.delayed(const Duration(milliseconds: 100));
+    final newVehicle = VehicleModel(
+      idKendaraan: DateTime.now().millisecondsSinceEpoch.toString(),
+      platNomor: platNomor,
+      jenisKendaraan: jenisKendaraan,
+      merk: merk,
+      tipe: tipe,
+      warna: warna,
+      isActive: isActive,
+    );
+    _mockVehicles.add(newVehicle);
+    return newVehicle;
+  }
+
+  @override
+  Future<VehicleModel> updateVehicle({
+    required String id,
+    String? platNomor,
+    String? jenisKendaraan,
+    String? merk,
+    String? tipe,
+    String? warna,
+    bool? isActive,
+    dynamic foto,
+  }) async {
+    await Future.delayed(const Duration(milliseconds: 100));
+    final index = _mockVehicles.indexWhere((v) => v.idKendaraan == id);
+    if (index == -1) throw Exception('Vehicle not found');
+    
+    final vehicle = _mockVehicles[index];
+    final updated = vehicle.copyWith(
+      platNomor: platNomor,
+      jenisKendaraan: jenisKendaraan,
+      merk: merk,
+      tipe: tipe,
+      warna: warna,
+      isActive: isActive,
+    );
+    _mockVehicles[index] = updated;
+    return updated;
+  }
+
+  @override
+  Future<void> deleteVehicle(String id) async {
+    await Future.delayed(const Duration(milliseconds: 100));
+    _mockVehicles.removeWhere((v) => v.idKendaraan == id);
+  }
+
+  @override
+  Future<VehicleModel> setActiveVehicle(String id) async {
+    await Future.delayed(const Duration(milliseconds: 100));
+    final index = _mockVehicles.indexWhere((v) => v.idKendaraan == id);
+    if (index == -1) throw Exception('Vehicle not found');
+    
+    // Deactivate all vehicles
+    for (int i = 0; i < _mockVehicles.length; i++) {
+      _mockVehicles[i] = _mockVehicles[i].copyWith(isActive: false);
+    }
+    
+    // Activate the selected vehicle
+    _mockVehicles[index] = _mockVehicles[index].copyWith(isActive: true);
+    return _mockVehicles[index];
+  }
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('ProfileProvider State Management', () {
     late ProfileProvider provider;
+    late MockVehicleApiService mockApiService;
 
     setUp(() {
-      provider = ProfileProvider();
+      mockApiService = MockVehicleApiService();
+      provider = ProfileProvider(vehicleApiService: mockApiService);
     });
 
     tearDown(() {
@@ -46,6 +136,16 @@ void main() {
     });
 
     test('fetchVehicles loads vehicles successfully', () async {
+      // Add a vehicle first
+      await provider.addVehicle(
+        platNomor: 'B 1111 AAA',
+        jenisKendaraan: 'Roda Empat',
+        merk: 'Toyota',
+        tipe: 'Avanza',
+        isActive: false,
+      );
+      
+      // Now fetch vehicles
       await provider.fetchVehicles();
 
       expect(provider.vehicles, isNotEmpty);
@@ -79,16 +179,14 @@ void main() {
       });
 
       final initialCount = provider.vehicles.length;
-      final newVehicle = VehicleModel(
-        idKendaraan: '999',
+
+      await provider.addVehicle(
         platNomor: 'B 9999 ZZZ',
         jenisKendaraan: 'Roda Empat',
         merk: 'Test',
         tipe: 'Test',
         isActive: false,
       );
-
-      await provider.addVehicle(newVehicle);
 
       expect(provider.vehicles.length, equals(initialCount + 1));
       expect(notificationCount, greaterThan(0));
@@ -133,6 +231,15 @@ void main() {
     });
 
     test('refreshAll fetches both user and vehicles', () async {
+      // Add a vehicle first
+      await provider.addVehicle(
+        platNomor: 'B 1111 AAA',
+        jenisKendaraan: 'Roda Empat',
+        merk: 'Toyota',
+        tipe: 'Avanza',
+        isActive: false,
+      );
+      
       await provider.refreshAll();
 
       expect(provider.user, isNotNull);
@@ -188,18 +295,12 @@ void main() {
     });
 
     test('updateVehicle handles non-existent vehicle', () async {
-      final nonExistentVehicle = VehicleModel(
-        idKendaraan: '999999',
-        platNomor: 'B 9999 XXX',
-        jenisKendaraan: 'Roda Empat',
-        merk: 'Test',
-        tipe: 'Test',
-        isActive: false,
-      );
-
       // Should throw exception for non-existent vehicle
       expect(
-        () => provider.updateVehicle(nonExistentVehicle),
+        () => provider.updateVehicle(
+          id: '999999',
+          platNomor: 'B 9999 XXX',
+        ),
         throwsException,
       );
     });
@@ -214,6 +315,16 @@ void main() {
 
     test('vehicles getter returns unmodifiable list', () async {
       await provider.fetchVehicles();
+      
+      // Add a vehicle first
+      await provider.addVehicle(
+        platNomor: 'B 1111 AAA',
+        jenisKendaraan: 'Roda Empat',
+        merk: 'Test',
+        tipe: 'Test',
+        isActive: false,
+      );
+      
       final vehicles = provider.vehicles;
 
       // Attempting to modify the list should throw
@@ -259,16 +370,13 @@ void main() {
     test('addVehicle updates lastSyncTime', () async {
       final initialSyncTime = provider.lastSyncTime;
 
-      final newVehicle = VehicleModel(
-        idKendaraan: '999',
+      await provider.addVehicle(
         platNomor: 'B 9999 ZZZ',
         jenisKendaraan: 'Roda Empat',
         merk: 'Test',
         tipe: 'Test',
         isActive: false,
       );
-
-      await provider.addVehicle(newVehicle);
 
       expect(provider.lastSyncTime, isNot(equals(initialSyncTime)));
       expect(provider.lastSyncTime, isNotNull);
@@ -335,15 +443,13 @@ void main() {
       final initialVehicleCount = provider.vehicles.length;
 
       // Add a vehicle
-      final newVehicle = VehicleModel(
-        idKendaraan: '999',
+      await provider.addVehicle(
         platNomor: 'B 9999 ZZZ',
         jenisKendaraan: 'Roda Empat',
         merk: 'Test',
         tipe: 'Test',
         isActive: false,
       );
-      await provider.addVehicle(newVehicle);
 
       // User should remain unchanged
       expect(provider.user, equals(initialUser));
@@ -388,14 +494,42 @@ void main() {
       );
 
       provider.setVehicles([vehicle1, vehicle2, vehicle3]);
+      
+      // Add vehicles to mock API service
+      await provider.addVehicle(
+        platNomor: vehicle1.platNomor,
+        jenisKendaraan: vehicle1.jenisKendaraan,
+        merk: vehicle1.merk,
+        tipe: vehicle1.tipe,
+        isActive: vehicle1.isActive,
+      );
+      await provider.addVehicle(
+        platNomor: vehicle2.platNomor,
+        jenisKendaraan: vehicle2.jenisKendaraan,
+        merk: vehicle2.merk,
+        tipe: vehicle2.tipe,
+        isActive: vehicle2.isActive,
+      );
+      await provider.addVehicle(
+        platNomor: vehicle3.platNomor,
+        jenisKendaraan: vehicle3.jenisKendaraan,
+        merk: vehicle3.merk,
+        tipe: vehicle3.tipe,
+        isActive: vehicle3.isActive,
+      );
+      
+      // Get the actual vehicle IDs from the added vehicles
+      await provider.fetchVehicles();
+      final addedVehicles = provider.vehicles;
+      expect(addedVehicles.length, equals(3));
 
-      // Set vehicle2 as active
-      await provider.setActiveVehicle('2');
+      // Set second vehicle as active
+      await provider.setActiveVehicle(addedVehicles[1].idKendaraan);
 
-      // Only vehicle2 should be active
+      // Only one vehicle should be active
       final activeVehicles = provider.vehicles.where((v) => v.isActive).toList();
       expect(activeVehicles.length, equals(1));
-      expect(activeVehicles.first.idKendaraan, equals('2'));
+      expect(activeVehicles.first.idKendaraan, equals(addedVehicles[1].idKendaraan));
 
       // All other vehicles should be inactive
       final inactiveVehicles = provider.vehicles.where((v) => !v.isActive).toList();
@@ -465,11 +599,16 @@ void main() {
       expect(provider.errorMessage, equals('Test error message'));
       expect(provider.hasError, isTrue);
       expect(provider.isLoading, isFalse);
+      
+      // Test setLoadingForTesting
+      provider.setLoadingForTesting(true);
+      expect(provider.isLoading, isTrue);
     });
 
     test('dispose cleans up resources', () {
       // Create a new provider for this test
-      final testProvider = ProfileProvider();
+      final testMockApiService = MockVehicleApiService();
+      final testProvider = ProfileProvider(vehicleApiService: testMockApiService);
       
       // Add a listener
       void listener() {}
@@ -482,9 +621,11 @@ void main() {
 
   group('ProfileProvider Property-Based Tests', () {
     late ProfileProvider provider;
+    late MockVehicleApiService mockApiService;
 
     setUp(() {
-      provider = ProfileProvider();
+      mockApiService = MockVehicleApiService();
+      provider = ProfileProvider(vehicleApiService: mockApiService);
     });
 
     tearDown(() {
@@ -501,7 +642,8 @@ void main() {
       final random = Random(42); // Fixed seed for reproducibility
 
       for (int i = 0; i < iterations; i++) {
-        final testProvider = ProfileProvider();
+        final testMockApiService = MockVehicleApiService();
+        final testProvider = ProfileProvider(vehicleApiService: testMockApiService);
         int notificationCount = 0;
 
         testProvider.addListener(() {
@@ -527,7 +669,14 @@ void main() {
         final randomVehicle = _generateRandomVehicle(random);
         
         // Add vehicle and verify notification
-        await testProvider.addVehicle(randomVehicle);
+        await testProvider.addVehicle(
+          platNomor: randomVehicle.platNomor,
+          jenisKendaraan: randomVehicle.jenisKendaraan,
+          merk: randomVehicle.merk,
+          tipe: randomVehicle.tipe,
+          warna: randomVehicle.warna,
+          isActive: randomVehicle.isActive,
+        );
         
         expect(
           notificationCount,
@@ -567,7 +716,8 @@ void main() {
       final random = Random(456);
 
       for (int i = 0; i < iterations; i++) {
-        final testProvider = ProfileProvider();
+        final testMockApiService = MockVehicleApiService();
+        final testProvider = ProfileProvider(vehicleApiService: testMockApiService);
         int notificationCount = 0;
 
         testProvider.addListener(() {
@@ -576,22 +726,32 @@ void main() {
 
         // Add a vehicle
         final vehicle1 = _generateRandomVehicle(random);
-        await testProvider.addVehicle(vehicle1);
+        await testProvider.addVehicle(
+          platNomor: vehicle1.platNomor,
+          jenisKendaraan: vehicle1.jenisKendaraan,
+          merk: vehicle1.merk,
+          tipe: vehicle1.tipe,
+          warna: vehicle1.warna,
+          isActive: vehicle1.isActive,
+        );
         final addNotifications = notificationCount;
+        
+        // Get the added vehicle ID
+        final addedVehicle = testProvider.vehicles.first;
 
         // Update a vehicle
-        final updatedVehicle = vehicle1.copyWith(
+        await testProvider.updateVehicle(
+          id: addedVehicle.idKendaraan,
           merk: 'Updated ${vehicle1.merk}',
         );
-        await testProvider.updateVehicle(updatedVehicle);
         final updateNotifications = notificationCount - addNotifications;
 
         // Set active vehicle
-        await testProvider.setActiveVehicle(vehicle1.idKendaraan);
+        await testProvider.setActiveVehicle(addedVehicle.idKendaraan);
         final setActiveNotifications = notificationCount - addNotifications - updateNotifications;
 
         // Delete the vehicle
-        await testProvider.deleteVehicle(vehicle1.idKendaraan);
+        await testProvider.deleteVehicle(addedVehicle.idKendaraan);
         final deleteNotifications = notificationCount - addNotifications - updateNotifications - setActiveNotifications;
 
         expect(
@@ -663,7 +823,8 @@ void main() {
       const int iterations = 50;
 
       for (int i = 0; i < iterations; i++) {
-        final testProvider = ProfileProvider();
+        final testMockApiService = MockVehicleApiService();
+        final testProvider = ProfileProvider(vehicleApiService: testMockApiService);
         int notificationCount = 0;
 
         testProvider.addListener(() {
@@ -686,7 +847,8 @@ void main() {
       const int iterations = 50;
 
       for (int i = 0; i < iterations; i++) {
-        final testProvider = ProfileProvider();
+        final testMockApiService = MockVehicleApiService();
+        final testProvider = ProfileProvider(vehicleApiService: testMockApiService);
         int notificationCount = 0;
 
         testProvider.addListener(() {

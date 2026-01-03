@@ -613,10 +613,10 @@ class MockLocationServiceWithErrors extends LocationService {
   @override
   Future<Position> getCurrentPosition() async {
     if (shouldThrowGpsError) {
-      throw LocationServiceDisabledException('GPS disabled');
+      throw QParkinLocationServiceDisabledException('GPS disabled');
     }
     if (shouldThrowPermissionError) {
-      throw PermissionDeniedException('Permission denied');
+      throw QParkinPermissionDeniedException('Permission denied');
     }
     return Position(
       latitude: 1.1,

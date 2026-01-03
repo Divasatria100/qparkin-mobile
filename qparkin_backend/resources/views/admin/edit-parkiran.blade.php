@@ -56,7 +56,7 @@
             <h3>Form Edit Parkiran</h3>
             <form id="editParkiranForm" class="parkiran-form">
                 @csrf
-                <input type="hidden" name="id_parkiran" value="{{ $parkiran->id_parkiran }}">
+                <input type="hidden" name="id_parkiran" id="parkiranId" value="{{ $parkiran->id_parkiran }}">
                 
                 <div class="form-group">
                     <label for="namaParkiran">Nama Parkiran *</label>
@@ -70,12 +70,12 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="statusParkiran">Status *</label>
+                    <label for="statusParkiran">Status Parkiran *</label>
                     <select id="statusParkiran" name="status" required>
-                        <option value="Tersedia" {{ $parkiran->status == 'Tersedia' ? 'selected' : '' }}>Aktif</option>
-                        <option value="maintenance" {{ $parkiran->status == 'maintenance' ? 'selected' : '' }}>Maintenance</option>
-                        <option value="Ditutup" {{ $parkiran->status == 'Ditutup' ? 'selected' : '' }}>Tidak Aktif</option>
+                        <option value="Tersedia" {{ $parkiran->status == 'Tersedia' ? 'selected' : '' }}>Tersedia (Operasional)</option>
+                        <option value="Ditutup" {{ $parkiran->status == 'Ditutup' ? 'selected' : '' }}>Ditutup (Seluruh Area)</option>
                     </select>
+                    <span class="form-hint">Status global untuk seluruh parkiran</span>
                 </div>
 
                 <div class="form-group">

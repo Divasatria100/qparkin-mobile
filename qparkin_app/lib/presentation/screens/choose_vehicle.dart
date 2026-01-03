@@ -1,6 +1,5 @@
 // lib/presentation/screens/choose_vehicle_page.dart
 import 'package:flutter/material.dart';
-import '../../data/services/auth_service.dart';
 
 class ChooseVehiclePage extends StatefulWidget {
   const ChooseVehiclePage({super.key});

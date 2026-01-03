@@ -10,14 +10,15 @@ import '/utils/navigation_utils.dart';
 import '/utils/page_transitions.dart';
 import '../../logic/providers/profile_provider.dart';
 import '../../logic/providers/notification_provider.dart';
+import '../../logic/providers/point_provider.dart';
 import '../widgets/profile/profile_shimmer_loading.dart';
 import '../widgets/common/empty_state_widget.dart';
 import '../widgets/common/notification_badge.dart';
 import '../widgets/common/cached_profile_image.dart';
 import '../widgets/profile/vehicle_card.dart';
 import '../widgets/premium_points_card.dart';
-import '../../pages/point_screen.dart';
-import '../../pages/notification_screen.dart';
+import 'point_page.dart';
+import 'notification_screen.dart';
 import '../../data/services/auth_service.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -106,7 +107,14 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildLoadingState() {
-    return const ProfilePageShimmer();
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: const ProfilePageShimmer(),
+      bottomNavigationBar: CurvedNavigationBar(
+        index: 3,
+        onTap: (index) => NavigationUtils.handleNavigation(context, index, 3),
+      ),
+    );
   }
 
   Widget _buildErrorState(ProfileProvider provider) {
@@ -142,10 +150,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: RefreshIndicator(
-          color: const Color(0xFF573ED1),
-          onRefresh: () async {
+      body: RefreshIndicator(
+        color: const Color(0xFF573ED1),
+        onRefresh: () async {
             // Announce refresh start
             if (mounted) {
               _announceToScreenReader('Memperbarui data profil');
@@ -214,7 +221,6 @@ class _ProfilePageState extends State<ProfilePage> {
               // 🔷 Header dengan gradient
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
@@ -225,9 +231,13 @@ class _ProfilePageState extends State<ProfilePage> {
                     end: Alignment.bottomCenter,
                   ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                child: SafeArea(
+                  bottom: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -357,7 +367,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         onTap: () {
                           Navigator.of(context).push(
                             PageTransitions.slideFromRight(
-                              page: const PointScreen(),
+                              page: const PointPage(),
                             ),
                           );
                         },
@@ -366,6 +376,8 @@ class _ProfilePageState extends State<ProfilePage> {
                   ],
                 ),
               ),
+            ),
+          ),
 
               // 🔹 Konten utama
               Padding(
@@ -391,36 +403,40 @@ class _ProfilePageState extends State<ProfilePage> {
                       vehicles.isEmpty
                           ? Semantics(
                               label: 'Daftar kendaraan kosong',
-                              child: Container(
-                                height: 200,
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: Colors.grey.shade200,
-                                    width: 1,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.05),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 2),
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    PageTransitions.slideFromRight(
+                                      page: const VehicleListPage(),
                                     ),
-                                  ],
-                                ),
-                                child: EmptyStateWidget(
-                                  icon: Icons.directions_car_outlined,
-                                  title: 'Tidak ada kendaraan terdaftar',
-                                  description: 'Anda belum memiliki kendaraan terdaftar. Tambahkan kendaraan untuk memulai parkir.',
-                                  actionText: 'Tambah Kendaraan',
-                                  onAction: () {
-                                    Navigator.of(context).push(
-                                      PageTransitions.slideFromRight(
-                                        page: const VehicleListPage(),
+                                  );
+                                },
+                                child: Container(
+                                  height: 200,
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: Colors.grey.shade200,
+                                      width: 1,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.05),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
                                       ),
-                                    );
-                                  },
+                                    ],
+                                  ),
+                                  child: const EmptyStateWidget(
+                                    icon: Icons.directions_car_outlined,
+                                    title: 'Tidak ada kendaraan',
+                                    description: 'Tambahkan kendaraan pertama Anda',
+                                    actionText: 'Tambah Kendaraan',
+                                    compact: true,
+                                    onAction: null, // Navigation handled by GestureDetector
+                                  ),
                                 ),
                               ),
                             )
@@ -544,11 +560,10 @@ class _ProfilePageState extends State<ProfilePage> {
                     ],
                   ),
                 ),
-              ],
-            ),
-          ),
-        ),
-      ),
+              ], // Close Column children
+            ), // Close Column
+          ), // Close SingleChildScrollView
+        ), // Close RefreshIndicator
       bottomNavigationBar: Semantics(
         label: 'Navigasi bawah, halaman profil aktif',
         child: CurvedNavigationBar(
@@ -854,6 +869,10 @@ class _ProfilePageState extends State<ProfilePage> {
       // Clear provider data
       final provider = context.read<ProfileProvider>();
       provider.clearError();
+      
+      // Clear PointProvider data and cache
+      final pointProvider = context.read<PointProvider>();
+      await pointProvider.clear();
 
       // Announce logout to screen reader
       _announceToScreenReader('Berhasil keluar dari akun');

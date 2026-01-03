@@ -9,13 +9,14 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
+        // Super Admin Account
         DB::table('user')->insert([
             'id_user' => 1,
             'name' => 'qparkin',
-            'no_hp' => null,
+            'nomor_hp' => null,
             'email' => null,
             'email_verified_at' => null,
-            'password' => bcrypt('superadmin123'), // bcrypt hash
+            'password' => bcrypt('superadmin123'),
             'provider' => null,
             'provider_id' => null,
             'role' => 'super_admin',
@@ -26,13 +27,14 @@ class UserSeeder extends Seeder
             'updated_at' => now(),
         ]);
 
+        // Customer Account
         DB::table('user')->insert([
             'id_user' => 2,
             'name' => 'berkat',
-            'no_hp' => '082284710929',
+            'nomor_hp' => '082284710929',
             'email' => null,
             'email_verified_at' => null,
-            'password' => '$2y$10$0sSLBbUcAVyYLCCj6FhUROrJZnqx2blRTC8HYCBoVQe3jO2CNhERm', // bcrypt hash
+            'password' => '$2y$10$0sSLBbUcAVyYLCCj6FhUROrJZnqx2blRTC8HYCBoVQe3jO2CNhERm',
             'provider' => null,
             'provider_id' => null,
             'role' => 'customer',
@@ -43,14 +45,14 @@ class UserSeeder extends Seeder
             'updated_at' => now(),
         ]);
 
-        // 🔹 Tambahan akun admin
+        // Admin Mall Account
         DB::table('user')->insert([
             'id_user' => 3,
-            'name' => 'admin_mall',
-            'no_hp' => '081234567890',
+            'name' => 'adminmall',
+            'nomor_hp' => '081234567890',
             'email' => 'admin@qparkin.com',
             'email_verified_at' => now(),
-            'password' => bcrypt('admin123'), // password: admin123
+            'password' => bcrypt('admin123'),
             'provider' => null,
             'provider_id' => null,
             'role' => 'admin_mall',

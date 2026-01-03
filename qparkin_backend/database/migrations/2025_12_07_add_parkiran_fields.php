@@ -6,22 +6,22 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
     {
         Schema::table('parkiran', function (Blueprint $table) {
-            if (!Schema::hasColumn('parkiran', 'nama_parkiran')) {
-                $table->string('nama_parkiran')->nullable()->after('id_mall');
-            }
-            if (!Schema::hasColumn('parkiran', 'kode_parkiran')) {
-                $table->string('kode_parkiran', 10)->nullable()->after('nama_parkiran');
-            }
-            if (!Schema::hasColumn('parkiran', 'jumlah_lantai')) {
-                $table->integer('jumlah_lantai')->default(1)->after('kapasitas');
-            }
+            $table->string('nama_parkiran')->nullable()->after('id_mall');
+            $table->string('kode_parkiran', 10)->nullable()->after('nama_parkiran');
+            $table->integer('jumlah_lantai')->default(1)->after('kapasitas');
         });
     }
 
-    public function down()
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
     {
         Schema::table('parkiran', function (Blueprint $table) {
             $table->dropColumn(['nama_parkiran', 'kode_parkiran', 'jumlah_lantai']);

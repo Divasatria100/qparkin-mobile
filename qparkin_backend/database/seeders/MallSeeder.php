@@ -20,27 +20,21 @@ class MallSeeder extends Seeder
                 'lokasi' => 'Batam Centre',
                 'kapasitas' => 200,
                 'alamat_gmaps' => 'Jl. Engku Putri no.1, Batam Centre',
-                'has_slot_reservation_enabled' => true, // Enable slot reservation
-                'created_at' => now(),
-                'updated_at' => now(),
+                'has_slot_reservation_enabled' => true,
             ],
             [
                 'nama_mall' => 'One Batam Mall',
                 'lokasi' => 'Batam Center',
                 'kapasitas' => 150,
                 'alamat_gmaps' => 'Jl. Raja H. Fisabilillah No. 9, Batam Center',
-                'has_slot_reservation_enabled' => true, // Enable slot reservation
-                'created_at' => now(),
-                'updated_at' => now(),
+                'has_slot_reservation_enabled' => true,
             ],
             [
                 'nama_mall' => 'SNL Food Bengkong',
                 'lokasi' => 'Bengkong',
                 'kapasitas' => 100,
                 'alamat_gmaps' => 'Garden Avenue Square, Bengkong, Batam',
-                'has_slot_reservation_enabled' => false, // Disable for testing gradual rollout
-                'created_at' => now(),
-                'updated_at' => now(),
+                'has_slot_reservation_enabled' => false,
             ],
         ];
 

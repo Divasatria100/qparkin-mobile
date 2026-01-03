@@ -1,10 +1,12 @@
 import 'package:flutter/widgets.dart';
 import '../../data/models/user_model.dart';
 import '../../data/models/vehicle_model.dart';
-import '../../data/models/vehicle_statistics.dart';
+import '../../data/services/vehicle_api_service.dart';
+import 'dart:io';
 
 /// Provider for managing profile-related data and operations
 /// Implements state management for user data and vehicle list
+/// Now integrated with VehicleApiService for real backend data
 class ProfileProvider extends ChangeNotifier {
   // Private state
   UserModel? _user;
@@ -12,6 +14,13 @@ class ProfileProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
   DateTime? _lastSyncTime;
+  
+  // API Service
+  final VehicleApiService _vehicleApiService;
+
+  // Constructor with required API service
+  ProfileProvider({required VehicleApiService vehicleApiService})
+      : _vehicleApiService = vehicleApiService;
 
   // Getters
   UserModel? get user => _user;
@@ -64,51 +73,17 @@ class ProfileProvider extends ChangeNotifier {
 
   /// Fetch vehicles associated with the user
   /// Sets loading state and handles errors appropriately
+  /// Now fetches from real backend API
   Future<void> fetchVehicles() async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      debugPrint('[ProfileProvider] Fetching vehicles...');
+      debugPrint('[ProfileProvider] Fetching vehicles from API...');
       
-      // TODO: Replace with actual API call when ProfileService is implemented
-      // For now, simulate API call with delay
-      await Future.delayed(const Duration(milliseconds: 500));
-      
-      // Mock vehicle data for development
-      _vehicles = [
-        VehicleModel(
-          idKendaraan: '1',
-          platNomor: 'B 1234 XYZ',
-          jenisKendaraan: 'Roda Empat',
-          merk: 'Toyota',
-          tipe: 'Avanza',
-          warna: 'Hitam',
-          isActive: true,
-          statistics: VehicleStatistics(
-            parkingCount: 15,
-            totalParkingMinutes: 1200, // 20 hours
-            totalCostSpent: 150000,
-            lastParkingDate: DateTime.now().subtract(const Duration(days: 2)),
-          ),
-        ),
-        VehicleModel(
-          idKendaraan: '2',
-          platNomor: 'B 5678 ABC',
-          jenisKendaraan: 'Roda Dua',
-          merk: 'Honda',
-          tipe: 'Beat',
-          warna: 'Merah',
-          isActive: false,
-          statistics: VehicleStatistics(
-            parkingCount: 8,
-            totalParkingMinutes: 480, // 8 hours
-            totalCostSpent: 40000,
-            lastParkingDate: DateTime.now().subtract(const Duration(days: 7)),
-          ),
-        ),
-      ];
+      // Fetch from real API
+      _vehicles = await _vehicleApiService.getVehicles();
 
       _lastSyncTime = DateTime.now();
       _isLoading = false;
@@ -118,9 +93,20 @@ class ProfileProvider extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       _isLoading = false;
-      _errorMessage = _getUserFriendlyError(e.toString());
       
-      debugPrint('[ProfileProvider] Error fetching user data: $e');
+      // Handle 404 gracefully - empty list is not an error
+      final errorString = e.toString().toLowerCase();
+      if (errorString.contains('404') || errorString.contains('not found')) {
+        // 404 means no vehicles found, which is valid - just empty list
+        _vehicles = [];
+        _errorMessage = null; // Don't show error for empty list
+        debugPrint('[ProfileProvider] No vehicles found (404) - showing empty state');
+      } else {
+        // Other errors should be shown to user
+        _errorMessage = _getUserFriendlyError(e.toString());
+        debugPrint('[ProfileProvider] Error fetching vehicles: $e');
+      }
+      
       notifyListeners();
     }
   }
@@ -149,14 +135,32 @@ class ProfileProvider extends ChangeNotifier {
 
   /// Add a new vehicle to the list
   /// Notifies listeners on successful addition
-  Future<void> addVehicle(VehicleModel vehicle) async {
+  /// Now uses real backend API
+  Future<void> addVehicle({
+    required String platNomor,
+    required String jenisKendaraan,
+    required String merk,
+    required String tipe,
+    String? warna,
+    bool isActive = false,
+    File? foto,
+  }) async {
     try {
-      debugPrint('[ProfileProvider] Adding vehicle...');
+      debugPrint('[ProfileProvider] Adding vehicle via API...');
       
-      // TODO: Replace with actual API call when ProfileService is implemented
-      await Future.delayed(const Duration(milliseconds: 300));
+      // Add via real API
+      final newVehicle = await _vehicleApiService.addVehicle(
+        platNomor: platNomor,
+        jenisKendaraan: jenisKendaraan,
+        merk: merk,
+        tipe: tipe,
+        warna: warna,
+        isActive: isActive,
+        foto: foto,
+      );
       
-      _vehicles.add(vehicle);
+      // Add to local list
+      _vehicles.add(newVehicle);
       _lastSyncTime = DateTime.now();
       
       debugPrint('[ProfileProvider] Vehicle added successfully');
@@ -171,16 +175,36 @@ class ProfileProvider extends ChangeNotifier {
 
   /// Update an existing vehicle
   /// Notifies listeners on successful update
-  Future<void> updateVehicle(VehicleModel vehicle) async {
+  /// Now uses real backend API
+  Future<void> updateVehicle({
+    required String id,
+    String? platNomor,
+    String? jenisKendaraan,
+    String? merk,
+    String? tipe,
+    String? warna,
+    bool? isActive,
+    File? foto,
+  }) async {
     try {
-      debugPrint('[ProfileProvider] Updating vehicle...');
+      debugPrint('[ProfileProvider] Updating vehicle via API...');
       
-      // TODO: Replace with actual API call when ProfileService is implemented
-      await Future.delayed(const Duration(milliseconds: 300));
+      // Update via real API
+      final updatedVehicle = await _vehicleApiService.updateVehicle(
+        id: id,
+        platNomor: platNomor,
+        jenisKendaraan: jenisKendaraan,
+        merk: merk,
+        tipe: tipe,
+        warna: warna,
+        isActive: isActive,
+        foto: foto,
+      );
       
-      final index = _vehicles.indexWhere((v) => v.idKendaraan == vehicle.idKendaraan);
+      // Update in local list
+      final index = _vehicles.indexWhere((v) => v.idKendaraan == id);
       if (index != -1) {
-        _vehicles[index] = vehicle;
+        _vehicles[index] = updatedVehicle;
         _lastSyncTime = DateTime.now();
         
         debugPrint('[ProfileProvider] Vehicle updated successfully');
@@ -198,13 +222,15 @@ class ProfileProvider extends ChangeNotifier {
 
   /// Delete a vehicle from the list
   /// Notifies listeners on successful deletion
+  /// Now uses real backend API
   Future<void> deleteVehicle(String vehicleId) async {
     try {
-      debugPrint('[ProfileProvider] Deleting vehicle...');
+      debugPrint('[ProfileProvider] Deleting vehicle via API...');
       
-      // TODO: Replace with actual API call when ProfileService is implemented
-      await Future.delayed(const Duration(milliseconds: 300));
+      // Delete via real API
+      await _vehicleApiService.deleteVehicle(vehicleId);
       
+      // Remove from local list
       _vehicles.removeWhere((v) => v.idKendaraan == vehicleId);
       _lastSyncTime = DateTime.now();
       
@@ -220,20 +246,21 @@ class ProfileProvider extends ChangeNotifier {
 
   /// Set a vehicle as the active vehicle
   /// Ensures only one vehicle is active at a time
+  /// Now uses real backend API
   Future<void> setActiveVehicle(String vehicleId) async {
     try {
-      debugPrint('[ProfileProvider] Setting active vehicle...');
+      debugPrint('[ProfileProvider] Setting active vehicle via API...');
       
-      // TODO: Replace with actual API call when ProfileService is implemented
-      await Future.delayed(const Duration(milliseconds: 300));
+      // Set active via real API
+      final updatedVehicle = await _vehicleApiService.setActiveVehicle(vehicleId);
       
-      // Deactivate all vehicles first
+      // Update local list - deactivate all first
       _vehicles = _vehicles.map((v) => v.copyWith(isActive: false)).toList();
       
       // Activate the selected vehicle
       final index = _vehicles.indexWhere((v) => v.idKendaraan == vehicleId);
       if (index != -1) {
-        _vehicles[index] = _vehicles[index].copyWith(isActive: true);
+        _vehicles[index] = updatedVehicle;
         _lastSyncTime = DateTime.now();
         
         debugPrint('[ProfileProvider] Active vehicle set successfully');
@@ -326,6 +353,14 @@ class ProfileProvider extends ChangeNotifier {
     _vehicles = vehicles;
     _isLoading = false;
     _errorMessage = null;
+    notifyListeners();
+  }
+  
+  /// Set loading state for testing purposes
+  /// This method should only be used in tests
+  @visibleForTesting
+  void setLoadingForTesting(bool loading) {
+    _isLoading = loading;
     notifyListeners();
   }
 

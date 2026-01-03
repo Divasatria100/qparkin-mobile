@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../data/models/vehicle_model.dart';
 import '../common/animated_card.dart';
+import '../../../utils/vehicle_icon_helper.dart';
 
 /// VehicleCard - Reusable vehicle card widget with interactive feedback
 ///
@@ -89,12 +90,12 @@ class VehicleCard extends StatelessWidget {
                 width: 64,
                 height: 64,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE3F2FD),
+                  color: VehicleIconHelper.getBackgroundColor(vehicle.jenisKendaraan),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
-                  Icons.directions_car,
-                  color: Color(0xFF1872B3),
+                child: Icon(
+                  VehicleIconHelper.getIcon(vehicle.jenisKendaraan),
+                  color: VehicleIconHelper.getColor(vehicle.jenisKendaraan),
                   size: 36,
                 ),
               ),
@@ -158,13 +159,13 @@ class VehicleCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
-                    // Plate number
+                    // Plate number - color matches vehicle icon
                     Text(
                       vehicle.platNomor,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF1872B3),
+                        color: VehicleIconHelper.getColor(vehicle.jenisKendaraan),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

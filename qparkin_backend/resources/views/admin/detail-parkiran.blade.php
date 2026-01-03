@@ -117,7 +117,18 @@
                 <div class="lantai-card">
                     <div class="lantai-card-header">
                         <h4>{{ $floor->floor_name }}</h4>
-                        <span class="lantai-badge">Lantai {{ $floor->floor_number }}</span>
+                        <div class="lantai-header-badges">
+                            <span class="lantai-badge">Lantai {{ $floor->floor_number }}</span>
+                            <span class="status-badge-small {{ $floor->status == 'active' ? 'active' : ($floor->status == 'maintenance' ? 'maintenance' : 'inactive') }}">
+                                @if($floor->status == 'active')
+                                    Aktif
+                                @elseif($floor->status == 'maintenance')
+                                    Maintenance
+                                @else
+                                    Tidak Aktif
+                                @endif
+                            </span>
+                        </div>
                     </div>
                     <div class="lantai-card-body">
                         <div class="lantai-stats">
@@ -134,6 +145,14 @@
                                 <span class="value occupied">{{ $floor->total_slots - $floor->available_slots }}</span>
                             </div>
                         </div>
+                        @if($floor->status == 'maintenance')
+                        <div class="lantai-warning">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-1.964-1.333-2.732 0L4.082 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <span>Lantai sedang maintenance - tidak bisa di-booking</span>
+                        </div>
+                        @endif
                         <div class="lantai-progress">
                             <div class="progress-bar">
                                 <div class="progress-fill" style="width: {{ $floor->total_slots > 0 ? round((($floor->total_slots - $floor->available_slots) / $floor->total_slots) * 100, 2) : 0 }}%"></div>
@@ -168,17 +187,59 @@
                         <option value="maintenance">Maintenance</option>
                     </select>
                 </div>
+                <div class="filter-group">
+                    <label for="itemsPerPage">Slot per Halaman:</label>
+                    <select id="itemsPerPage">
+                        <option value="20">20 slot</option>
+                        <option value="50">50 slot</option>
+                        <option value="100">100 slot</option>
+                        <option value="all">Semua</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="pagination-info" id="paginationInfo">
+                <span id="showingText">Menampilkan 1-20 dari 100 slot</span>
             </div>
 
             <div class="slot-grid" id="slotGrid">
                 @foreach($parkiran->floors as $floor)
                     @foreach($floor->slots as $slot)
-                    <div class="slot-item {{ $slot->status }}" data-floor="{{ $floor->id_floor }}" data-status="{{ $slot->status }}">
+                    @php
+                        // Derive display status from parent floor
+                        $displayStatus = $floor->status == 'maintenance' ? 'maintenance' : $slot->status;
+                        $displayStatusText = $floor->status == 'maintenance' ? 'Maintenance' : ucfirst($slot->status);
+                    @endphp
+                    <div class="slot-item {{ $displayStatus }}" data-floor="{{ $floor->id_floor }}" data-status="{{ $displayStatus }}" data-floor-status="{{ $floor->status }}">
                         <div class="slot-code">{{ $slot->slot_code }}</div>
-                        <div class="slot-status">{{ ucfirst($slot->status) }}</div>
+                        <div class="slot-status">{{ $displayStatusText }}</div>
                     </div>
                     @endforeach
                 @endforeach
+            </div>
+
+            <div class="pagination-controls" id="paginationControls">
+                <button class="pagination-btn" id="firstPageBtn" title="Halaman Pertama">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                    </svg>
+                </button>
+                <button class="pagination-btn" id="prevPageBtn" title="Halaman Sebelumnya">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+                <div class="pagination-numbers" id="paginationNumbers"></div>
+                <button class="pagination-btn" id="nextPageBtn" title="Halaman Selanjutnya">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+                <button class="pagination-btn" id="lastPageBtn" title="Halaman Terakhir">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                    </svg>
+                </button>
             </div>
         </div>
     </div>
@@ -188,29 +249,212 @@
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Elements
     const filterLantai = document.getElementById('filterLantai');
     const filterStatus = document.getElementById('filterStatus');
+    const itemsPerPageSelect = document.getElementById('itemsPerPage');
     const slotGrid = document.getElementById('slotGrid');
-    const slots = slotGrid.querySelectorAll('.slot-item');
+    const paginationInfo = document.getElementById('paginationInfo');
+    const showingText = document.getElementById('showingText');
+    const paginationControls = document.getElementById('paginationControls');
+    const paginationNumbers = document.getElementById('paginationNumbers');
+    const firstPageBtn = document.getElementById('firstPageBtn');
+    const prevPageBtn = document.getElementById('prevPageBtn');
+    const nextPageBtn = document.getElementById('nextPageBtn');
+    const lastPageBtn = document.getElementById('lastPageBtn');
+    
+    // Get all slots and store them
+    const allSlots = Array.from(slotGrid.querySelectorAll('.slot-item'));
+    
+    // Pagination state
+    let currentPage = 1;
+    let itemsPerPage = 20;
+    let filteredSlots = [];
 
+    // Initialize
+    function init() {
+        filterAndPaginate();
+        setupEventListeners();
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+        filterLantai.addEventListener('change', () => {
+            currentPage = 1; // Reset to page 1 when filter changes
+            filterAndPaginate();
+        });
+        
+        filterStatus.addEventListener('change', () => {
+            currentPage = 1; // Reset to page 1 when filter changes
+            filterAndPaginate();
+        });
+        
+        itemsPerPageSelect.addEventListener('change', () => {
+            const value = itemsPerPageSelect.value;
+            itemsPerPage = value === 'all' ? Infinity : parseInt(value);
+            currentPage = 1; // Reset to page 1 when items per page changes
+            filterAndPaginate();
+        });
+        
+        firstPageBtn.addEventListener('click', () => goToPage(1));
+        prevPageBtn.addEventListener('click', () => goToPage(currentPage - 1));
+        nextPageBtn.addEventListener('click', () => goToPage(currentPage + 1));
+        lastPageBtn.addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredSlots.length / itemsPerPage);
+            goToPage(totalPages);
+        });
+    }
+
+    // Filter slots based on selected filters
     function filterSlots() {
         const selectedFloor = filterLantai.value;
         const selectedStatus = filterStatus.value;
 
-        slots.forEach(slot => {
+        filteredSlots = allSlots.filter(slot => {
             const floorMatch = selectedFloor === 'all' || slot.dataset.floor === selectedFloor;
-            const statusMatch = selectedStatus === 'all' || slot.dataset.status === selectedStatus;
-
-            if (floorMatch && statusMatch) {
-                slot.style.display = 'flex';
-            } else {
-                slot.style.display = 'none';
-            }
+            const displayStatus = slot.dataset.status;
+            const statusMatch = selectedStatus === 'all' || displayStatus === selectedStatus;
+            return floorMatch && statusMatch;
         });
     }
 
-    filterLantai.addEventListener('change', filterSlots);
-    filterStatus.addEventListener('change', filterSlots);
+    // Display slots for current page
+    function displaySlots() {
+        // Clear grid
+        slotGrid.innerHTML = '';
+        
+        // Calculate pagination
+        const totalSlots = filteredSlots.length;
+        const totalPages = Math.ceil(totalSlots / itemsPerPage);
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = Math.min(startIndex + itemsPerPage, totalSlots);
+        
+        // Get slots for current page
+        const slotsToDisplay = filteredSlots.slice(startIndex, endIndex);
+        
+        // Display slots
+        slotsToDisplay.forEach(slot => {
+            slotGrid.appendChild(slot.cloneNode(true));
+        });
+        
+        // Update pagination info
+        updatePaginationInfo(startIndex + 1, endIndex, totalSlots);
+        
+        // Update pagination controls
+        updatePaginationControls(currentPage, totalPages);
+    }
+
+    // Update pagination info text
+    function updatePaginationInfo(start, end, total) {
+        if (total === 0) {
+            showingText.textContent = 'Tidak ada slot yang ditampilkan';
+            paginationInfo.style.display = 'block';
+        } else if (itemsPerPage === Infinity) {
+            showingText.textContent = `Menampilkan semua ${total} slot`;
+            paginationInfo.style.display = 'block';
+        } else {
+            showingText.textContent = `Menampilkan ${start}-${end} dari ${total} slot`;
+            paginationInfo.style.display = 'block';
+        }
+    }
+
+    // Update pagination controls
+    function updatePaginationControls(page, totalPages) {
+        // Hide pagination if showing all or only one page
+        if (itemsPerPage === Infinity || totalPages <= 1) {
+            paginationControls.style.display = 'none';
+            return;
+        }
+        
+        paginationControls.style.display = 'flex';
+        
+        // Update button states
+        firstPageBtn.disabled = page === 1;
+        prevPageBtn.disabled = page === 1;
+        nextPageBtn.disabled = page === totalPages;
+        lastPageBtn.disabled = page === totalPages;
+        
+        // Generate page numbers
+        generatePageNumbers(page, totalPages);
+    }
+
+    // Generate page number buttons
+    function generatePageNumbers(page, totalPages) {
+        paginationNumbers.innerHTML = '';
+        
+        // Calculate which page numbers to show
+        let startPage = Math.max(1, page - 2);
+        let endPage = Math.min(totalPages, page + 2);
+        
+        // Adjust if near start or end
+        if (page <= 3) {
+            endPage = Math.min(5, totalPages);
+        }
+        if (page >= totalPages - 2) {
+            startPage = Math.max(1, totalPages - 4);
+        }
+        
+        // Add first page and ellipsis if needed
+        if (startPage > 1) {
+            addPageButton(1);
+            if (startPage > 2) {
+                addEllipsis();
+            }
+        }
+        
+        // Add page numbers
+        for (let i = startPage; i <= endPage; i++) {
+            addPageButton(i, i === page);
+        }
+        
+        // Add ellipsis and last page if needed
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                addEllipsis();
+            }
+            addPageButton(totalPages);
+        }
+    }
+
+    // Add page button
+    function addPageButton(pageNum, isActive = false) {
+        const btn = document.createElement('button');
+        btn.className = 'pagination-number' + (isActive ? ' active' : '');
+        btn.textContent = pageNum;
+        btn.addEventListener('click', () => goToPage(pageNum));
+        paginationNumbers.appendChild(btn);
+    }
+
+    // Add ellipsis
+    function addEllipsis() {
+        const ellipsis = document.createElement('span');
+        ellipsis.className = 'pagination-ellipsis';
+        ellipsis.textContent = '...';
+        paginationNumbers.appendChild(ellipsis);
+    }
+
+    // Go to specific page
+    function goToPage(page) {
+        const totalPages = Math.ceil(filteredSlots.length / itemsPerPage);
+        if (page < 1 || page > totalPages) return;
+        
+        currentPage = page;
+        displaySlots();
+        
+        // Scroll to top of slot grid
+        slotGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Main filter and paginate function
+    function filterAndPaginate() {
+        filterSlots();
+        displaySlots();
+    }
+
+    // Initialize on load
+    init();
+    
+    console.log('Detail parkiran loaded - Floor maintenance status is derived to slots with pagination');
 });
 </script>
 @endsection

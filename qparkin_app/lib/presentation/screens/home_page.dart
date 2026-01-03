@@ -7,6 +7,7 @@ import '../widgets/bottom_nav.dart';
 import '../widgets/shimmer_loading.dart';
 import '../widgets/common/animated_card.dart';
 import '/utils/navigation_utils.dart';
+import '/utils/vehicle_icon_helper.dart';
 import '../../logic/providers/profile_provider.dart';
 
 /// Home Page - Main landing page of QPARKIN app
@@ -615,8 +616,12 @@ class _HomePageState extends State<HomePage> {
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          const Icon(
-                                            Icons.directions_car,
+                                          Icon(
+                                            vehicles.isNotEmpty
+                                                ? VehicleIconHelper.getIcon(
+                                                    vehicles.firstWhere((v) => v.isActive, orElse: () => vehicles.first).jenisKendaraan
+                                                  )
+                                                : Icons.directions_car,
                                             color: Colors.white,
                                             size: 18,
                                           ),

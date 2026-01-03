@@ -10,11 +10,17 @@ class CheckRole
 {
     public function handle(Request $request, Closure $next, string $role)
     {
-        if (!Auth::check()) {
-            return redirect()->route('signin');
+        // Middleware auth sudah handle pengecekan login, jadi tidak perlu cek lagi di sini
+        // Ini mencegah redirect loop antara guest dan auth middleware
+        
+        $user = Auth::user();
+        
+        if (!$user) {
+            // Jika somehow user null (seharusnya tidak terjadi karena middleware auth),
+            // abort dengan 401 daripada redirect untuk menghindari loop
+            abort(401, 'Unauthenticated');
         }
 
-        $user = Auth::user();
         $userRole = $user->role ?? null;
 
         // Map role names

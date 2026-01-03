@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
@@ -341,17 +342,17 @@ void main() {
     });
 
     test('LocationServiceDisabledException accepts custom message', () {
-      final exception = LocationServiceDisabledException('Custom message');
+      final exception = QParkinLocationServiceDisabledException('Custom message');
       expect(exception.toString(), equals('Custom message'));
     });
 
     test('PermissionDeniedException has correct message', () {
-      final exception = PermissionDeniedException('Permission denied');
+      final exception = QParkinPermissionDeniedException('Permission denied');
       expect(exception.toString(), equals('Permission denied'));
     });
 
     test('PermissionDeniedException requires message', () {
-      final exception = PermissionDeniedException('Test message');
+      final exception = QParkinPermissionDeniedException('Test message');
       expect(exception.message, equals('Test message'));
     });
   });

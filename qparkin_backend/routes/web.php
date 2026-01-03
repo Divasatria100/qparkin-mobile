@@ -1,19 +1,33 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\WebAuthController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\AdminController;
 
-// Redirect root to signin - FIX TYPO
+// Redirect root based on authentication status
 Route::get('/', function () {
-    return redirect()->route('signin'); // ← HAPUS SPASI
+    if (Auth::check()) {
+        $user = Auth::user();
+        // Redirect authenticated users to their dashboard
+        if ($user->isSuperAdmin()) {
+            return redirect()->route('superadmin.dashboard');
+        } elseif ($user->isAdminMall()) {
+            return redirect()->route('admin.dashboard');
+        }
+        // Default for other roles
+        return redirect()->route('signin');
+    }
+    // Guest users go to signin
+    return redirect()->route('signin');
 });
 
 // Auth Routes
 Route::middleware('guest')->group(function () {
     Route::get('/signin', [WebAuthController::class, 'showLoginForm'])->name('signin');
+    Route::get('/login', [WebAuthController::class, 'showLoginForm'])->name('login'); // Laravel default redirect
     Route::post('/signin', [WebAuthController::class, 'login']);
     Route::get('/register', function () { 
         return view('auth.signup'); 
@@ -56,6 +70,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/parkiran/{id}', [AdminController::class, 'detailParkiran'])->name('parkiran.detail');
     Route::get('/parkiran/{id}/edit', [AdminController::class, 'editParkiran'])->name('parkiran.edit');
     Route::post('/parkiran/{id}/update', [AdminController::class, 'updateParkiran'])->name('parkiran.update');
+    Route::put('/parkiran/{id}', [AdminController::class, 'updateParkiran'])->name('parkiran.update.put');
     Route::delete('/parkiran/{id}', [AdminController::class, 'deleteParkiran'])->name('parkiran.delete');
 });
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../data/models/vehicle_model.dart';
 import '../../logic/providers/profile_provider.dart';
+import 'tambah_kendaraan.dart';
 
 /// Vehicle Detail Page
 /// Displays detailed information about a specific vehicle
@@ -50,28 +51,85 @@ class VehicleDetailPage extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  // Vehicle icon
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
+                  // Vehicle photo (if available)
+                  if (vehicle.fotoUrl != null && vehicle.fotoUrl!.isNotEmpty) ...[
+                    ClipRRect(
                       borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                      child: Image.network(
+                        vehicle.fotoUrl!,
+                        width: 200,
+                        height: 150,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          // If image fails to load, show vehicle icon instead
+                          return Container(
+                            width: 80,
+                            height: 80,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              _getVehicleIcon(vehicle.jenisKendaraan),
+                              size: 40,
+                              color: const Color(0xFF573ED1),
+                            ),
+                          );
+                        },
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Container(
+                            width: 200,
+                            height: 150,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes != null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes!
+                                    : null,
+                                valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     ),
-                    child: Icon(
-                      _getVehicleIcon(vehicle.jenisKendaraan),
-                      size: 40,
-                      color: const Color(0xFF573ED1),
+                    const SizedBox(height: 16),
+                  ] else ...[
+                    // Vehicle icon (if no photo)
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        _getVehicleIcon(vehicle.jenisKendaraan),
+                        size: 40,
+                        color: const Color(0xFF573ED1),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 16),
+                  ],
                   // Vehicle name
                   Text(
                     '${vehicle.merk} ${vehicle.tipe}',
@@ -418,17 +476,21 @@ class VehicleDetailPage extends StatelessWidget {
   }
 
   Future<void> _handleEdit(BuildContext context) async {
-    // TODO: Navigate to edit vehicle page when implemented
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Fitur edit kendaraan akan segera tersedia',
-          style: TextStyle(fontFamily: 'Nunito'),
+    // Navigate to VehicleSelectionPage in edit mode
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => VehicleSelectionPage(
+          isEditMode: true,
+          vehicle: vehicle,
         ),
-        behavior: SnackBarBehavior.floating,
-        duration: Duration(seconds: 2),
       ),
     );
+    
+    // If edit was successful, pop back to previous page
+    if (result == true && context.mounted) {
+      Navigator.of(context).pop();
+    }
   }
 
   Future<void> _handleDelete(BuildContext context) async {
