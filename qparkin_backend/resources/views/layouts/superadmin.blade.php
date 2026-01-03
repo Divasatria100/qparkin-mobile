@@ -6,10 +6,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Dashboard Super Admin') - QPARKIN</title>
     
-    <!-- Tailwind CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@4.5.0/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Base Dashboard Styles -->
+    <link rel="stylesheet" href="{{ asset('css/super-dashboard.css') }}">
     
-    <!-- Styles -->
+    <!-- Page Specific Styles -->
     @stack('styles')
 </head>
 <body>
@@ -40,7 +40,10 @@
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- Base Dashboard Scripts -->
+    <script src="{{ asset('js/super-dashboard.js') }}"></script>
+    
+    <!-- Page Specific Scripts -->
     @stack('scripts')
 </body>
 </html>

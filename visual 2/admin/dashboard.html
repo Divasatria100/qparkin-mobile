@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - QPARKIN</title>
+    <link rel="stylesheet" href="../styles/admin-dashboard.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Header - Fixed -->
+        <header class="admin-header">
+            <div class="header-left">
+                <button id="sidebarToggle" class="menu-toggle" aria-label="Toggle Sidebar">
+                    <svg id="menuIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    <svg id="closeIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <h1 class="logo">QPARKIN</h1>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <span>Admin Mall</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Wrapper -->
+        <div class="main-wrapper">
+            <!-- Sidebar - Fixed -->
+            <aside class="admin-sidebar">
+                <nav class="sidebar-nav">
+                    <ul>
+                        <li class="nav-item active">
+                            <a href="#" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                </svg>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="profile.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                <span>Profile</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="notifikasi.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                                <span>Notifikasi</span>
+                                <span class="notification-badge">5</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="tiket.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                                <span>Tiket</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="tarif.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>Tarif</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="parkiran.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                <span>Parkiran</span>
+                            </a>
+                        </li>
+                        <li class="nav-item logout">
+                            <a href="../pages/signin.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
+                                <span>Keluar</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </aside>
+
+            <!-- Sidebar Overlay -->
+            <div class="sidebar-overlay"></div>
+
+            <!-- Main Content - Scrollable -->
+            <main class="admin-content">
+                <!-- Breadcrumb -->
+                <div class="breadcrumb">
+                    <span>Dashboard</span>
+                </div>
+
+                <!-- Cards Section -->
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Pendapatan Harian</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-value">Rp 8.250.000</div>
+                            <div class="card-trend positive">
+                                <span>+12.5%</span> dari kemarin
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Pendapatan Mingguan</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-value">Rp 52.100.000</div>
+                            <div class="card-trend positive">
+                                <span>+8.3%</span> dari minggu lalu
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Pendapatan Bulanan</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-value">Rp 198.750.000</div>
+                            <div class="card-trend negative">
+                                <span>-2.1%</span> dari bulan lalu
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Tiket Masuk</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-value">1.245</div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Tiket Keluar</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-value">1.198</div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Sedang Parkir</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-value">47</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transaction History -->
+                <div class="table-section">
+                    <div class="table-header">
+                        <h2>Riwayat Transaksi Terbaru</h2>
+                        <a href="#" class="view-all">Lihat Semua</a>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Plat</th>
+                                    <th>Jenis</th>
+                                    <th>Jam Masuk</th>
+                                    <th>Jam Keluar</th>
+                                    <th>Durasi Parkir</th>
+                                    <th>Biaya</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>TRX001245</td>
+                                    <td>B 1234 ABC</td>
+                                    <td>Roda 4</td>
+                                    <td>09:15</td>
+                                    <td>12:45</td>
+                                    <td>3 jam 30 menit</td>
+                                    <td>Rp 15.000</td>
+                                </tr>
+                                <tr>
+                                    <td>TRX001244</td>
+                                    <td>B 5678 DEF</td>
+                                    <td>Roda 2</td>
+                                    <td>10:30</td>
+                                    <td>11:45</td>
+                                    <td>1 jam 15 menit</td>
+                                    <td>Rp 5.000</td>
+                                </tr>
+                                <tr>
+                                    <td>TRX001243</td>
+                                    <td>B 9012 GHI</td>
+                                    <td>Roda 4</td>
+                                    <td>08:00</td>
+                                    <td>14:20</td>
+                                    <td>6 jam 20 menit</td>
+                                    <td>Rp 25.000</td>
+                                </tr>
+                                <tr>
+                                    <td>TRX001242</td>
+                                    <td>B 3456 JKL</td>
+                                    <td>Roda 6</td>
+                                    <td>07:45</td>
+                                    <td>10:15</td>
+                                    <td>2 jam 30 menit</td>
+                                    <td>Rp 20.000</td>
+                                </tr>
+                                <tr>
+                                    <td>TRX001241</td>
+                                    <td>B 7890 MNO</td>
+                                    <td>Roda 4</td>
+                                    <td>13:10</td>
+                                    <td>15:40</td>
+                                    <td>2 jam 30 menit</td>
+                                    <td>Rp 12.000</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <footer class="admin-footer">
+                    <p>&copy; 2025 QPARKIN - Sistem Manajemen Parkir Mall</p>
+                </footer>
+            </main>
+        </div>
+    </div>
+
+    <script src="../scripts/admin-dashboard.js"></script>
+</body>
+</html>

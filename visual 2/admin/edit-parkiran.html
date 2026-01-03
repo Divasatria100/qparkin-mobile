@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Parkiran - QPARKIN</title>
+    <link rel="stylesheet" href="../styles/admin-dashboard.css">
+    <link rel="stylesheet" href="../styles/edit-parkiran.css">
+</head>
+<body>
+    <div class="admin-container">
+        <header class="admin-header">
+            <div class="header-left">
+                <button id="sidebarToggle" class="menu-toggle" aria-label="Toggle Sidebar">
+                    <svg id="menuIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    <svg id="closeIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <h1 class="logo">QPARKIN</h1>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <span>Admin Mall</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-wrapper">
+            <!-- Sidebar - Fixed -->
+            <aside class="admin-sidebar">
+                <nav class="sidebar-nav">
+                    <ul>
+                        <li class="nav-item">
+                            <a href="dashboard.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                </svg>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="profile.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                <span>Profile</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="notifikasi.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                                <span>Notifikasi</span>
+                                <span class="notification-badge">5</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="tiket.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                                <span>Tiket</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="tarif.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>Tarif</span>
+                            </a>
+                        </li>
+                        <li class="nav-item active">
+                            <a href="parkiran.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                <span>Parkiran</span>
+                            </a>
+                        </li>
+                        <li class="nav-item logout">
+                            <a href="../pages/signin.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
+                                <span>Keluar</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </aside>
+
+            <div class="sidebar-overlay"></div>
+
+            <main class="admin-content">
+                <div class="breadcrumb">
+                    <a href="parkiran.html" class="breadcrumb-link">Parkiran</a>
+                    <span class="breadcrumb-separator">/</span>
+                    <span id="pageTitle">Edit Parkiran</span>
+                </div>
+
+                <div class="parkiran-edit-container">
+                    <div class="edit-header">
+                        <h2 id="formTitle">Edit Parkiran</h2>
+                        <p id="formSubtitle">Perbarui informasi dan konfigurasi parkiran</p>
+                    </div>
+
+                    <div class="edit-content">
+                        <div class="current-info-section">
+                            <h3>Informasi Saat Ini</h3>
+                            <div class="current-info-card">
+                                <div class="info-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    </svg>
+                                </div>
+                                <div class="current-info-content">
+                                    <h4 id="currentParkiranName">Parkiran Mawar</h4>
+                                    <div class="current-stats">
+                                        <div class="current-stat">
+                                            <span class="label">Kode:</span>
+                                            <span class="value" id="currentKode">MWR</span>
+                                        </div>
+                                        <div class="current-stat">
+                                            <span class="label">Status:</span>
+                                            <span class="value" id="currentStatus">Aktif</span>
+                                        </div>
+                                        <div class="current-stat">
+                                            <span class="label">Lantai:</span>
+                                            <span class="value" id="currentLantai">5</span>
+                                        </div>
+                                        <div class="current-stat">
+                                            <span class="label">Total Slot:</span>
+                                            <span class="value" id="currentTotalSlot">250</span>
+                                        </div>
+                                    </div>
+                                    <div class="last-updated">
+                                        Terakhir diupdate: <span id="lastUpdated">15 Mar 2025</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3>Form Edit Parkiran</h3>
+                            <form id="editParkiranForm" class="parkiran-form">
+                                <div class="form-group">
+                                    <label for="namaParkiran">Nama Parkiran *</label>
+                                    <input type="text" id="namaParkiran" name="namaParkiran" placeholder="Masukkan nama parkiran" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="kodeParkiran">Kode Parkiran *</label>
+                                    <input type="text" id="kodeParkiran" name="kodeParkiran" placeholder="Masukkan kode parkiran" maxlength="5" required>
+                                    <span class="form-hint">Kode unik untuk identifikasi (maks. 5 karakter)</span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="statusParkiran">Status *</label>
+                                    <select id="statusParkiran" name="statusParkiran" required>
+                                        <option value="active">Aktif</option>
+                                        <option value="maintenance">Maintenance</option>
+                                        <option value="inactive">Tidak Aktif</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="jumlahLantai">Jumlah Lantai *</label>
+                                    <input type="number" id="jumlahLantai" name="jumlahLantai" min="1" max="10" placeholder="Jumlah lantai" required>
+                                    <span class="form-hint">Mengubah jumlah lantai akan mempengaruhi konfigurasi slot</span>
+                                </div>
+
+                                <div class="lantai-configuration">
+                                    <h4>Konfigurasi Lantai</h4>
+                                    <div class="configuration-info">
+                                        <p>Atur jumlah slot dan sistem penamaan untuk setiap lantai</p>
+                                    </div>
+                                    <div id="lantaiContainer" class="lantai-container">
+                                        <!-- Dynamic lantai fields will be added here -->
+                                    </div>
+                                </div>
+
+                                <div class="preview-section">
+                                    <h4>Preview Perubahan</h4>
+                                    <div class="preview-card">
+                                        <div class="preview-header">
+                                            <div class="preview-icon">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                                </svg>
+                                            </div>
+                                            <div class="preview-title">
+                                                <h5 id="previewNama">Nama Parkiran</h5>
+                                                <span class="preview-status" id="previewStatus">Status</span>
+                                            </div>
+                                        </div>
+                                        <div class="preview-body">
+                                            <div class="preview-stats">
+                                                <div class="preview-stat">
+                                                    <span class="label">Lantai:</span>
+                                                    <span class="value" id="previewLantai">0</span>
+                                                </div>
+                                                <div class="preview-stat">
+                                                    <span class="label">Total Slot:</span>
+                                                    <span class="value" id="previewSlot">0</span>
+                                                </div>
+                                                <div class="preview-stat">
+                                                    <span class="label">Kode:</span>
+                                                    <span class="value" id="previewKode">-</span>
+                                                </div>
+                                            </div>
+                                            <div class="preview-lantai-list">
+                                                <h6>Detail Lantai:</h6>
+                                                <div id="previewLantaiList">
+                                                    <!-- Dynamic lantai preview will be added here -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="edit-actions">
+                        <button class="btn-cancel" onclick="window.location.href='parkiran.html'">Batal</button>
+                        <button class="btn-delete" id="deleteBtn" type="button">Hapus Parkiran</button>
+                        <button class="btn-save" id="saveParkiranBtn">
+                            <span class="loading-spinner"></span>
+                            <span class="btn-text">Simpan Perubahan</span>
+                        </button>
+                    </div>
+                </div>
+
+                <footer class="admin-footer">
+                    <p>&copy; 2025 QPARKIN - Sistem Manajemen Parkir Mall</p>
+                </footer>
+            </main>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-spinner-large"></div>
+            <h3>Memuat Data Parkiran</h3>
+            <p>Sedang mengambil informasi parkiran...</p>
+            <div class="loading-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <span class="progress-text" id="progressText">0%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Hapus Parkiran</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="warning-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                </div>
+                <p>Apakah Anda yakin ingin menghapus <strong id="deleteParkiranName">Parkiran Mawar</strong>?</p>
+                <p class="warning-text">Tindakan ini tidak dapat dibatalkan. Semua data parkiran, termasuk histori parkir, akan dihapus permanen.</p>
+                <div class="confirmation-input">
+                    <label for="confirmDelete">Ketik "HAPUS" untuk konfirmasi:</label>
+                    <input type="text" id="confirmDelete" placeholder="HAPUS">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel">Batal</button>
+                <button type="button" class="btn-danger" id="confirmDeleteBtn" disabled>Hapus Parkiran</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../scripts/admin-dashboard.js"></script>
+    <script src="../scripts/edit-parkiran.js"></script>
+</body>
+</html>

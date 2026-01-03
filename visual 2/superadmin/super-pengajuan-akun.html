@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengajuan Akun - QPARKIN Super Admin</title>
+    <link rel="stylesheet" href="../styles/super-dashboard.css">
+    <link rel="stylesheet" href="../styles/super-pengajuan-akun.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Header - Fixed -->
+        <header class="admin-header">
+            <div class="header-left">
+                <button id="sidebarToggle" class="menu-toggle" aria-label="Toggle Sidebar">
+                    <svg id="menuIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    <svg id="closeIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <h1 class="logo">QPARKIN</h1>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <span>Super Admin</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Wrapper -->
+        <div class="main-wrapper">
+            <!-- Sidebar - Fixed -->
+            <aside class="admin-sidebar">
+                <nav class="sidebar-nav">
+                    <ul>
+                        <li class="nav-item">
+                            <a href="super-dashboard.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                </svg>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="super-profile.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                <span>Profile</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="super-manajemen-mall.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                <span>Manajemen Mall</span>
+                            </a>
+                        </li>
+                        <li class="nav-item active">
+                            <a href="super-pengajuan-akun.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                                </svg>
+                                <span>Pengajuan Akun</span>
+                                <span class="notification-badge">12</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="super-laporan.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                                <span>Laporan & Analitik</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="super-konfigurasi.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span>Konfigurasi Sistem</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="super-notifikasi.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                                <span>Notifikasi</span>
+                                <span class="notification-badge">3</span>
+                            </a>
+                        </li>
+                        <li class="nav-item logout">
+                            <a href="../pages/signin.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
+                                <span>Keluar</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </aside>
+
+            <!-- Sidebar Overlay -->
+            <div class="sidebar-overlay"></div>
+
+            <!-- Main Content - Scrollable -->
+            <main class="admin-content">
+                <!-- Breadcrumb -->
+                <div class="breadcrumb">
+                    <span>Pengajuan Akun & Manajemen Pengguna</span>
+                </div>
+
+                <!-- Tab Navigation -->
+                <div class="tab-navigation">
+                    <button class="tab-button active" data-tab="permohonan">Permohonan Baru</button>
+                    <button class="tab-button" data-tab="semua-pengguna">Semua Pengguna</button>
+                    <button class="tab-button" data-tab="role-permission">Role & Permission</button>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="tab-content">
+                    <!-- Tab 1: Permohonan Baru -->
+                    <div class="tab-pane active" id="permohonan">
+                        <!-- Filter Section -->
+                        <div class="filter-section">
+                            <div class="filter-controls">
+                                <div class="filter-group">
+                                    <label for="filter-status">Status</label>
+                                    <select id="filter-status" class="filter-select">
+                                        <option value="semua">Semua Status</option>
+                                        <option value="pending" selected>Menunggu</option>
+                                        <option value="approved">Disetujui</option>
+                                        <option value="rejected">Ditolak</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label for="filter-tanggal">Tanggal</label>
+                                    <select id="filter-tanggal" class="filter-select">
+                                        <option value="hari-ini">Hari Ini</option>
+                                        <option value="minggu-ini">Minggu Ini</option>
+                                        <option value="bulan-ini" selected>Bulan Ini</option>
+                                        <option value="semua">Semua</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label for="search">Cari</label>
+                                    <input type="text" id="search" class="filter-input" placeholder="Nama, email, atau mall...">
+                                </div>
+                                <button class="btn-filter">Terapkan Filter</button>
+                            </div>
+                        </div>
+
+                        <!-- Stats Overview -->
+                        <div class="stats-overview">
+                            <div class="stat-card">
+                                <div class="stat-value">12</div>
+                                <div class="stat-label">Menunggu</div>
+                                <div class="stat-badge pending"></div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">28</div>
+                                <div class="stat-label">Disetujui</div>
+                                <div class="stat-badge approved"></div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">5</div>
+                                <div class="stat-label">Ditolak</div>
+                                <div class="stat-badge rejected"></div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">45</div>
+                                <div class="stat-label">Total</div>
+                                <div class="stat-badge total"></div>
+                            </div>
+                        </div>
+
+                        <!-- Applications Table -->
+                        <div class="table-section">
+                            <div class="table-header">
+                                <h2>Daftar Permohonan Admin Mall Baru</h2>
+                                <div class="table-actions">
+                                    <button class="btn-action" id="bulk-approve">Approve Selected</button>
+                                    <button class="btn-action" id="bulk-reject">Reject Selected</button>
+                                </div>
+                            </div>
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                <input type="checkbox" id="select-all">
+                                            </th>
+                                            <th>Tanggal</th>
+                                            <th>Nama Lengkap</th>
+                                            <th>Email</th>
+                                            <th>Mall</th>
+                                            <th>No. HP</th>
+                                            <th>Status</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><input type="checkbox" class="row-select"></td>
+                                            <td>25 Sep 2025</td>
+                                            <td>Budi Santoso</td>
+                                            <td>budi.santoso@grandindonesia.com</td>
+                                            <td>Grand Indonesia</td>
+                                            <td>081234567890</td>
+                                            <td><span class="status-badge pending">Menunggu</span></td>
+                                            <td>
+                                                <div class="action-buttons">
+                                                    <button class="btn-approve" data-id="1">Approve</button>
+                                                    <button class="btn-reject" data-id="1">Reject</button>
+                                                    <button class="btn-detail" data-id="1">Detail</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><input type="checkbox" class="row-select"></td>
+                                            <td>24 Sep 2025</td>
+                                            <td>Sari Dewi</td>
+                                            <td>sari.dewi@plazaindonesia.com</td>
+                                            <td>Plaza Indonesia</td>
+                                            <td>081298765432</td>
+                                            <td><span class="status-badge pending">Menunggu</span></td>
+                                            <td>
+                                                <div class="action-buttons">
+                                                    <button class="btn-approve" data-id="2">Approve</button>
+                                                    <button class="btn-reject" data-id="2">Reject</button>
+                                                    <button class="btn-detail" data-id="2">Detail</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><input type="checkbox" class="row-select"></td>
+                                            <td>23 Sep 2025</td>
+                                            <td>Rizki Pratama</td>
+                                            <td>rizki.pratama@pacificplace.com</td>
+                                            <td>Pacific Place</td>
+                                            <td>081112223344</td>
+                                            <td><span class="status-badge approved">Disetujui</span></td>
+                                            <td>
+                                                <div class="action-buttons">
+                                                    <button class="btn-view" data-id="3">View</button>
+                                                    <button class="btn-deactivate" data-id="3">Nonaktifkan</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><input type="checkbox" class="row-select"></td>
+                                            <td>22 Sep 2025</td>
+                                            <td>Maya Sari</td>
+                                            <td>maya.sari@senayancity.com</td>
+                                            <td>Senayan City</td>
+                                            <td>081556677889</td>
+                                            <td><span class="status-badge rejected">Ditolak</span></td>
+                                            <td>
+                                                <div class="action-buttons">
+                                                    <button class="btn-view" data-id="4">View</button>
+                                                    <button class="btn-restore" data-id="4">Restore</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><input type="checkbox" class="row-select"></td>
+                                            <td>21 Sep 2025</td>
+                                            <td>Andi Wijaya</td>
+                                            <td>andi.wijaya@lippomall.com</td>
+                                            <td>Lippo Mall Kemang</td>
+                                            <td>081998877665</td>
+                                            <td><span class="status-badge pending">Menunggu</span></td>
+                                            <td>
+                                                <div class="action-buttons">
+                                                    <button class="btn-approve" data-id="5">Approve</button>
+                                                    <button class="btn-reject" data-id="5">Reject</button>
+                                                    <button class="btn-detail" data-id="5">Detail</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: Semua Pengguna -->
+                    <div class="tab-pane" id="semua-pengguna">
+                        <div class="filter-section">
+                            <div class="filter-controls">
+                                <div class="filter-group">
+                                    <label for="filter-role">Role</label>
+                                    <select id="filter-role" class="filter-select">
+                                        <option value="semua">Semua Role</option>
+                                        <option value="admin_mall">Admin Mall</option>
+                                        <option value="customer">Customer</option>
+                                        <option value="super_admin">Super Admin</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label for="filter-status-user">Status</label>
+                                    <select id="filter-status-user" class="filter-select">
+                                        <option value="semua">Semua Status</option>
+                                        <option value="aktif">Aktif</option>
+                                        <option value="non-aktif">Non-aktif</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label for="search-user">Cari</label>
+                                    <input type="text" id="search-user" class="filter-input" placeholder="Nama, email, atau telepon...">
+                                </div>
+                                <button class="btn-filter">Terapkan Filter</button>
+                            </div>
+                        </div>
+
+                        <div class="table-section">
+                            <div class="table-header">
+                                <h2>Semua Pengguna Sistem</h2>
+                                <div class="table-actions">
+                                    <button class="btn-action" id="export-users">Ekspor Data</button>
+                                </div>
+                            </div>
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Nama</th>
+                                            <th>Email</th>
+                                            <th>No. HP</th>
+                                            <th>Role</th>
+                                            <th>Mall</th>
+                                            <th>Status</th>
+                                            <th>Terdaftar</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>USR001</td>
+                                            <td>Budi Santoso</td>
+                                            <td>budi.santoso@grandindonesia.com</td>
+                                            <td>081234567890</td>
+                                            <td><span class="role-badge admin">Admin Mall</span></td>
+                                            <td>Grand Indonesia</td>
+                                            <td><span class="status-badge active">Aktif</span></td>
+                                            <td>15 Sep 2025</td>
+                                            <td>
+                                                <div class="action-buttons">
+                                                    <button class="btn-view">View</button>
+                                                    <button class="btn-edit">Edit</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>USR002</td>
+                                            <td>Customer Anonim 1</td>
+                                            <td>customer1@email.com</td>
+                                            <td>081298765432</td>
+                                            <td><span class="role-badge customer">Customer</span></td>
+                                            <td>-</td>
+                                            <td><span class="status-badge active">Aktif</span></td>
+                                            <td>20 Sep 2025</td>
+                                            <td>
+                                                <div class="action-buttons">
+                                                    <button class="btn-view">View</button>
+                                                    <button class="btn-support">Support</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>USR003</td>
+                                            <td>Sari Dewi</td>
+                                            <td>sari.dewi@plazaindonesia.com</td>
+                                            <td>081112223344</td>
+                                            <td><span class="role-badge admin">Admin Mall</span></td>
+                                            <td>Plaza Indonesia</td>
+                                            <td><span class="status-badge inactive">Non-aktif</span></td>
+                                            <td>10 Sep 2025</td>
+                                            <td>
+                                                <div class="action-buttons">
+                                                    <button class="btn-view">View</button>
+                                                    <button class="btn-activate">Aktifkan</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 3: Role & Permission -->
+                    <div class="tab-pane" id="role-permission">
+                        <div class="role-management">
+                            <div class="role-header">
+                                <h2>Manajemen Role & Permission</h2>
+                                <button class="btn-primary" id="add-role">Tambah Role Baru</button>
+                            </div>
+                            
+                            <div class="roles-grid">
+                                <div class="role-card">
+                                    <div class="role-header">
+                                        <h3>Super Admin</h3>
+                                        <span class="role-badge primary">System</span>
+                                    </div>
+                                    <div class="role-description">
+                                        Akses penuh ke semua fitur sistem
+                                    </div>
+                                    <div class="permissions-list">
+                                        <div class="permission-item">Manajemen Mall</div>
+                                        <div class="permission-item">Manajemen Pengguna</div>
+                                        <div class="permission-item">Akses Laporan</div>
+                                        <div class="permission-item">Konfigurasi Sistem</div>
+                                    </div>
+                                    <div class="role-actions">
+                                        <button class="btn-edit">Edit</button>
+                                        <button class="btn-view">View Details</button>
+                                    </div>
+                                </div>
+
+                                <div class="role-card">
+                                    <div class="role-header">
+                                        <h3>Admin Mall</h3>
+                                        <span class="role-badge admin">Mall</span>
+                                    </div>
+                                    <div class="role-description">
+                                        Mengelola operasional mall tertentu
+                                    </div>
+                                    <div class="permissions-list">
+                                        <div class="permission-item">Kelola Parkiran</div>
+                                        <div class="permission-item">Lihat Laporan Mall</div>
+                                        <div class="permission-item">Kelola Tarif</div>
+                                        <div class="permission-item">Monitor Gerbang</div>
+                                    </div>
+                                    <div class="role-actions">
+                                        <button class="btn-edit">Edit</button>
+                                        <button class="btn-view">View Details</button>
+                                    </div>
+                                </div>
+
+                                <div class="role-card">
+                                    <div class="role-header">
+                                        <h3>Supervisor</h3>
+                                        <span class="role-badge warning">Supervisor</span>
+                                    </div>
+                                    <div class="role-description">
+                                        Supervisor untuk multiple mall dalam grup
+                                    </div>
+                                    <div class="permissions-list">
+                                        <div class="permission-item">Monitor Multiple Mall</div>
+                                        <div class="permission-item">Laporan Konsolidasi</div>
+                                        <div class="permission-item">Approval Budget</div>
+                                        <div class="permission-item">Review Kinerja</div>
+                                    </div>
+                                    <div class="role-actions">
+                                        <button class="btn-edit">Edit</button>
+                                        <button class="btn-view">View Details</button>
+                                    </div>
+                                </div>
+
+                                <div class="role-card">
+                                    <div class="role-header">
+                                        <h3>Customer</h3>
+                                        <span class="role-badge customer">Customer</span>
+                                    </div>
+                                    <div class="role-description">
+                                        Akses terbatas untuk penggunaan aplikasi customer
+                                    </div>
+                                    <div class="permissions-list">
+                                        <div class="permission-item">Booking Parkir</div>
+                                        <div class="permission-item">Lihat Riwayat</div>
+                                        <div class="permission-item">Kelola Kendaraan</div>
+                                        <div class="permission-item">Gunakan Poin</div>
+                                    </div>
+                                    <div class="role-actions">
+                                        <button class="btn-edit">Edit</button>
+                                        <button class="btn-view">View Details</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <footer class="admin-footer">
+                    <p>&copy; 2025 QPARKIN - Sistem Manajemen Parkir Mall | Super Admin Dashboard</p>
+                </footer>
+            </main>
+        </div>
+    </div>
+
+    <script src="../scripts/super-dashboard.js"></script>
+    <script src="../scripts/super-pengajuan-akun.js"></script>
+</body>
+</html>

@@ -14,9 +14,9 @@
             <h3>Total Mall Terdaftar</h3>
         </div>
         <div class="card-body">
-            <div class="card-value">{{ $totalMalls ?? 0 }}</div>
-            <div class="card-trend positive">
-                <span>+3</span> bulan ini
+            <div class="card-value">{{ $totalMalls }}</div>
+            <div class="card-trend {{ $lastMonthMalls > 0 ? 'positive' : 'neutral' }}">
+                <span>+{{ $lastMonthMalls }}</span> bulan ini
             </div>
         </div>
     </div>
@@ -25,9 +25,9 @@
             <h3>Total Pendapatan Sistem</h3>
         </div>
         <div class="card-body">
-            <div class="card-value">Rp {{ number_format($totalRevenue ?? 0, 0, ',', '.') }}</div>
-            <div class="card-trend positive">
-                <span>+15.8%</span> dari bulan lalu
+            <div class="card-value">Rp {{ number_format($totalRevenue / 1000000, 1, ',', '.') }}M</div>
+            <div class="card-trend {{ $revenueGrowth >= 0 ? 'positive' : 'negative' }}">
+                <span>{{ $revenueGrowth >= 0 ? '+' : '' }}{{ $revenueGrowth }}%</span> dari bulan lalu
             </div>
         </div>
     </div>
@@ -36,9 +36,9 @@
             <h3>Admin Aktif</h3>
         </div>
         <div class="card-body">
-            <div class="card-value">{{ $activeAdmins ?? 0 }}</div>
-            <div class="card-trend positive">
-                <span>+5</span> dari bulan lalu
+            <div class="card-value">{{ $activeAdmins }}</div>
+            <div class="card-trend {{ $lastMonthAdmins > 0 ? 'positive' : 'neutral' }}">
+                <span>+{{ $lastMonthAdmins }}</span> dari bulan lalu
             </div>
         </div>
     </div>
@@ -47,7 +47,7 @@
             <h3>Pengajuan Akun Baru</h3>
         </div>
         <div class="card-body">
-            <div class="card-value">{{ $pendingRequests ?? 0 }}</div>
+            <div class="card-value">{{ $pendingRequests }}</div>
             <div class="card-trend negative">
                 Menunggu verifikasi
             </div>
@@ -58,9 +58,9 @@
             <h3>Transaksi Hari Ini</h3>
         </div>
         <div class="card-body">
-            <div class="card-value">{{ number_format($todayTransactions ?? 0, 0, ',', '.') }}</div>
-            <div class="card-trend positive">
-                <span>+8.3%</span> dari kemarin
+            <div class="card-value">{{ number_format($todayTransactions, 0, ',', '.') }}</div>
+            <div class="card-trend {{ $transactionGrowth >= 0 ? 'positive' : 'negative' }}">
+                <span>{{ $transactionGrowth >= 0 ? '+' : '' }}{{ $transactionGrowth }}%</span> dari kemarin
             </div>
         </div>
     </div>
@@ -69,9 +69,9 @@
             <h3>Pengguna Aktif</h3>
         </div>
         <div class="card-body">
-            <div class="card-value">{{ number_format($activeUsers ?? 0, 0, ',', '.') }}</div>
-            <div class="card-trend positive">
-                <span>+12.5%</span> growth
+            <div class="card-value">{{ number_format($activeUsers / 1000, 1, ',', '.') }}K</div>
+            <div class="card-trend {{ $userGrowth >= 0 ? 'positive' : 'negative' }}">
+                <span>{{ $userGrowth >= 0 ? '+' : '' }}{{ $userGrowth }}%</span> growth
             </div>
         </div>
     </div>

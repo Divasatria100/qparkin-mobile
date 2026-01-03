@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Mall - Grand Indonesia - QPARKIN</title>
+    <!-- Tailwind CDN 4 -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@4.5.0/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../styles/super-dashboard.css">
+    <link rel="stylesheet" href="../styles/super-detail-mall.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Header - Fixed -->
+        <header class="admin-header">
+            <div class="header-left">
+                <button id="sidebarToggle" class="menu-toggle" aria-label="Toggle Sidebar">
+                    <svg id="menuIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    <svg id="closeIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <h1 class="logo">QPARKIN </h1>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <span>Super Admin</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Wrapper -->
+        <div class="main-wrapper">
+            <!-- Sidebar - Fixed -->
+            <aside class="admin-sidebar">
+                <nav class="sidebar-nav">
+                    <ul>
+                        <li class="nav-item">
+                            <a href="super-dashboard.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                </svg>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="super-profile.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                <span>Profile</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="super-manajemen-mall.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                <span>Manajemen Mall</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="super-pengajuan-akun.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                                </svg>
+                                <span>Pengajuan Akun</span>
+                                <span class="notification-badge">12</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="super-laporan.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                                <span>Laporan & Analitik</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="super-konfigurasi.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span>Konfigurasi Sistem</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="super-notifikasi.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                                <span>Notifikasi</span>
+                                <span class="notification-badge">3</span>
+                            </a>
+                        </li>
+                        <li class="nav-item logout">
+                            <a href="../pages/signin.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
+                                <span>Keluar</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </aside>
+
+            <!-- Sidebar Overlay -->
+            <div class="sidebar-overlay"></div>
+
+            <!-- Main Content - Scrollable -->
+            <main class="admin-content">
+                <!-- Breadcrumb -->
+                <div class="breadcrumb">
+                    <a href="super-manajemen-mall.html" class="breadcrumb-link">Manajemen Mall</a>
+                    <span class="breadcrumb-separator">/</span>
+                    <span>Detail Mall - Grand Indonesia</span>
+                </div>
+
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div class="header-content">
+                        <div class="mall-header">
+                            <div class="mall-logo-large">
+                                <img src="../assets/mall-logos/grand-indonesia.png" alt="Grand Indonesia">
+                            </div>
+                            <div class="mall-info-header">
+                                <h1>Grand Indonesia Shopping Town</h1>
+                                <div class="mall-meta">
+                                    <span class="mall-code">Kode: GI</span>
+                                    <span class="mall-category">Kategori: Super Mall</span>
+                                    <div class="mall-status-badge active">
+                                        <span class="status-dot"></span>
+                                        Status: Aktif
+                                    </div>
+                                </div>
+                                <p class="mall-description">
+                                    Grand Indonesia Shopping Town adalah pusat perbelanjaan premium yang terletak di jantung Jakarta. 
+                                    Menawarkan pengalaman berbelanja mewah dengan berbagai brand internasional.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="header-actions">
+                        <a href="super-edit-mall.html?mall=Grand%20Indonesia" class="btn-primary">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            Edit Mall
+                        </a>
+                        <a href="super-manajemen-mall.html" class="btn-secondary">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            Kembali
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Dashboard Tabs -->
+                <div class="dashboard-tabs">
+                    <nav class="tabs-navigation">
+                        <button class="tab-button active" data-tab="overview">Overview</button>
+                        <button class="tab-button" data-tab="parking">Parkir & Tarif</button>
+                        <button class="tab-button" data-tab="performance">Performance</button>
+                        <button class="tab-button" data-tab="admin">Admin & Staff</button>
+                        <button class="tab-button" data-tab="settings">Pengaturan</button>
+                    </nav>
+
+                    <!-- Overview Tab -->
+                    <div class="tab-content active" id="overview-tab">
+                        <!-- Statistics Cards -->
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon primary">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    </svg>
+                                </div>
+                                <div class="stat-content">
+                                    <h3>Total Slot Parkir</h3>
+                                    <div class="stat-value">1,200</div>
+                                    <div class="stat-trend positive">
+                                        <span>+50</span> dari bulan lalu
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-icon success">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                </div>
+                                <div class="stat-content">
+                                    <h3>Pendapatan Bulan Ini</h3>
+                                    <div class="stat-value">Rp 450 Jt</div>
+                                    <div class="stat-trend positive">
+                                        <span>+18.2%</span> dari bulan lalu
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-icon warning">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                </div>
+                                <div class="stat-content">
+                                    <h3>Pengunjung Hari Ini</h3>
+                                    <div class="stat-value">2,847</div>
+                                    <div class="stat-trend positive">
+                                        <span>+12.5%</span> dari kemarin
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-icon info">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                    </svg>
+                                </div>
+                                <div class="stat-content">
+                                    <h3>Occupancy Rate</h3>
+                                    <div class="stat-value">85%</div>
+                                    <div class="stat-trend positive">
+                                        <span>+5%</span> dari minggu lalu
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Main Content Grid -->
+                        <div class="content-grid">
+                            <!-- Basic Information -->
+                            <div class="info-card">
+                                <div class="card-header">
+                                    <h3>Informasi Dasar</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="info-grid">
+                                        <div class="info-item">
+                                            <label>Nama Mall</label>
+                                            <span>Grand Indonesia Shopping Town</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <label>Kode Mall</label>
+                                            <span>GI</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <label>Kategori</label>
+                                            <span class="badge premium">Super Mall</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <label>Status</label>
+                                            <span class="badge active">Aktif</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <label>Deskripsi</label>
+                                            <span>Grand Indonesia Shopping Town adalah pusat perbelanjaan premium yang terletak di jantung Jakarta. Menawarkan pengalaman berbelanja mewah dengan berbagai brand internasional.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Contact Information -->
+                            <div class="info-card">
+                                <div class="card-header">
+                                    <h3>Kontak & Lokasi</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="info-grid">
+                                        <div class="info-item">
+                                            <label>Alamat</label>
+                                            <span>Jl. M.H. Thamrin No.1, Menteng, Jakarta Pusat 10310</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <label>Provinsi</label>
+                                            <span>DKI Jakarta</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <label>Kota</label>
+                                            <span>Jakarta Pusat</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <label>Kode Pos</label>
+                                            <span>10310</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <label>Telepon</label>
+                                            <span>(021) 23583838</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <label>Email</label>
+                                            <span>info@grand-indonesia.com</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <label>Website</label>
+                                            <span>https://www.grand-indonesia.com</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Recent Activity -->
+                            <div class="info-card">
+                                <div class="card-header">
+                                    <h3>Aktivitas Terbaru</h3>
+                                    <a href="#" class="view-all">Lihat Semua</a>
+                                </div>
+                                <div class="card-body">
+                                    <div class="activity-list">
+                                        <div class="activity-item">
+                                            <div class="activity-icon success">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                            </div>
+                                            <div class="activity-content">
+                                                <p>Tarif parkir berhasil diupdate</p>
+                                                <span>Hari ini, 14:30</span>
+                                            </div>
+                                        </div>
+                                        <div class="activity-item">
+                                            <div class="activity-icon info">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                                </svg>
+                                            </div>
+                                            <div class="activity-content">
+                                                <p>Slot parkir baru ditambahkan</p>
+                                                <span>Kemarin, 09:15</span>
+                                            </div>
+                                        </div>
+                                        <div class="activity-item">
+                                            <div class="activity-icon warning">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                                </svg>
+                                            </div>
+                                            <div class="activity-content">
+                                                <p>Maintenance sistem parkir</p>
+                                                <span>2 hari lalu, 11:00</span>
+                                            </div>
+                                        </div>
+                                        <div class="activity-item">
+                                            <div class="activity-icon primary">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                </svg>
+                                            </div>
+                                            <div class="activity-content">
+                                                <p>Admin baru ditambahkan</p>
+                                                <span>3 hari lalu, 16:45</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Quick Actions -->
+                            <div class="info-card">
+                                <div class="card-header">
+                                    <h3>Aksi Cepat</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="quick-actions">
+                                        <button class="quick-action-btn" data-action="edit-rates">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                                            </svg>
+                                            Edit Tarif
+                                        </button>
+                                        <button class="quick-action-btn" data-action="view-reports">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                            </svg>
+                                            Lihat Laporan
+                                        </button>
+                                        <button class="quick-action-btn" data-action="manage-admin">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                                            </svg>
+                                            Kelola Admin
+                                        </button>
+                                        <button class="quick-action-btn" data-action="system-status">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                            </svg>
+                                            Status Sistem
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Parking & Rates Tab -->
+                    <div class="tab-content" id="parking-tab">
+                        <div class="tab-header">
+                            <h2>Konfigurasi Parkir & Tarif</h2>
+                            <p>Pengaturan kapasitas parkir dan struktur tarif</p>
+                        </div>
+
+                        <div class="content-grid">
+                            <!-- Parking Capacity -->
+                            <div class="info-card">
+                                <div class="card-header">
+                                    <h3>Kapasitas Parkir</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="capacity-stats">
+                                        <div class="capacity-item">
+                                            <div class="capacity-label">Total Slot</div>
+                                            <div class="capacity-value">1,200</div>
+                                            <div class="capacity-progress">
+                                                <div class="progress-bar">
+                                                    <div class="progress-fill" style="width: 85%"></div>
+                                                </div>
+                                                <div class="progress-text">85% terisi</div>
+                                            </div>
+                                        </div>
+                                        <div class="capacity-breakdown">
+                                            <div class="breakdown-item">
+                                                <div class="breakdown-label">
+                                                    <span class="color-dot car"></span>
+                                                    Mobil
+                                                </div>
+                                                <div class="breakdown-value">900 slot</div>
+                                                <div class="breakdown-percentage">75%</div>
+                                            </div>
+                                            <div class="breakdown-item">
+                                                <div class="breakdown-label">
+                                                    <span class="color-dot motorcycle"></span>
+                                                    Motor
+                                                </div>
+                                                <div class="breakdown-value">280 slot</div>
+                                                <div class="breakdown-percentage">23%</div>
+                                            </div>
+                                            <div class="breakdown-item">
+                                                <div class="breakdown-label">
+                                                    <span class="color-dot disabled"></span>
+                                                    Disabilitas
+                                                </div>
+                                                <div class="breakdown-value">20 slot</div>
+                                                <div class="breakdown-percentage">2%</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Parking Rates -->
+                            <div class="info-card">
+                                <div class="card-header">
+                                    <h3>Struktur Tarif</h3>
+                                    <button class="btn-small primary">Edit Tarif</button>
+                                </div>
+                                <div class="card-body">
+                                    <div class="rates-grid">
+                                        <div class="rate-category">
+                                            <h4>Kendaraan Mobil</h4>
+                                            <div class="rate-list">
+                                                <div class="rate-item">
+                                                    <span class="rate-label">Jam Pertama</span>
+                                                    <span class="rate-value">Rp 15,000</span>
+                                                </div>
+                                                <div class="rate-item">
+                                                    <span class="rate-label">Jam Berikutnya</span>
+                                                    <span class="rate-value">Rp 10,000</span>
+                                                </div>
+                                                <div class="rate-item">
+                                                    <span class="rate-label">Maksimal Harian</span>
+                                                    <span class="rate-value">Rp 75,000</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="rate-category">
+                                            <h4>Kendaraan Motor</h4>
+                                            <div class="rate-list">
+                                                <div class="rate-item">
+                                                    <span class="rate-label">Per Jam</span>
+                                                    <span class="rate-value">Rp 5,000</span>
+                                                </div>
+                                                <div class="rate-item">
+                                                    <span class="rate-label">Maksimal Harian</span>
+                                                    <span class="rate-value">Rp 25,000</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Parking Facilities -->
+                            <div class="info-card">
+                                <div class="card-header">
+                                    <h3>Fasilitas Parkir</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="facilities-list">
+                                        <div class="facility-item available">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            CCTV 24 Jam
+                                        </div>
+                                        <div class="facility-item available">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            Security 24 Jam
+                                        </div>
+                                        <div class="facility-item available">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            Valet Parking
+                                        </div>
+                                        <div class="facility-item not-available">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                            Charging Station EV
+                                        </div>
+                                        <div class="facility-item not-available">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                            Car Wash
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Operational Hours -->
+                            <div class="info-card">
+                                <div class="card-header">
+                                    <h3>Jam Operasional</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="operational-hours">
+                                        <div class="hours-item">
+                                            <span class="days">Senin - Minggu</span>
+                                            <span class="time">06:00 - 22:00</span>
+                                        </div>
+                                        <div class="hours-note">
+                                            * Parkir tersedia 24 jam untuk kendaraan yang sudah parkir sebelum jam tutup
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Performance Tab -->
+                    <div class="tab-content" id="performance-tab">
+                        <div class="tab-header">
+                            <h2>Performance & Analytics</h2>
+                            <p>Data kinerja dan analitik mall</p>
+                        </div>
+                        <!-- Performance content will be loaded here -->
+                        <div class="performance-placeholder">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            <h3>Performance Analytics</h3>
+                            <p>Data performance dan analytics akan ditampilkan di sini</p>
+                        </div>
+                    </div>
+
+                    <!-- Admin & Staff Tab -->
+                    <div class="tab-content" id="admin-tab">
+                        <div class="tab-header">
+                            <h2>Admin & Staff</h2>
+                            <p>Manajemen tim operasional mall</p>
+                        </div>
+                        <!-- Admin content will be loaded here -->
+                        <div class="admin-placeholder">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                            </svg>
+                            <h3>Admin Management</h3>
+                            <p>Informasi admin dan staff akan ditampilkan di sini</p>
+                        </div>
+                    </div>
+
+                    <!-- Settings Tab -->
+                    <div class="tab-content" id="settings-tab">
+                        <div class="tab-header">
+                            <h2>Pengaturan Sistem</h2>
+                            <p>Konfigurasi sistem dan integrasi</p>
+                        </div>
+                        <!-- Settings content will be loaded here -->
+                        <div class="settings-placeholder">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <h3>System Settings</h3>
+                            <p>Pengaturan sistem akan ditampilkan di sini</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <footer class="admin-footer">
+                    <p>&copy; 2025 QPARKIN - Sistem Manajemen Parkir Mall | Super Admin Dashboard</p>
+                </footer>
+            </main>
+        </div>
+    </div>
+
+    <script src="../scripts/super-dashboard.js"></script>
+    <script src="../scripts/super-detail-mall.js"></script>
+</body>
+</html>

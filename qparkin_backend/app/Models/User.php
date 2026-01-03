@@ -40,7 +40,15 @@ class User extends Authenticatable
         'saldo_poin',
         'status',
         'provider',
-        'provider_id'
+        'provider_id',
+        'avatar',
+        'application_status',
+        'requested_mall_name',
+        'requested_mall_location',
+        'application_notes',
+        'applied_at',
+        'reviewed_at',
+        'reviewed_by'
     ];
 
     protected $hidden = [

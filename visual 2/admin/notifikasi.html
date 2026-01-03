@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifikasi - QPARKIN</title>
+    <link rel="stylesheet" href="../styles/admin-profile.css">
+    <link rel="stylesheet" href="../styles/notifikasi.css">
+</head>
+<body>
+    <div class="admin-container">
+        <header class="admin-header">
+            <div class="header-left">
+                <button id="sidebarToggle" class="menu-toggle" aria-label="Toggle Sidebar">
+                    <svg id="menuIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    <svg id="closeIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <h1 class="logo">QPARKIN</h1>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <span>Admin Mall</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-wrapper">
+            <aside class="admin-sidebar">
+                <nav class="sidebar-nav">
+                    <ul>
+                        <li class="nav-item">
+                            <a href="dashboard.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                </svg>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="profile.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                <span>Profile</span>
+                            </a>
+                        </li>
+                        <li class="nav-item active">
+                            <a href="notifikasi.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                                <span>Notifikasi</span>
+                                <span class="notification-badge">12</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="tiket.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                                <span>Tiket</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="tarif.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>Tarif</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="parkiran.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                <span>Parkiran</span>
+                            </a>
+                        </li>
+                        <li class="nav-item logout">
+                            <a href="../pages/signin.html" class="nav-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
+                                <span>Keluar</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </aside>
+
+            <div class="sidebar-overlay"></div>
+
+            <main class="admin-content">
+                <div class="breadcrumb">
+                    <span>Notifikasi</span>
+                </div>
+
+                <div class="notifications-container">
+                    <div class="notifications-header">
+                        <h2>Notifikasi</h2>
+                        <div class="header-actions">
+                            <button class="btn-mark-all" id="markAllRead">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                Tandai Semua Dibaca
+                            </button>
+                            <div class="filter-options">
+                                <select id="filterCategory">
+                                    <option value="all">Semua Kategori</option>
+                                    <option value="system">Sistem</option>
+                                    <option value="parking">Parkir</option>
+                                    <option value="payment">Pembayaran</option>
+                                    <option value="security">Keamanan</option>
+                                    <option value="maintenance">Pemeliharaan</option>
+                                    <option value="report">Laporan</option>
+                                </select>
+                            </div>
+                            <button class="btn-clear-all" id="clearAllNotifications">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="notifications-list" id="notificationsList">
+                        <!-- Notifikasi Sistem -->
+                        <div class="notification-item unread" data-category="system">
+                            <div class="notification-icon system">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-header">
+                                    <h4>Backup Sistem Berhasil</h4>
+                                    <span class="notification-category-label">Sistem</span>
+                                </div>
+                                <p>Backup data harian sistem parkir Central Park Mall telah berhasil dilakukan.</p>
+                                <span class="notification-time">2 menit yang lalu</span>
+                            </div>
+                        </div>
+                    
+                        <div class="notification-item unread" data-category="system">
+                            <div class="notification-icon system">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                </svg>
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-header">
+                                    <h4>Peringatan: CPU Usage Tinggi</h4>
+                                    <span class="notification-category-label">Sistem</span>
+                                </div>
+                                <p>Penggunaan CPU server mencapai 85%. Periksa performa sistem.</p>
+                                <span class="notification-time">1 jam yang lalu</span>
+                            </div>
+                        </div>
+                    
+                        <!-- Notifikasi Parkir -->
+                        <div class="notification-item unread" data-category="parking">
+                            <div class="notification-icon parking">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-header">
+                                    <h4>Parkir Penuh: Lantai B1</h4>
+                                    <span class="notification-category-label">Parkir</span>
+                                </div>
+                                <p>Kapasitas parkir lantai B1 telah mencapai 95%. Pertimbangkan untuk mengalihkan kendaraan ke lantai lain.</p>
+                                <span class="notification-time">15 menit yang lalu</span>
+                            </div>
+                        </div>
+                    
+                        <!-- Notifikasi 4: Pembayaran -->
+                        <div class="notification-item unread" data-category="payment">
+                            <div class="notification-icon payment">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-header">
+                                    <h4>Transaksi Gagal: Mesin EDC</h4>
+                                    <span class="notification-category-label">Pembayaran</span>
+                                </div>
+                                <p>Mesin EDC di gate keluar 2 mengalami gangguan transaksi. Gunakan mesin alternatif.</p>
+                                <span class="notification-time">30 menit yang lalu</span>
+                            </div>
+                        </div>
+                    
+                        <!-- Notifikasi 5: Keamanan -->
+                        <div class="notification-item" data-category="security">
+                            <div class="notification-icon security">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-header">
+                                    <h4>Akses Tidak Sah Terdeteksi</h4>
+                                    <span class="notification-category-label">Keamanan</span>
+                                </div>
+                                <p>Percobaan akses tidak sah terdeteksi di area parkir basement 2. CCTV merekam aktivitas mencurigakan.</p>
+                                <span class="notification-time">45 menit yang lalu</span>
+                            </div>
+                        </div>
+                    
+                        <!-- Notifikasi 6: Pemeliharaan -->
+                        <div class="notification-item unread" data-category="maintenance">
+                            <div class="notification-icon maintenance">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-header">
+                                    <h4>Jadwal Maintenance CCTV</h4>
+                                    <span class="notification-category-label">Pemeliharaan</span>
+                                </div>
+                                <p>Maintenance rutin sistem CCTV akan dilakukan besok pukul 02:00-04:00. Sistem mungkin offline sementara.</p>
+                                <span class="notification-time">6 jam yang lalu</span>
+                            </div>
+                        </div>
+                    
+                        <!-- Notifikasi 7: Laporan -->
+                        <div class="notification-item" data-category="report">
+                            <div class="notification-icon report">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-header">
+                                    <h4>Laporan Bulanan Siap</h4>
+                                    <span class="notification-category-label">Laporan</span>
+                                </div>
+                                <p>Laporan kinerja parkir bulan Maret 2024 sudah dapat diunduh. Cek bagian laporan.</p>
+                                <span class="notification-time">12 jam yang lalu</span>
+                            </div>
+                        </div>
+                    
+                        <!-- Notifikasi 8: Parkir -->
+                        <div class="notification-item unread" data-category="parking">
+                            <div class="notification-icon parking">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-header">
+                                    <h4>Reservasi Parkir Khusus</h4>
+                                    <span class="notification-category-label">Parkir</span>
+                                </div>
+                                <p>Ada 5 reservasi parkir khusus untuk event besok. Siapkan area yang ditentukan.</p>
+                                <span class="notification-time">5 jam yang lalu</span>
+                            </div>
+                        </div>
+                    
+                        <!-- Notifikasi 9: Pembayaran -->
+                        <div class="notification-item" data-category="payment">
+                            <div class="notification-icon payment">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-header">
+                                    <h4>Pendapatan Harian Meningkat</h4>
+                                    <span class="notification-category-label">Pembayaran</span>
+                                </div>
+                                <p>Pendapatan parkir hari ini meningkat 15% dibandingkan kemarin. Total: Rp 12.450.000</p>
+                                <span class="notification-time">2 jam yang lalu</span>
+                            </div>
+                        </div>
+                    
+                        <!-- Notifikasi 10: Keamanan -->
+                        <div class="notification-item unread" data-category="security">
+                            <div class="notification-icon security">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                                </svg>
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-header">
+                                    <h4>Pintu Darurat Terbuka</h4>
+                                    <span class="notification-category-label">Keamanan</span>
+                                </div>
+                                <p>Pintu darurat di lantai LG terbuka lebih dari 5 menit. Periksa apakah ada keadaan darurat.</p>
+                                <span class="notification-time">1 jam yang lalu</span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="notifications-empty" id="emptyState" style="display: none;">
+                        <div class="empty-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                        </div>
+                        <h3>Tidak Ada Notifikasi</h3>
+                        <p>Semua notifikasi telah dibaca. Anda akan mendapat notifikasi baru ketika ada aktivitas penting.</p>
+                    </div>
+                </div>
+
+                <footer class="admin-footer">
+                    <p>&copy; 2025 QPARKIN - Sistem Manajemen Parkir Mall</p>
+                </footer>
+            </main>
+        </div>
+    </div>
+
+    <script src="../scripts/admin-profile.js"></script>
+    <script src="../scripts/notifikasi.js"></script>
+</body>
+</html>

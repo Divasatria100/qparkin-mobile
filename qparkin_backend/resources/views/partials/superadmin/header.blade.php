@@ -8,7 +8,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
         </button>
-        <h1 class="logo">QPARKIN</h1>
+        <h1 class="logo">QPARKIN <span class="role-badge">SUPER</span></h1>
     </div>
     <div class="header-right">
         <div class="user-info">

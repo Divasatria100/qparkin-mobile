@@ -122,18 +122,15 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Simulate upload process
-        savePhotoBtn.disabled = true;
-        savePhotoBtn.textContent = 'Menyimpan...';
-
-        setTimeout(function() {
-            alert('Foto profil berhasil diubah!');
-            savePhotoBtn.disabled = false;
-            savePhotoBtn.textContent = 'Simpan Foto';
-            
-            // Redirect back to profile page
-            window.location.href = 'profile.html';
-        }, 2000);
+        // Submit form
+        const form = document.getElementById('uploadPhotoForm');
+        if (form) {
+            savePhotoBtn.disabled = true;
+            savePhotoBtn.textContent = 'Menyimpan...';
+            form.submit();
+        } else {
+            alert('Form tidak ditemukan');
+        }
     });
 
     // Keyboard shortcuts

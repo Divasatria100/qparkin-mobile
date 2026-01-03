@@ -2,7 +2,63 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize mall management functionality
     initMallManagement();
+    initTableSearch();
 });
+
+// Initialize table search and filter
+function initTableSearch() {
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
+    const table = document.getElementById('mallTable');
+    
+    if (searchInput && table) {
+        searchInput.addEventListener('input', function() {
+            filterTable();
+        });
+    }
+    
+    if (statusFilter && table) {
+        statusFilter.addEventListener('change', function() {
+            filterTable();
+        });
+    }
+}
+
+// Filter table based on search and filters
+function filterTable() {
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
+    const table = document.getElementById('mallTable');
+    
+    if (!table) return;
+    
+    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+    const statusValue = statusFilter ? statusFilter.value.toLowerCase() : '';
+    const rows = table.querySelectorAll('tbody tr');
+    
+    let visibleCount = 0;
+    
+    rows.forEach(row => {
+        // Skip empty state row
+        if (row.querySelector('.empty-state')) {
+            return;
+        }
+        
+        const text = row.textContent.toLowerCase();
+        const statusBadge = row.querySelector('.badge');
+        const status = statusBadge ? statusBadge.textContent.toLowerCase() : '';
+        
+        const matchesSearch = text.includes(searchTerm);
+        const matchesStatus = !statusValue || status.includes(statusValue);
+        
+        if (matchesSearch && matchesStatus) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
 
 function initMallManagement() {
     // Search functionality
@@ -30,38 +86,25 @@ function initMallManagement() {
         });
     }
 
-    // Action buttons functionality
-    const actionButtons = document.querySelectorAll('.action-btn');
-    actionButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const card = this.closest('.mall-card');
-            const mallName = card.querySelector('.mall-name').textContent;
-            const action = this.getAttribute('title');
-            
-            handleMallAction(action, mallName, card);
-        });
-    });
-
     // Pagination functionality
     const paginationButtons = document.querySelectorAll('.pagination-btn:not(.disabled)');
     paginationButtons.forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
             if (!this.classList.contains('active')) {
-                handlePagination(this.textContent.trim());
+                const pageNum = this.textContent.trim();
+                if (pageNum && !isNaN(pageNum)) {
+                    handlePagination(pageNum);
+                }
             }
         });
     });
 
-    // View details functionality
-    const viewDetailsLinks = document.querySelectorAll('.view-details');
-    viewDetailsLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const card = this.closest('.mall-card');
-            const mallName = card.querySelector('.mall-name').textContent;
-            viewMallDetails(mallName);
-        });
-    });
+    console.log('Mall management initialized');
+    console.log('Search input:', searchInput ? 'Found' : 'Not found');
+    console.log('Status filter:', statusFilter ? 'Found' : 'Not found');
+    console.log('Region filter:', regionFilter ? 'Found' : 'Not found');
+    console.log('Mall cards:', document.querySelectorAll('.mall-card').length);
 }
 
 // Debounce function for search
@@ -147,71 +190,75 @@ function updatePaginationVisibility(visibleCount) {
     }
 }
 
-// Handle mall actions (edit, delete)
-function handleMallAction(action, mallName, card) {
-    switch (action) {
-        case 'Edit':
-            editMall(mallName, card);
-            break;
-        case 'Hapus':
-            deleteMall(mallName, card);
-            break;
-        default:
-            console.log('Unknown action:', action);
+// No need for handleMallAction - buttons use direct links and onclick
+
+// Delete mall function - Global function
+window.deleteMall = function(mallId) {
+    if (!confirm('Apakah Anda yakin ingin menghapus mall ini? Tindakan ini tidak dapat dibatalkan.')) {
+        return;
     }
-}
 
-// Edit mall function
-function editMall(mallName, card) {
-    // In a real application, this would redirect to an edit page
-    // For now, we'll simulate the behavior
-    console.log(`Editing mall: ${mallName}`);
+    // Get CSRF token
+    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
     
-    // Show loading state
-    const actions = card.querySelector('.mall-actions');
-    const originalHTML = actions.innerHTML;
-    actions.innerHTML = '<span class="text-sm text-blue-600">Mengedit...</span>';
-    
-    // Simulate API call
-    setTimeout(() => {
-        // Redirect to edit page (simulated)
-        window.location.href = `super-edit-mall.html?mall=${encodeURIComponent(mallName)}`;
-    }, 1000);
-}
+    // Show loading
+    const btn = event.target.closest('.action-btn');
+    const originalHTML = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>';
+    }
 
-// Delete mall function
-function deleteMall(mallName, card) {
-    // Show confirmation dialog
-    if (confirm(`Apakah Anda yakin ingin menghapus ${mallName}? Tindakan ini tidak dapat dibatalkan.`)) {
-        console.log(`Deleting mall: ${mallName}`);
-        
-        // Show loading state
-        const actions = card.querySelector('.mall-actions');
-        const originalHTML = actions.innerHTML;
-        actions.innerHTML = '<span class="text-sm text-red-600">Menghapus...</span>';
-        
-        // Simulate API call
-        setTimeout(() => {
+    // Send delete request
+    fetch(`/superadmin/mall/${mallId}/delete`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': token,
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message, 'success');
             // Remove card with animation
-            card.style.opacity = '0';
-            card.style.transform = 'translateX(100px)';
-            
-            setTimeout(() => {
-                card.remove();
-                showNotification(`${mallName} berhasil dihapus`, 'success');
-            }, 300);
-        }, 1500);
-    }
+            const card = btn ? btn.closest('.mall-card') : null;
+            if (card) {
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    card.remove();
+                    // Check if no more cards
+                    const remainingCards = document.querySelectorAll('.mall-card');
+                    if (remainingCards.length === 0) {
+                        window.location.reload();
+                    }
+                }, 300);
+            } else {
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            }
+        } else {
+            showNotification(data.message, 'error');
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Terjadi kesalahan saat menghapus mall', 'error');
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        }
+    });
 }
 
-// View mall details
-function viewMallDetails(mallName) {
-    console.log(`Viewing details for: ${mallName}`);
-    
-    // In a real application, this would redirect to a details page
-    // For now, we'll simulate the behavior
-    window.location.href = `super-detail-mall.html?mall=${encodeURIComponent(mallName)}`;
-}
+// View details links work via href - no JS needed
 
 // Handle pagination
 function handlePagination(page) {
