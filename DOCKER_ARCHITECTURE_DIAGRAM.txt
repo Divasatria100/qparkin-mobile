@@ -1,0 +1,316 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                    ARSITEKTUR DOCKER - QPARKIN PBL                            ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          HOST MACHINE (Komputer)                            │
+│                                                                             │
+│  ┌───────────────────────────────────────────────────────────────────────┐ │
+│  │                    DOCKER ENGINE                                      │ │
+│  │                                                                       │ │
+│  │  ┌─────────────────────────────────────────────────────────────────┐ │ │
+│  │  │              Docker Network: qparkin_network (Bridge)           │ │ │
+│  │  │                                                                 │ │ │
+│  │  │   ┌──────────────────┐      ┌──────────────────┐              │ │ │
+│  │  │   │  MySQL Container │      │ Backend Container│              │ │ │
+│  │  │   │                  │      │                  │              │ │ │
+│  │  │   │  Image: mysql:8.0│      │  Image: Custom   │              │ │ │
+│  │  │   │  Port: 3306      │◄─────┤  Port: 8000      │              │ │ │
+│  │  │   │                  │      │                  │              │ │ │
+│  │  │   │  Database:       │      │  Laravel 12      │              │ │ │
+│  │  │   │  - qparkin       │      │  PHP 8.2         │              │ │ │
+│  │  │   │                  │      │  Composer        │              │ │ │
+│  │  │   │  Volume:         │      │  Passport Auth   │              │ │ │
+│  │  │   │  mysql_data      │      │                  │              │ │ │
+│  │  │   └────────┬─────────┘      └────────┬─────────┘              │ │ │
+│  │  │            │                         │                        │ │ │
+│  │  │            │                         │                        │ │ │
+│  │  │            │    ┌────────────────────┴──────────┐            │ │ │
+│  │  │            │    │  PHPMyAdmin Container         │            │ │ │
+│  │  │            │    │                               │            │ │ │
+│  │  │            │    │  Image: phpmyadmin:latest     │            │ │ │
+│  │  │            └───►│  Port: 80                     │            │ │ │
+│  │  │                 │                               │            │ │ │
+│  │  │                 │  Web UI untuk Database        │            │ │ │
+│  │  │                 └───────────────────────────────┘            │ │ │
+│  │  │                                                               │ │ │
+│  │  └─────────────────────────────────────────────────────────────┘ │ │
+│  │                                                                   │ │
+│  └───────────────────────────────────────────────────────────────────┘ │
+│                                                                         │
+│  ┌───────────────────────────────────────────────────────────────────┐ │
+│  │                      PORT MAPPING                                 │ │
+│  │                                                                   │ │
+│  │   Host Port 3307  ──────────►  Container MySQL:3306             │ │
+│  │   Host Port 8000  ──────────►  Container Backend:8000           │ │
+│  │   Host Port 8080  ──────────►  Container PHPMyAdmin:80          │ │
+│  └───────────────────────────────────────────────────────────────────┘ │
+│                                                                         │
+│  ┌───────────────────────────────────────────────────────────────────┐ │
+│  │                    FLUTTER APP (Native)                           │ │
+│  │                                                                   │ │
+│  │   Platform: Android / iOS                                        │ │
+│  │   Framework: Flutter 3.0+                                        │ │
+│  │   State Management: Provider                                     │ │
+│  │                                                                   │ │
+│  │   API Connection: http://192.168.x.x:8000                        │ │
+│  │                                                                   │ │
+│  │   ┌─────────────────────────────────────────────────────────┐   │ │
+│  │   │  Features:                                              │   │ │
+│  │   │  • Google Sign-In                                       │   │ │
+│  │   │  • QR Scanner & Generator                               │   │ │
+│  │   │  • OpenStreetMap Integration                            │   │ │
+│  │   │  • Booking Management                                   │   │ │
+│  │   │  • Vehicle Management                                   │   │ │
+│  │   │  • Point System                                         │   │ │
+│  │   └─────────────────────────────────────────────────────────┘   │ │
+│  └───────────────────────────────────────────────────────────────────┘ │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                         DATA FLOW DIAGRAM                                     ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+┌──────────────┐         HTTP Request          ┌──────────────┐
+│              │────────────────────────────────►│              │
+│  Flutter App │         (Port 8000)            │   Laravel    │
+│   (Mobile)   │                                │   Backend    │
+│              │◄────────────────────────────────│   (Docker)   │
+└──────────────┘         JSON Response          └──────┬───────┘
+                                                       │
+                                                       │ SQL Query
+                                                       │
+                                                       ▼
+                                                ┌──────────────┐
+                                                │    MySQL     │
+                                                │   Database   │
+                                                │   (Docker)   │
+                                                └──────────────┘
+                                                       ▲
+                                                       │
+                                                       │ Web UI
+                                                       │
+                                                ┌──────┴───────┐
+                                                │  PHPMyAdmin  │
+                                                │   (Docker)   │
+                                                └──────────────┘
+
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                      DOCKER COMPOSE SERVICES                                  ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  Service: mysql                                                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Image:        mysql:8.0                                                    │
+│  Container:    qparkin_mysql                                                │
+│  Port:         3307:3306                                                    │
+│  Environment:                                                               │
+│    - MYSQL_DATABASE=qparkin                                                 │
+│    - MYSQL_USER=qparkin_user                                                │
+│    - MYSQL_PASSWORD=qparkin_password                                        │
+│  Volume:       mysql_data:/var/lib/mysql                                    │
+│  Network:      qparkin_network                                              │
+│  Health Check: mysqladmin ping                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  Service: backend                                                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Build:        ./qparkin_backend/Dockerfile                                 │
+│  Container:    qparkin_backend                                              │
+│  Port:         8000:8000                                                    │
+│  Environment:                                                               │
+│    - DB_HOST=mysql                                                          │
+│    - DB_DATABASE=qparkin                                                    │
+│    - DB_USERNAME=qparkin_user                                               │
+│    - DB_PASSWORD=qparkin_password                                           │
+│  Volume:       ./qparkin_backend:/var/www                                   │
+│  Network:      qparkin_network                                              │
+│  Depends On:   mysql (with health check)                                    │
+│  Command:      composer install && php artisan serve                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  Service: phpmyadmin                                                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Image:        phpmyadmin:latest                                            │
+│  Container:    qparkin_phpmyadmin                                           │
+│  Port:         8080:80                                                      │
+│  Environment:                                                               │
+│    - PMA_HOST=mysql                                                         │
+│    - PMA_USER=qparkin_user                                                  │
+│    - PMA_PASSWORD=qparkin_password                                          │
+│  Network:      qparkin_network                                              │
+│  Depends On:   mysql                                                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                         DEPLOYMENT WORKFLOW                                   ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────┐
+│   START     │
+└──────┬──────┘
+       │
+       ▼
+┌─────────────────────────────┐
+│  docker-compose up -d       │  ◄── Jalankan perintah
+└──────┬──────────────────────┘
+       │
+       ▼
+┌─────────────────────────────┐
+│  Build Backend Image        │  ◄── Build dari Dockerfile
+│  - Install PHP 8.2          │
+│  - Install Extensions       │
+│  - Install Composer         │
+└──────┬──────────────────────┘
+       │
+       ▼
+┌─────────────────────────────┐
+│  Pull MySQL Image           │  ◄── Download dari Docker Hub
+│  - mysql:8.0                │
+└──────┬──────────────────────┘
+       │
+       ▼
+┌─────────────────────────────┐
+│  Pull PHPMyAdmin Image      │  ◄── Download dari Docker Hub
+│  - phpmyadmin:latest        │
+└──────┬──────────────────────┘
+       │
+       ▼
+┌─────────────────────────────┐
+│  Create Network             │  ◄── Bridge network
+│  - qparkin_network          │
+└──────┬──────────────────────┘
+       │
+       ▼
+┌─────────────────────────────┐
+│  Start MySQL Container      │  ◄── Database ready
+│  - Wait for health check    │
+└──────┬──────────────────────┘
+       │
+       ▼
+┌─────────────────────────────┐
+│  Start Backend Container    │  ◄── Laravel API ready
+│  - composer install         │
+│  - php artisan migrate      │
+│  - php artisan serve        │
+└──────┬──────────────────────┘
+       │
+       ▼
+┌─────────────────────────────┐
+│  Start PHPMyAdmin Container │  ◄── Web UI ready
+└──────┬──────────────────────┘
+       │
+       ▼
+┌─────────────────────────────┐
+│  All Services Running       │  ✅ READY!
+│  - MySQL: localhost:3307    │
+│  - Backend: localhost:8000  │
+│  - PHPMyAdmin: :8080        │
+└─────────────────────────────┘
+
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                         VOLUME & PERSISTENCE                                  ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  Volume: mysql_data                                                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Type:         Named Volume                                                 │
+│  Mount Point:  /var/lib/mysql (in container)                                │
+│  Purpose:      Persistent database storage                                  │
+│  Data:         All MySQL databases, tables, and data                        │
+│  Lifecycle:    Survives container restart/removal                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  Volume: backend_storage                                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Type:         Named Volume                                                 │
+│  Mount Point:  /var/www/storage (in container)                              │
+│  Purpose:      Laravel storage (logs, cache, uploads)                       │
+│  Data:         Uploaded files, logs, cache files                            │
+│  Lifecycle:    Survives container restart/removal                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  Bind Mount: ./qparkin_backend                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Type:         Bind Mount                                                   │
+│  Mount Point:  /var/www (in container)                                      │
+│  Purpose:      Live code editing during development                         │
+│  Data:         Laravel application code                                     │
+│  Sync:         Real-time sync with host                                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                    COMPARISON: BEFORE vs AFTER DOCKER                         ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+┌──────────────────────────────┬──────────────────────────────────────────────┐
+│      BEFORE DOCKER           │           AFTER DOCKER                       │
+├──────────────────────────────┼──────────────────────────────────────────────┤
+│                              │                                              │
+│  1. Install XAMPP/WAMP       │  1. Install Docker Desktop                   │
+│  2. Install PHP 8.2          │  2. Run: docker-compose up -d                │
+│  3. Install Composer         │  3. Done! ✅                                 │
+│  4. Install MySQL            │                                              │
+│  5. Configure PHP.ini        │  Time: 5-10 minutes                          │
+│  6. Configure MySQL          │  Complexity: Low                             │
+│  7. Install extensions       │  Consistency: 100%                           │
+│  8. Setup virtual host       │  Portability: High                           │
+│  9. Configure .env           │  Troubleshooting: Easy                       │
+│  10. Run migrations          │                                              │
+│                              │                                              │
+│  Time: 1-2 hours             │                                              │
+│  Complexity: High            │                                              │
+│  Consistency: Low            │                                              │
+│  Portability: Low            │                                              │
+│  Troubleshooting: Hard       │                                              │
+│                              │                                              │
+└──────────────────────────────┴──────────────────────────────────────────────┘
+
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                         USEFUL COMMANDS                                       ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  BASIC COMMANDS                                                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  docker-compose up -d              Start all services (detached)            │
+│  docker-compose down               Stop and remove all containers           │
+│  docker-compose ps                 List running containers                  │
+│  docker-compose logs -f            View logs (follow mode)                  │
+│  docker-compose restart            Restart all services                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  DEBUGGING COMMANDS                                                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  docker-compose exec backend bash  Enter backend container                 │
+│  docker-compose exec mysql bash    Enter MySQL container                   │
+│  docker stats                      View resource usage                      │
+│  docker inspect qparkin_backend    Inspect container details               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  MAINTENANCE COMMANDS                                                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  docker-compose down -v            Stop and remove volumes                  │
+│  docker system prune -a            Clean up unused resources                │
+│  docker-compose build --no-cache   Rebuild without cache                    │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                              END OF DIAGRAM
+═══════════════════════════════════════════════════════════════════════════════

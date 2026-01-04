@@ -1,0 +1,38 @@
+# Ignore untuk mengurangi ukuran Docker image
+
+# Flutter app (tidak perlu di-build dalam Docker untuk mobile)
+qparkin_app/
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+docs/
+visual/
+visual 2/
+
+# Laravel vendor (akan di-install ulang)
+qparkin_backend/vendor/
+qparkin_backend/node_modules/
+
+# Laravel cache dan logs
+qparkin_backend/storage/logs/*
+qparkin_backend/storage/framework/cache/*
+qparkin_backend/storage/framework/sessions/*
+qparkin_backend/storage/framework/views/*
+qparkin_backend/bootstrap/cache/*
+
+# Environment files
+qparkin_backend/.env.example
+
+# IDE
+.idea/
+.vscode/
+.kiro/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  # Database MySQL untuk Laravel Backend
+  mysql:
+    image: mysql:8.0
+    container_name: qparkin_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: qparkin
+      MYSQL_ROOT_PASSWORD: qparkin_root_password
+      MYSQL_USER: qparkin_user
+      MYSQL_PASSWORD: qparkin_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./qparkin_backend/database/qparkin.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - qparkin_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Laravel Backend API
+  backend:
+    build:
+      context: ./qparkin_backend
+      dockerfile: Dockerfile
+    container_name: qparkin_backend
+    restart: unless-stopped
+    working_dir: /var/www
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=qparkin
+      - DB_USERNAME=qparkin_user
+      - DB_PASSWORD=qparkin_password
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./qparkin_backend:/var/www
+      - backend_storage:/var/www/storage
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - qparkin_network
+    command: >
+      sh -c "composer install --no-dev --optimize-autoloader &&
+             php artisan config:cache &&
+             php artisan route:cache &&
+             php artisan migrate --force &&
+             php artisan passport:keys --force &&
+             php artisan serve --host=0.0.0.0 --port=8000"
+
+  # PHPMyAdmin untuk manajemen database (opsional, untuk development)
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: qparkin_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: qparkin_user
+      PMA_PASSWORD: qparkin_password
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+    networks:
+      - qparkin_network
+
+networks:
+  qparkin_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
+  backend_storage:
+    driver: local
