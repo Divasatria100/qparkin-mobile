@@ -2,6 +2,8 @@ import 'package:flutter/widgets.dart';
 import '../../data/models/user_model.dart';
 import '../../data/models/vehicle_model.dart';
 import '../../data/services/vehicle_api_service.dart';
+import '../../data/services/profile_service.dart';
+import '../../data/services/auth_service.dart';
 import 'dart:io';
 
 /// Provider for managing profile-related data and operations
@@ -15,12 +17,19 @@ class ProfileProvider extends ChangeNotifier {
   String? _errorMessage;
   DateTime? _lastSyncTime;
   
-  // API Service
+  // API Services
   final VehicleApiService _vehicleApiService;
+  final ProfileService _profileService;
+  final AuthService _authService;
 
-  // Constructor with required API service
-  ProfileProvider({required VehicleApiService vehicleApiService})
-      : _vehicleApiService = vehicleApiService;
+  // Constructor with required API services
+  ProfileProvider({
+    required VehicleApiService vehicleApiService,
+    ProfileService? profileService,
+    AuthService? authService,
+  })  : _vehicleApiService = vehicleApiService,
+        _profileService = profileService ?? ProfileService(),
+        _authService = authService ?? AuthService();
 
   // Getters
   UserModel? get user => _user;
@@ -38,29 +47,22 @@ class ProfileProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      debugPrint('[ProfileProvider] Fetching user data...');
+      debugPrint('[ProfileProvider] Fetching user data from API...');
       
-      // TODO: Replace with actual API call when ProfileService is implemented
-      // For now, simulate API call with delay
-      await Future.delayed(const Duration(milliseconds: 500));
+      // Get auth token
+      final token = await _authService.getToken();
+      if (token == null) {
+        throw Exception('Token tidak ditemukan. Silakan login kembali.');
+      }
       
-      // Mock user data for development
-      _user = UserModel(
-        id: '1',
-        name: 'User Name',
-        email: 'user@example.com',
-        phoneNumber: '081234567890',
-        photoUrl: null,
-        saldoPoin: 150,
-        createdAt: DateTime.now().subtract(const Duration(days: 30)),
-        updatedAt: DateTime.now(),
-      );
+      // Fetch from real API
+      _user = await _profileService.fetchUserData(token: token);
 
       _lastSyncTime = DateTime.now();
       _isLoading = false;
       _errorMessage = null;
       
-      debugPrint('[ProfileProvider] User data fetched successfully');
+      debugPrint('[ProfileProvider] User data fetched successfully: ${_user?.name}');
       notifyListeners();
     } catch (e) {
       _isLoading = false;
@@ -113,18 +115,35 @@ class ProfileProvider extends ChangeNotifier {
 
   /// Update user data
   /// Notifies listeners on successful update
+  /// IMPORTANT: Always fetch fresh data after update to ensure UI shows latest data
   Future<void> updateUser(UserModel user) async {
     try {
-      debugPrint('[ProfileProvider] Updating user data...');
+      debugPrint('[ProfileProvider] Updating user data via API...');
+      debugPrint('[ProfileProvider] Update payload - name: ${user.name}, email: ${user.email}');
       
-      // TODO: Replace with actual API call when ProfileService is implemented
-      await Future.delayed(const Duration(milliseconds: 300));
+      // Get auth token
+      final token = await _authService.getToken();
+      if (token == null) {
+        throw Exception('Token tidak ditemukan. Silakan login kembali.');
+      }
       
-      _user = user;
+      // Update via real API
+      final updatedUser = await _profileService.updateUser(user: user, token: token);
+      
+      // CRITICAL: Update local state with response from API
+      _user = updatedUser;
       _lastSyncTime = DateTime.now();
       
       debugPrint('[ProfileProvider] User data updated successfully');
+      debugPrint('[ProfileProvider] Updated email from API: ${updatedUser.email}');
+      
+      // Notify listeners immediately with fresh data
       notifyListeners();
+      
+      // IMPORTANT: Fetch fresh data from API to ensure complete sync
+      // This ensures any server-side transformations are reflected
+      await fetchUserData();
+      
     } catch (e) {
       _errorMessage = _getUserFriendlyError(e.toString());
       debugPrint('[ProfileProvider] Error updating user: $e');
@@ -367,6 +386,7 @@ class ProfileProvider extends ChangeNotifier {
   @override
   void dispose() {
     debugPrint('[ProfileProvider] Disposing provider');
+    _profileService.dispose();
     super.dispose();
   }
 }

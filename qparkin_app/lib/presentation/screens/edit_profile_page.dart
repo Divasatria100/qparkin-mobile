@@ -33,7 +33,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       
       if (user != null) {
         _nameController.text = user.name;
-        _emailController.text = user.email;
+        _emailController.text = user.email ?? ''; // Null-safe: use empty string if email is null
         _phoneController.text = user.phoneNumber ?? '';
         setState(() {
           _photoUrl = user.photoUrl;
@@ -50,13 +50,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
     super.dispose();
   }
 
-  /// Validate email format
+  /// Validate email format (optional)
   String? _validateEmail(String? value) {
+    // Email is optional - allow empty
     if (value == null || value.trim().isEmpty) {
-      return 'Email wajib diisi';
+      return null;
     }
     
-    // Basic email validation regex
+    // If email is provided, validate format
     final emailRegex = RegExp(
       r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
     );
@@ -100,28 +101,57 @@ class _EditProfilePageState extends State<EditProfilePage> {
       return;
     }
 
+    // Check if user is removing email (had email before, now empty)
+    final provider = context.read<ProfileProvider>();
+    final currentUser = provider.user;
+    
+    if (currentUser == null) {
+      throw Exception('User data not found');
+    }
+
+    final hadEmail = currentUser.email != null && currentUser.email!.isNotEmpty; // Null-safe: use ! after null check
+    final removingEmail = hadEmail && _emailController.text.trim().isEmpty;
+
+    // Show warning if removing email
+    if (removingEmail) {
+      final confirmed = await _showRemoveEmailWarning();
+      if (confirmed != true) {
+        return; // User cancelled
+      }
+    }
+
     setState(() {
       _isLoading = true;
     });
 
     try {
-      final provider = context.read<ProfileProvider>();
-      final currentUser = provider.user;
+      // Log current state before update
+      debugPrint('[EditProfilePage] ========================================');
+      debugPrint('[EditProfilePage] BEFORE UPDATE:');
+      debugPrint('[EditProfilePage] - Current email: ${currentUser.email}');
+      debugPrint('[EditProfilePage] - Input email: "${_emailController.text}"');
+      debugPrint('[EditProfilePage] - Had email: $hadEmail');
+      debugPrint('[EditProfilePage] - Removing email: $removingEmail');
+      debugPrint('[EditProfilePage] ========================================');
       
-      if (currentUser == null) {
-        throw Exception('User data not found');
-      }
-
       // Create updated user model
       final updatedUser = currentUser.copyWith(
         name: _nameController.text.trim(),
-        email: _emailController.text.trim(),
+        email: _emailController.text.trim().isEmpty 
+            ? null 
+            : _emailController.text.trim(),
         phoneNumber: _phoneController.text.trim().isEmpty 
             ? null 
             : _phoneController.text.trim(),
         photoUrl: _photoUrl,
         updatedAt: DateTime.now(),
       );
+      
+      debugPrint('[EditProfilePage] UPDATED USER MODEL:');
+      debugPrint('[EditProfilePage] - name: ${updatedUser.name}');
+      debugPrint('[EditProfilePage] - email: ${updatedUser.email} (${updatedUser.email == null ? "NULL" : "has value"})');
+      debugPrint('[EditProfilePage] - phoneNumber: ${updatedUser.phoneNumber}');
+      debugPrint('[EditProfilePage] ========================================');
 
       // Update user data through provider
       await provider.updateUser(updatedUser);
@@ -140,8 +170,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
           ),
         );
 
-        // Navigate back to profile page
-        Navigator.of(context).pop();
+        // Navigate back to profile page with result
+        Navigator.of(context).pop(true); // Return true to trigger refresh
       }
     } catch (e) {
       if (mounted) {
@@ -196,6 +226,78 @@ class _EditProfilePageState extends State<EditProfilePage> {
               style: TextStyle(
                 fontFamily: 'Nunito',
                 color: Color(0xFF573ED1),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Show warning dialog when user removes email
+  Future<bool?> _showRemoveEmailWarning() async {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            Icon(
+              Icons.warning_amber_rounded,
+              color: Colors.orange[700],
+              size: 28,
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              'Hapus Email?',
+              style: TextStyle(
+                fontFamily: 'Nunito',
+                fontWeight: FontWeight.w700,
+                fontSize: 18,
+              ),
+            ),
+          ],
+        ),
+        content: const Text(
+          'Jika Anda menghapus email, Anda tidak akan menerima notifikasi booking parkiran via email. Anda masih bisa menambahkan email kembali nanti.',
+          style: TextStyle(
+            fontFamily: 'Nunito',
+            fontSize: 14,
+            height: 1.5,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text(
+              'Batal',
+              style: TextStyle(
+                fontFamily: 'Nunito',
+                color: Color(0xFF8E8E93),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.orange[50],
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 12,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(
+              'Hapus Email',
+              style: TextStyle(
+                fontFamily: 'Nunito',
+                color: Colors.orange[700],
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
@@ -334,26 +436,40 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 // Email Field
                 Semantics(
                   label: 'Label email',
-                  child: const Text(
-                    'Email',
-                    style: TextStyle(
-                      fontFamily: 'Nunito',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF1C1C1E),
-                    ),
+                  child: Row(
+                    children: [
+                      const Text(
+                        'Email',
+                        style: TextStyle(
+                          fontFamily: 'Nunito',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF1C1C1E),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '(opsional)',
+                        style: TextStyle(
+                          fontFamily: 'Nunito',
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 8),
                 Semantics(
                   label: 'Kolom input email',
-                  hint: 'Masukkan alamat email Anda',
+                  hint: 'Masukkan alamat email Anda, opsional',
                   textField: true,
                   child: TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
-                      hintText: 'Masukkan email',
+                      hintText: 'Masukkan email (opsional)',
                       hintStyle: const TextStyle(
                         fontFamily: 'Nunito',
                         color: Color(0xFF8E8E93),
@@ -374,6 +490,32 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       fontSize: 14,
                     ),
                     validator: _validateEmail,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // Email info text
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        size: 14,
+                        color: Colors.grey[600],
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'Email digunakan untuk notifikasi booking parkiran',
+                          style: TextStyle(
+                            fontFamily: 'Nunito',
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                            height: 1.3,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 20),

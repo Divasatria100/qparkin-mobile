@@ -16,6 +16,7 @@ import '../widgets/common/empty_state_widget.dart';
 import '../widgets/common/notification_badge.dart';
 import '../widgets/common/cached_profile_image.dart';
 import '../widgets/profile/vehicle_card.dart';
+import '../widgets/profile/email_reminder_card.dart';
 import '../widgets/premium_points_card.dart';
 import 'point_page.dart';
 import 'notification_screen.dart';
@@ -321,36 +322,40 @@ class _ProfilePageState extends State<ProfilePage> {
                           backgroundColor: Colors.white.withOpacity(0.3),
                         ),
                         const SizedBox(width: 12),
-                        Semantics(
-                          label: 'Informasi pengguna',
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Semantics(
-                                label: 'Nama pengguna: ${user?.name ?? 'Pengguna'}',
-                                child: Text(
-                                  user?.name ?? 'Pengguna',
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                    letterSpacing: 0.3,
+                        Expanded(
+                          child: Semantics(
+                            label: 'Informasi pengguna',
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Semantics(
+                                  label: 'Nama pengguna: ${user?.name ?? 'Pengguna'}',
+                                  child: Text(
+                                    user?.name ?? 'Pengguna',
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      letterSpacing: 0.3,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              Semantics(
-                                label: 'Email: ${user?.email ?? 'email@example.com'}',
-                                child: Text(
-                                  user?.email ?? 'email@example.com',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.white.withOpacity(0.8),
+                                // Only show email if it exists and is not empty
+                                if (user?.email != null && user!.email!.isNotEmpty) // Null-safe: use ! after null check
+                                  Semantics(
+                                    label: 'Email: ${user.email}',
+                                    child: Text(
+                                      user.email!,  // Null-safe: use ! after null check
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.white.withOpacity(0.8),
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ],
@@ -384,6 +389,24 @@ class _ProfilePageState extends State<ProfilePage> {
                 padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
                 child: Column(
                   children: [
+                      // Email Reminder (show if email is empty or null)
+                      if (user?.email == null || user!.email!.isEmpty) // Null-safe: use ! after null check
+                        EmailReminderCard(
+                          onTap: () async {
+                            final navigator = Navigator.of(context);
+                            await navigator.push(
+                              PageTransitions.slideFromRight(
+                                page: const EditProfilePage(),
+                              ),
+                            );
+                            
+                            // Refresh profile data after returning
+                            if (!mounted) return;
+                            final provider = context.read<ProfileProvider>();
+                            await provider.fetchUserData();
+                          },
+                        ),
+                      
                       // Section: Informasi Kendaraan
                       Semantics(
                         header: true,

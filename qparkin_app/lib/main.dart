@@ -60,10 +60,11 @@ class MyApp extends StatelessWidget {
           ),
         ),
         // ProfileProvider untuk mengelola state profil pengguna
-        // Now integrated with VehicleApiService for real backend data
+        // Now integrated with VehicleApiService, ProfileService, and AuthService
         ChangeNotifierProvider(
           create: (_) => ProfileProvider(
             vehicleApiService: VehicleApiService(baseUrl: apiBaseUrl),
+            authService: AuthService(),
           ),
         ),
         // PointProvider untuk mengelola state poin pengguna

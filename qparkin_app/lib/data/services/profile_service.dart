@@ -39,7 +39,7 @@ class ProfileService {
         throw Exception('Request cancelled');
       }
 
-      final uri = Uri.parse('$_baseUrl/api/profile/user');
+      final uri = Uri.parse('$_baseUrl/api/user/profile');
       debugPrint('[ProfileService] Fetching user data from: $uri');
 
       final response = await _client.get(
@@ -85,7 +85,7 @@ class ProfileService {
         throw Exception('Request cancelled');
       }
 
-      final uri = Uri.parse('$_baseUrl/api/profile/vehicles');
+      final uri = Uri.parse('$_baseUrl/api/kendaraan');
       debugPrint('[ProfileService] Fetching vehicles from: $uri');
 
       final response = await _client.get(
@@ -134,9 +134,26 @@ class ProfileService {
         throw Exception('Request cancelled');
       }
 
-      final uri = Uri.parse('$_baseUrl/api/profile/user');
+      final uri = Uri.parse('$_baseUrl/api/user/profile');
       debugPrint('[ProfileService] Updating user data at: $uri');
-      debugPrint('[ProfileService] Update data: ${user.toJson()}');
+      
+      // CRITICAL: Always send email field (even if null) to allow deletion
+      // This ensures backend receives the email field and can process deletion
+      final updateData = {
+        'name': user.name,
+        'email': user.email, // IMPORTANT: Send null to delete email, not omit the field
+        if (user.phoneNumber != null) 'phone_number': user.phoneNumber,
+        if (user.photoUrl != null) 'photo_url': user.photoUrl,
+      };
+      
+      debugPrint('[ProfileService] ========================================');
+      debugPrint('[ProfileService] UPDATE PAYLOAD:');
+      debugPrint('[ProfileService] - name: ${updateData['name']}');
+      debugPrint('[ProfileService] - email: ${updateData['email']} (${updateData['email'] == null ? "NULL - will delete" : "has value"})');
+      debugPrint('[ProfileService] - phone_number: ${updateData['phone_number']}');
+      debugPrint('[ProfileService] - photo_url: ${updateData['photo_url']}');
+      debugPrint('[ProfileService] ========================================');
+      debugPrint('[ProfileService] JSON body: ${json.encode(updateData)}');
 
       final response = await _client.put(
         uri,
@@ -145,7 +162,7 @@ class ProfileService {
           'Accept': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: json.encode(user.toJson()),
+        body: json.encode(updateData),
       ).timeout(_timeout);
 
       debugPrint('[ProfileService] Update response status: ${response.statusCode}');
