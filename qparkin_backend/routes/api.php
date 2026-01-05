@@ -29,6 +29,8 @@ Route::get('/health', function () {
 // Authentication Routes
 Route::prefix('auth')->group(function () {
     Route::post('/register', [ApiAuthController::class, 'register']);
+    Route::post('/verify-otp', [ApiAuthController::class, 'verifyOtp']);
+    Route::post('/resend-otp', [ApiAuthController::class, 'resendOtp']);
     Route::post('/login', [ApiAuthController::class, 'login']);
     Route::post('/google-login', [ApiAuthController::class, 'googleLogin']);
 });

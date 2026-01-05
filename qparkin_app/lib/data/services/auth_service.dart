@@ -166,8 +166,8 @@ class AuthService {
     }
   }
 
-  /// Registrasi menggunakan nama, email/nomor HP, dan password
-  /// Returns: {'success': bool, 'message': string}
+  /// Registrasi menggunakan nama, nomor HP, dan PIN
+  /// Returns: {'success': bool, 'message': string, 'nomor_hp': string?}
   Future<Map<String, dynamic>> register({
     required String nama,
     required String nomorHp,
@@ -199,22 +199,15 @@ class AuthService {
       // Parsing response
       final responseData = jsonDecode(response.body) as Map<String, dynamic>;
 
-      // Status 201 - Registrasi berhasil (Created)
-      if (response.statusCode == 201) {
+      // Status 200 - OTP dikirim
+      if (response.statusCode == 200) {
         final success = responseData['success'] as bool? ?? false;
         
         return {
           'success': success,
-          'message': responseData['message'] ?? (success ? 'Registrasi berhasil' : 'Registrasi gagal'),
-        };
-      }
-
-      // Status 200 - OK (jika backend menggunakan 200)
-      else if (response.statusCode == 200) {
-        final success = responseData['success'] as bool? ?? false;
-        return {
-          'success': success,
-          'message': responseData['message'] ?? (success ? 'Registrasi berhasil' : 'Registrasi gagal'),
+          'message': responseData['message'] ?? 'OTP telah dikirim',
+          'nomor_hp': responseData['nomor_hp'],
+          'debug_email': responseData['debug_email'], // Untuk development
         };
       }
 
@@ -250,6 +243,126 @@ class AuthService {
         return {
           'success': false,
           'message': 'Terjadi kesalahan. Status code: ${response.statusCode}',
+        };
+      }
+    } on TimeoutException catch (e) {
+      return {
+        'success': false,
+        'message': e.message,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Error: ${e.toString()}',
+      };
+    }
+  }
+
+  /// Verifikasi OTP setelah registrasi
+  /// Returns: {'success': bool, 'message': string}
+  Future<Map<String, dynamic>> verifyOtp({
+    required String nomorHp,
+    required String otpCode,
+  }) async {
+    try {
+      final url = Uri.parse('$baseUrl/api/auth/verify-otp');
+
+      final body = {
+        'nomor_hp': nomorHp,
+        'otp_code': otpCode,
+      };
+
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode(body),
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () => throw TimeoutException('Koneksi timeout. Silakan coba lagi.'),
+      );
+
+      final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        final success = responseData['success'] as bool? ?? false;
+        return {
+          'success': success,
+          'message': responseData['message'] ?? 'Verifikasi berhasil',
+        };
+      } else if (response.statusCode == 404) {
+        return {
+          'success': false,
+          'message': responseData['message'] ?? 'Kode OTP tidak ditemukan',
+        };
+      } else if (response.statusCode == 400) {
+        return {
+          'success': false,
+          'message': responseData['message'] ?? 'Kode OTP tidak valid',
+        };
+      } else {
+        return {
+          'success': false,
+          'message': responseData['message'] ?? 'Verifikasi gagal',
+        };
+      }
+    } on TimeoutException catch (e) {
+      return {
+        'success': false,
+        'message': e.message,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Error: ${e.toString()}',
+      };
+    }
+  }
+
+  /// Kirim ulang OTP
+  /// Returns: {'success': bool, 'message': string}
+  Future<Map<String, dynamic>> resendOtp({
+    required String nomorHp,
+  }) async {
+    try {
+      final url = Uri.parse('$baseUrl/api/auth/resend-otp');
+
+      final body = {
+        'nomor_hp': nomorHp,
+      };
+
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode(body),
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () => throw TimeoutException('Koneksi timeout. Silakan coba lagi.'),
+      );
+
+      final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+
+      if (response.statusCode == 200) {
+        final success = responseData['success'] as bool? ?? false;
+        return {
+          'success': success,
+          'message': responseData['message'] ?? 'OTP telah dikirim ulang',
+          'debug_email': responseData['debug_email'],
+        };
+      } else if (response.statusCode == 404) {
+        return {
+          'success': false,
+          'message': responseData['message'] ?? 'Data registrasi tidak ditemukan',
+        };
+      } else {
+        return {
+          'success': false,
+          'message': responseData['message'] ?? 'Gagal mengirim ulang OTP',
         };
       }
     } on TimeoutException catch (e) {

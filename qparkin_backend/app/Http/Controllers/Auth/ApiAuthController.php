@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use App\Models\User;
+use App\Models\OtpVerification;
+use App\Mail\OtpMail;
 use Google\Client as GoogleClient;
 
 class ApiAuthController extends Controller
@@ -111,24 +114,181 @@ class ApiAuthController extends Controller
                 ], 409);
             }
 
+            // Generate OTP 6 digit
+            $otpCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+            // Hapus OTP lama untuk nomor HP ini (jika ada)
+            OtpVerification::where('nomor_hp', $request->nomor_hp)->delete();
+
+            // Simpan OTP ke database (berlaku 5 menit)
+            OtpVerification::create([
+                'nomor_hp' => $request->nomor_hp,
+                'otp_code' => $otpCode,
+                'expires_at' => now()->addMinutes(5),
+                'is_verified' => false,
+            ]);
+
+            // Simpan data registrasi sementara di session/cache
+            // Untuk sementara kita simpan di OTP table sebagai metadata
+            // Atau bisa gunakan cache Laravel
+            cache()->put(
+                'register_data_' . $request->nomor_hp,
+                [
+                    'nama' => $request->nama,
+                    'nomor_hp' => $request->nomor_hp,
+                    'pin' => $request->pin,
+                ],
+                now()->addMinutes(10) // Cache 10 menit
+            );
+
+            // Kirim OTP via email (simulasi SMS)
+            // Email dummy: nomor_hp@qparkin.test
+            $dummyEmail = str_replace(['+', ' ', '-'], '', $request->nomor_hp) . '@qparkin.test';
+            
+            Mail::to($dummyEmail)->send(new OtpMail($otpCode, $request->nama, $request->nomor_hp));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'OTP telah dikirim. Silakan cek email Mailtrap.',
+                'nomor_hp' => $request->nomor_hp,
+                'debug_email' => $dummyEmail, // Untuk development
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error during registration: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function verifyOtp(Request $request)
+    {
+        // Validasi input
+        $request->validate([
+            'nomor_hp' => 'required|string',
+            'otp_code' => 'required|string|size:6'
+        ]);
+
+        try {
+            // Cari OTP yang belum diverifikasi
+            $otpRecord = OtpVerification::where('nomor_hp', $request->nomor_hp)
+                ->where('is_verified', false)
+                ->latest()
+                ->first();
+
+            if (!$otpRecord) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Kode OTP tidak ditemukan atau sudah digunakan.'
+                ], 404);
+            }
+
+            // Cek apakah OTP sudah kedaluwarsa
+            if ($otpRecord->isExpired()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Kode OTP sudah kedaluwarsa. Silakan minta OTP baru.'
+                ], 400);
+            }
+
+            // Verifikasi kode OTP
+            if (!$otpRecord->isValid($request->otp_code)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Kode OTP salah. Silakan coba lagi.'
+                ], 400);
+            }
+
+            // Ambil data registrasi dari cache
+            $registerData = cache()->get('register_data_' . $request->nomor_hp);
+
+            if (!$registerData) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data registrasi tidak ditemukan. Silakan daftar ulang.'
+                ], 404);
+            }
+
             // Buat user baru
             $user = User::create([
-                'name' => $request->nama,
-                'nomor_hp' => $request->nomor_hp,
-                'password' => Hash::make($request->pin),
+                'name' => $registerData['nama'],
+                'nomor_hp' => $registerData['nomor_hp'],
+                'password' => Hash::make($registerData['pin']),
                 'role' => 'customer',
                 'status' => 'aktif',
                 'saldo_poin' => 0,
             ]);
 
+            // Tandai OTP sebagai terverifikasi
+            $otpRecord->update(['is_verified' => true]);
+
+            // Hapus cache data registrasi
+            cache()->forget('register_data_' . $request->nomor_hp);
+
             return response()->json([
                 'success' => true,
-                'message' => 'Registrasi berhasil'
+                'message' => 'Verifikasi berhasil! Akun Anda telah aktif.',
+                'user' => [
+                    'id_user' => $user->id_user,
+                    'name' => $user->name,
+                    'nomor_hp' => $user->nomor_hp,
+                ]
             ], 201);
 
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Error during registration: ' . $e->getMessage()
+                'success' => false,
+                'message' => 'Error during verification: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function resendOtp(Request $request)
+    {
+        // Validasi input
+        $request->validate([
+            'nomor_hp' => 'required|string'
+        ]);
+
+        try {
+            // Cek apakah ada data registrasi di cache
+            $registerData = cache()->get('register_data_' . $request->nomor_hp);
+
+            if (!$registerData) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data registrasi tidak ditemukan. Silakan daftar ulang.'
+                ], 404);
+            }
+
+            // Generate OTP baru
+            $otpCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+            // Hapus OTP lama
+            OtpVerification::where('nomor_hp', $request->nomor_hp)->delete();
+
+            // Simpan OTP baru
+            OtpVerification::create([
+                'nomor_hp' => $request->nomor_hp,
+                'otp_code' => $otpCode,
+                'expires_at' => now()->addMinutes(5),
+                'is_verified' => false,
+            ]);
+
+            // Kirim OTP via email
+            $dummyEmail = str_replace(['+', ' ', '-'], '', $request->nomor_hp) . '@qparkin.test';
+            Mail::to($dummyEmail)->send(new OtpMail($otpCode, $registerData['nama'], $request->nomor_hp));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'OTP baru telah dikirim.',
+                'debug_email' => $dummyEmail,
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error resending OTP: ' . $e->getMessage()
             ], 500);
         }
     }

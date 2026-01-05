@@ -4,6 +4,7 @@ import '/config/app_theme.dart';
 import '/utils/validators.dart';
 import '/presentation/widgets/phone_field.dart';
 import '/presentation/widgets/buttons.dart';
+import '/presentation/dialogs/otp_verification_dialog.dart';
 import '/data/services/auth_service.dart';
 import 'login_screen.dart';
 
@@ -151,19 +152,93 @@ class _SignUpScreenState extends State<SignUpScreen> {
         pin: _pinCtrl.text.trim(),
       );
 
+      setState(() => _isLoading = false);
+
       if (result['success'] == true) {
-        // Registrasi berhasil, navigasi ke login
+        // OTP berhasil dikirim, tampilkan dialog verifikasi
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(result['message'] ?? 'Registrasi berhasil'),
-              backgroundColor: Colors.green,
+          final nomorHp = result['nomor_hp'] ?? _phoneCtrl.text.trim();
+          
+          // Tampilkan info debug email (untuk development)
+          if (result['debug_email'] != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('OTP dikirim ke: ${result['debug_email']}'),
+                backgroundColor: Colors.blue,
+                duration: const Duration(seconds: 5),
+              ),
+            );
+          }
+
+          // Tampilkan dialog OTP
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => OtpVerificationDialog(
+              nomorHp: nomorHp,
+              onVerify: (otpCode) async {
+                // Verifikasi OTP
+                final verifyResult = await _auth.verifyOtp(
+                  nomorHp: nomorHp,
+                  otpCode: otpCode,
+                );
+
+                if (mounted) {
+                  if (verifyResult['success'] == true) {
+                    // Verifikasi berhasil
+                    Navigator.of(context).pop(); // Tutup dialog OTP
+                    
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(verifyResult['message'] ?? 'Registrasi berhasil!'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                    
+                    // Navigasi ke login
+                    Navigator.pushReplacementNamed(context, LoginScreen.routeName);
+                  } else {
+                    // Verifikasi gagal
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(verifyResult['message'] ?? 'Kode OTP salah'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              },
+              onResend: () async {
+                // Kirim ulang OTP
+                final resendResult = await _auth.resendOtp(nomorHp: nomorHp);
+                
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(resendResult['message'] ?? 'OTP telah dikirim ulang'),
+                      backgroundColor: resendResult['success'] == true 
+                          ? Colors.green 
+                          : Colors.red,
+                    ),
+                  );
+                  
+                  // Tampilkan debug email jika ada
+                  if (resendResult['debug_email'] != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('OTP dikirim ke: ${resendResult['debug_email']}'),
+                        backgroundColor: Colors.blue,
+                        duration: const Duration(seconds: 5),
+                      ),
+                    );
+                  }
+                }
+              },
             ),
           );
-          Navigator.pushReplacementNamed(context, LoginScreen.routeName);
         }
       } else {
-        // Registrasi gagal, tampilkan error
+        // Registrasi gagal (nomor HP sudah terdaftar, dll)
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -175,16 +250,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
       }
     } catch (e) {
       if (mounted) {
+        setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Terjadi kesalahan. Silakan coba lagi.'),
             backgroundColor: Colors.red,
           ),
         );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
       }
     }
   }
