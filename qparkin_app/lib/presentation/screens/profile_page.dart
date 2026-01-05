@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'list_kendaraan.dart';
 import 'vehicle_detail_page.dart';
 import 'edit_profile_page.dart';
-import 'welcome_screen.dart';
+import 'about_page.dart';
 import '../widgets/bottom_nav.dart';
 import '/utils/navigation_utils.dart';
 import '/utils/page_transitions.dart';
@@ -340,20 +340,28 @@ class _ProfilePageState extends State<ProfilePage> {
                                     ),
                                   ),
                                 ),
-                                // Only show email if it exists and is not empty
-                                if (user?.email != null && user!.email!.isNotEmpty) // Null-safe: use ! after null check
-                                  Semantics(
-                                    label: 'Email: ${user.email}',
-                                    child: Text(
-                                      user.email!,  // Null-safe: use ! after null check
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        color: Colors.white.withOpacity(0.8),
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                                // Always show email label with placeholder if empty
+                                Semantics(
+                                  label: user?.email != null && user!.email!.isNotEmpty
+                                      ? 'Email: ${user.email}'
+                                      : 'Email belum ditambahkan',
+                                  child: Text(
+                                    user?.email != null && user!.email!.isNotEmpty
+                                        ? user.email!
+                                        : 'Tambahkan email untuk notifikasi',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: user?.email != null && user!.email!.isNotEmpty
+                                          ? Colors.white.withOpacity(0.8)
+                                          : Colors.white.withOpacity(0.6),
+                                      fontStyle: user?.email != null && user!.email!.isNotEmpty
+                                          ? FontStyle.normal
+                                          : FontStyle.italic,
                                     ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
+                                ),
                               ],
                             ),
                           ),
@@ -904,10 +912,10 @@ class _ProfilePageState extends State<ProfilePage> {
       final navigator = Navigator.of(context);
       navigator.pop(); // Close loading dialog
       
-      // Navigate to welcome screen and clear navigation stack
+      // Navigate to about page and clear navigation stack
       navigator.pushAndRemoveUntil(
         MaterialPageRoute(
-          builder: (context) => const WelcomeScreen(),
+          builder: (context) => const AboutPage(),
         ),
         (route) => false, // Remove all routes from stack
       );
