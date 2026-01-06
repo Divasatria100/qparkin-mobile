@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '/config/app_theme.dart';
 import '../screens/qr_scan_screen.dart';
 
 typedef _LetIndexPage = bool Function(int value);
@@ -31,7 +32,7 @@ class CurvedNavigationBar extends StatefulWidget {
     ],
     this.index = 0,
     this.color = Colors.white,
-    this.buttonBackgroundColor = const Color(0xFFFB923C),
+    this.buttonBackgroundColor = AppTheme.primaryOrange,
     this.backgroundColor = Colors.white,
     this.onTap,
     _LetIndexPage? letIndexChange,
@@ -53,19 +54,19 @@ class CurvedNavigationBar extends StatefulWidget {
 class CurvedNavigationBarState extends State<CurvedNavigationBar> {
   // Cache decoration as a getter to avoid late initialization issues
   BoxDecoration get _containerDecoration => BoxDecoration(
-    color: widget.backgroundColor,
-    borderRadius: const BorderRadius.only(
-      topLeft: Radius.circular(0),
-      topRight: Radius.circular(0),
-    ),
-    boxShadow: [
-      BoxShadow(
-        color: Colors.black.withOpacity(0.1),
-        blurRadius: 10,
-        offset: const Offset(0, -5),
-      ),
-    ],
-  );
+        color: widget.backgroundColor,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(0),
+          topRight: Radius.circular(0),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +111,8 @@ class CurvedNavigationBarState extends State<CurvedNavigationBar> {
                     },
                     backgroundColor: widget.buttonBackgroundColor,
                     elevation: 6,
-                    child: const Icon(Icons.qr_code_scanner, color: Colors.white, size: 32),
+                    child: const Icon(Icons.qr_code_scanner,
+                        color: Colors.white, size: 32),
                   ),
                 ),
               ),
@@ -124,7 +126,7 @@ class CurvedNavigationBarState extends State<CurvedNavigationBar> {
   Widget _buildNavItem(int index) {
     final isActive = index == widget.index;
     final color = isActive ? widget.buttonBackgroundColor : Colors.black;
-    
+
     return Expanded(
       child: RepaintBoundary(
         child: GestureDetector(
@@ -191,7 +193,7 @@ class BottomNavWithFab extends StatelessWidget {
       body: Container(), // Placeholder, actual body will be in parent Scaffold
       floatingActionButton: FloatingActionButton(
         onPressed: onFabPressed,
-        backgroundColor: const Color(0xFFFB923C),
+        backgroundColor: AppTheme.primaryOrange,
         child: const Icon(Icons.qr_code_scanner, color: Colors.white, size: 32),
         elevation: 6,
       ),

@@ -1,10 +1,24 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
+  // Brand Colors
   static const Color brandBlue = Color(0xFF2E3A8C);
   static const Color brandIndigo = Color(0xFF5C3BFF);
   static const Color brandNavy = Color(0xFF1F2A5A);
   static const Color brandRed = Color(0xFFE53935);
+
+  // Primary Colors (frequently used)
+  static const Color primaryPurple = Color(0xFF573ED1);
+  static const Color primaryOrange = Color(0xFFFB923C);
+
+  // Semantic Colors
+  static const Color successGreen = Color(0xFF4CAF50);
+  static const Color warningOrange = Color(0xFFFF9800);
+  static const Color errorRed = Color(0xFFF44336);
+
+  // Neutral Colors
+  static const Color borderGrey = Color(0xFFD0D5DD);
+  static const Color hintGrey = Color(0xFF949191);
 
   static ThemeData get light {
     final base = ThemeData.light(useMaterial3: false);
