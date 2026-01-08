@@ -262,16 +262,92 @@
     }
     
     /**
+     * Show success toast notification
+     */
+    function showSuccessToast(message) {
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: message,
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer);
+                toast.addEventListener('mouseleave', Swal.resumeTimer);
+            }
+        });
+    }
+    
+    /**
+     * Show error toast notification
+     */
+    function showErrorToast(message) {
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'error',
+            title: message,
+            showConfirmButton: false,
+            timer: 4000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer);
+                toast.addEventListener('mouseleave', Swal.resumeTimer);
+            }
+        });
+    }
+    
+    /**
+     * Show warning toast notification
+     */
+    function showWarningToast(message) {
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'warning',
+            title: message,
+            showConfirmButton: false,
+            timer: 3500,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer);
+                toast.addEventListener('mouseleave', Swal.resumeTimer);
+            }
+        });
+    }
+    
+    /**
+     * Show info toast notification
+     */
+    function showInfoToast(message) {
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'info',
+            title: message,
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer);
+                toast.addEventListener('mouseleave', Swal.resumeTimer);
+            }
+        });
+    }
+    
+    /**
      * Handle save button click
      */
     function handleSave() {
         if (!currentLat || !currentLng) {
-            alert('Silakan pilih lokasi pada peta terlebih dahulu');
+            showWarningToast('Silakan pilih lokasi pada peta terlebih dahulu');
             return;
         }
         
         if (!updateUrl) {
-            alert('Error: Update URL tidak ditemukan');
+            showErrorToast('Error: Update URL tidak ditemukan');
             return;
         }
         
@@ -299,16 +375,16 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('✅ Lokasi berhasil disimpan!');
+                showSuccessToast('Lokasi berhasil disimpan!');
                 updateStatus(true);
                 console.log('[LokasiMall] Saved successfully');
             } else {
-                alert('❌ Gagal menyimpan: ' + (data.message || 'Unknown error'));
+                showErrorToast('Gagal menyimpan: ' + (data.message || 'Unknown error'));
             }
         })
         .catch(error => {
             console.error('[LokasiMall] Save error:', error);
-            alert('❌ Terjadi kesalahan saat menyimpan');
+            showErrorToast('Terjadi kesalahan saat menyimpan');
         })
         .finally(() => {
             // Reset button
@@ -322,7 +398,7 @@
      */
     function handleGeolocate() {
         if (!navigator.geolocation) {
-            alert('Browser Anda tidak mendukung geolocation');
+            showErrorToast('Browser Anda tidak mendukung geolocation');
             return;
         }
         
@@ -351,12 +427,15 @@
                 
                 console.log('[LokasiMall] Geolocated:', lat.toFixed(6), lng.toFixed(6));
                 
+                // Show success toast
+                showSuccessToast('Lokasi GPS berhasil didapatkan');
+                
                 // Reset button
                 resetGeolocateBtn();
             },
             function(error) {
                 console.error('[LokasiMall] Geolocation error:', error);
-                alert('Gagal mendapatkan lokasi: ' + error.message);
+                showErrorToast('Gagal mendapatkan lokasi: ' + error.message);
                 resetGeolocateBtn();
             }
         );
@@ -545,7 +624,7 @@
         }
         
         if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-            alert('Koordinat tidak valid. Latitude: -90 hingga 90, Longitude: -180 hingga 180');
+            showWarningToast('Koordinat tidak valid. Latitude: -90 hingga 90, Longitude: -180 hingga 180');
             return;
         }
         

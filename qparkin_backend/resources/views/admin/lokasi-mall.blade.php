@@ -9,6 +9,8 @@
 @section('styles')
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" />
 <link rel="stylesheet" href="{{ asset('css/lokasi-mall.css') }}">
+<!-- SweetAlert2 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 @endsection
 
 @section('content')
@@ -159,6 +161,9 @@
 @endsection
 
 @section('scripts')
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- MapLibre GL -->
 <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
 <script src="{{ asset('js/lokasi-mall.js') }}"></script>
 @endsection
