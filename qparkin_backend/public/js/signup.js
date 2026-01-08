@@ -401,8 +401,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 coordinates: marker ? marker.getPosition().toJSON() : null
             });
             
-            // Redirect to success page
-            window.location.href = 'success-signup.html';
+            // Redirect to success page (Laravel route)
+            window.location.href = '/success-signup';
         }, 2000);
     });
 });

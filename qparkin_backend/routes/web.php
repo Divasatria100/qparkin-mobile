@@ -33,6 +33,9 @@ Route::middleware('guest')->group(function () {
         return view('auth.signup'); 
     })->name('register');
     Route::post('/register', [RegisteredUserController::class, 'store']);
+    Route::get('/success-signup', function () {
+        return view('auth.success-signup');
+    })->name('success-signup');
     Route::get('/forgot-password', function () { 
         return view('auth.forgot-password'); 
     })->name('password.request');
