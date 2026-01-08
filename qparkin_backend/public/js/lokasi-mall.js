@@ -22,6 +22,9 @@
     let saveBtn = null;
     let geolocateBtn = null;
     let statusContainer = null;
+    let googleMapsInput = null;
+    let parseCoordinatesBtn = null;
+    let coordinateError = null;
     
     // Config
     let mallName = '';
@@ -42,6 +45,9 @@
         saveBtn = document.getElementById('saveBtn');
         geolocateBtn = document.getElementById('geolocateBtn');
         statusContainer = document.getElementById('statusContainer');
+        googleMapsInput = document.getElementById('googleMapsInput');
+        parseCoordinatesBtn = document.getElementById('parseCoordinatesBtn');
+        coordinateError = document.getElementById('coordinateError');
         
         if (!mapContainer) {
             console.error('[LokasiMall] Map container not found!');
@@ -65,6 +71,30 @@
         // Attach event listeners
         if (saveBtn) saveBtn.addEventListener('click', handleSave);
         if (geolocateBtn) geolocateBtn.addEventListener('click', handleGeolocate);
+        if (parseCoordinatesBtn) parseCoordinatesBtn.addEventListener('click', handleParseCoordinates);
+        
+        // Allow Enter key on Google Maps input
+        if (googleMapsInput) {
+            googleMapsInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleParseCoordinates();
+                }
+            });
+            
+            // Clear error on input
+            googleMapsInput.addEventListener('input', function() {
+                hideCoordinateError();
+            });
+        }
+        
+        // Allow manual input changes to update map
+        if (latInput) {
+            latInput.addEventListener('change', handleManualCoordinateChange);
+        }
+        if (lngInput) {
+            lngInput.addEventListener('change', handleManualCoordinateChange);
+        }
         
         // Wait for container to be visible, then init map
         waitForContainer();
@@ -364,6 +394,176 @@
         
         if (success) {
             statusContainer.innerHTML = '<div class="alert alert-success"><svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><span>Lokasi sudah diatur</span></div>';
+        }
+    }
+    
+    /**
+     * Handle parse coordinates from Google Maps format
+     */
+    function handleParseCoordinates() {
+        if (!googleMapsInput) return;
+        
+        const input = googleMapsInput.value.trim();
+        
+        if (!input) {
+            showCoordinateError('Silakan masukkan koordinat terlebih dahulu');
+            return;
+        }
+        
+        // Parse coordinates
+        const result = parseGoogleMapsCoordinates(input);
+        
+        if (!result.valid) {
+            showCoordinateError(result.error);
+            return;
+        }
+        
+        // Valid coordinates
+        const lat = result.latitude;
+        const lng = result.longitude;
+        
+        console.log('[LokasiMall] Parsed coordinates:', lat, lng);
+        
+        // Update state
+        currentLat = lat;
+        currentLng = lng;
+        
+        // Update inputs
+        updateInputs(lat, lng);
+        
+        // Update map
+        if (map) {
+            // Fly to location
+            map.flyTo({
+                center: [lng, lat],
+                zoom: 16,
+                essential: true
+            });
+            
+            // Add marker
+            addMarker(lng, lat);
+        }
+        
+        // Clear input and error
+        googleMapsInput.value = '';
+        hideCoordinateError();
+        
+        // Show success feedback
+        googleMapsInput.placeholder = '✓ Koordinat berhasil digunakan';
+        setTimeout(function() {
+            googleMapsInput.placeholder = 'Contoh: 1.072020040894358, 104.02393750738969';
+        }, 3000);
+    }
+    
+    /**
+     * Parse Google Maps coordinate string
+     * Supports formats:
+     * - "lat, lng" (standard)
+     * - "lat,lng" (no space)
+     * - "lat , lng" (extra spaces)
+     */
+    function parseGoogleMapsCoordinates(input) {
+        // Remove extra whitespace
+        input = input.trim();
+        
+        // Split by comma
+        const parts = input.split(',');
+        
+        if (parts.length !== 2) {
+            return {
+                valid: false,
+                error: 'Format tidak valid. Gunakan format: latitude, longitude'
+            };
+        }
+        
+        // Parse latitude and longitude
+        const lat = parseFloat(parts[0].trim());
+        const lng = parseFloat(parts[1].trim());
+        
+        // Validate numbers
+        if (isNaN(lat) || isNaN(lng)) {
+            return {
+                valid: false,
+                error: 'Koordinat harus berupa angka yang valid'
+            };
+        }
+        
+        // Validate latitude range (-90 to 90)
+        if (lat < -90 || lat > 90) {
+            return {
+                valid: false,
+                error: 'Latitude harus antara -90 dan 90'
+            };
+        }
+        
+        // Validate longitude range (-180 to 180)
+        if (lng < -180 || lng > 180) {
+            return {
+                valid: false,
+                error: 'Longitude harus antara -180 dan 180'
+            };
+        }
+        
+        return {
+            valid: true,
+            latitude: lat,
+            longitude: lng
+        };
+    }
+    
+    /**
+     * Show coordinate error message
+     */
+    function showCoordinateError(message) {
+        if (!coordinateError) return;
+        
+        coordinateError.textContent = message;
+        coordinateError.style.display = 'flex';
+        
+        // Auto-hide after 5 seconds
+        setTimeout(hideCoordinateError, 5000);
+    }
+    
+    /**
+     * Hide coordinate error message
+     */
+    function hideCoordinateError() {
+        if (!coordinateError) return;
+        coordinateError.style.display = 'none';
+    }
+    
+    /**
+     * Handle manual coordinate input changes
+     */
+    function handleManualCoordinateChange() {
+        const lat = parseFloat(latInput.value);
+        const lng = parseFloat(lngInput.value);
+        
+        // Validate
+        if (isNaN(lat) || isNaN(lng)) {
+            return;
+        }
+        
+        if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+            alert('Koordinat tidak valid. Latitude: -90 hingga 90, Longitude: -180 hingga 180');
+            return;
+        }
+        
+        // Update state
+        currentLat = lat;
+        currentLng = lng;
+        
+        console.log('[LokasiMall] Manual coordinate change:', lat, lng);
+        
+        // Update map
+        if (map) {
+            map.flyTo({
+                center: [lng, lat],
+                zoom: 16,
+                essential: true
+            });
+            
+            addMarker(lng, lat);
         }
     }
     

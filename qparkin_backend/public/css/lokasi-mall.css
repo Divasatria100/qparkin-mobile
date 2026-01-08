@@ -293,6 +293,112 @@
     cursor: not-allowed;
 }
 
+/* Google Maps Input Group */
+.google-maps-input-group {
+    margin-bottom: 24px;
+    padding: 16px;
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
+}
+
+.google-maps-input-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #0c4a6e;
+    margin-bottom: 10px;
+}
+
+.google-maps-input-group label svg {
+    color: #0284c7;
+}
+
+.input-with-button {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.input-with-button input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    font-size: 14px;
+    background: white;
+    color: #1a202c;
+    font-family: 'Courier New', monospace;
+}
+
+.input-with-button input:focus {
+    outline: none;
+    border-color: #0284c7;
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+}
+
+.input-with-button input::placeholder {
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+.btn-parse {
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-parse:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+}
+
+.btn-parse:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-parse svg {
+    flex-shrink: 0;
+}
+
+.hint-text {
+    display: block;
+    font-size: 12px;
+    color: #0369a1;
+    margin-top: 4px;
+}
+
+.coordinate-error {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #991b1b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.coordinate-error::before {
+    content: "⚠️";
+    font-size: 16px;
+}
+
 /* Instructions */
 .instructions {
     margin-top: 24px;

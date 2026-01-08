@@ -86,6 +86,7 @@
                         </button>
                     </div>
                     <small class="hint-text">Salin koordinat dari Google Maps dan klik "Gunakan"</small>
+                    <div id="coordinateError" class="coordinate-error" style="display: none;"></div>
                 </div>
 
                 <!-- Coordinate Inputs -->
@@ -144,10 +145,11 @@
                 <div class="instructions">
                     <h4>Panduan:</h4>
                     <ol>
-                        <li>Klik pada peta untuk menentukan lokasi mall</li>
-                        <li>Atau gunakan tombol "Gunakan Lokasi Saat Ini"</li>
-                        <li>Koordinat akan otomatis terisi</li>
-                        <li>Klik "Simpan Lokasi" untuk menyimpan</li>
+                        <li><strong>Copy-paste dari Google Maps:</strong> Salin koordinat dari Google Maps (format: lat, lng) dan klik "Gunakan"</li>
+                        <li><strong>Klik pada peta:</strong> Klik langsung pada peta untuk menentukan lokasi mall</li>
+                        <li><strong>Input manual:</strong> Ketik koordinat langsung di input Latitude/Longitude dan tekan Enter</li>
+                        <li><strong>Lokasi saat ini:</strong> Gunakan tombol "Gunakan Lokasi Saat Ini" untuk GPS</li>
+                        <li><strong>Simpan:</strong> Klik "Simpan Lokasi" untuk menyimpan perubahan</li>
                     </ol>
                 </div>
             </div>
