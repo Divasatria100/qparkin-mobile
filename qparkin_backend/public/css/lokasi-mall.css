@@ -161,7 +161,103 @@
     padding: 20px;
 }
 
-/* Info Groups */
+/* Mall Data Section */
+.mall-data-section {
+    margin-bottom: 24px;
+}
+
+.section-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a202c;
+    margin: 0 0 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.section-title::before {
+    content: '';
+    width: 4px;
+    height: 16px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 2px;
+}
+
+.section-divider {
+    height: 1px;
+    background: #e2e8f0;
+    margin: 24px 0;
+}
+
+/* Input Groups */
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #4a5568;
+    margin-bottom: 8px;
+}
+
+.input-group label svg {
+    color: #667eea;
+    flex-shrink: 0;
+}
+
+.input-group input[type="text"],
+.input-group input[type="url"],
+.input-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    font-size: 14px;
+    background: white;
+    color: #1a202c;
+    transition: all 0.2s;
+}
+
+.input-group textarea {
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+    line-height: 1.5;
+}
+
+.input-group input:focus,
+.input-group textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.input-group input:disabled,
+.input-group textarea:disabled {
+    background: #f7fafc;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.input-group .hint-text {
+    display: block;
+    font-size: 12px;
+    color: #718096;
+    margin-top: 4px;
+}
+
+/* Character Counter */
+.input-group input[maxlength],
+.input-group textarea[maxlength] {
+    position: relative;
+}
+
+/* Info Groups (for read-only display) */
 .info-group {
     margin-bottom: 20px;
 }

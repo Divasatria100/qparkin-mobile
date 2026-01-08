@@ -57,16 +57,60 @@
             </div>
             
             <div class="info-card-body">
-                <!-- Mall Info -->
-                <div class="info-group">
-                    <label>Nama Mall</label>
-                    <p class="info-value">{{ $mall->nama_mall ?? '-' }}</p>
+                <!-- Mall Data Inputs -->
+                <div class="mall-data-section">
+                    <h4 class="section-title">Data Mall</h4>
+                    
+                    <div class="input-group">
+                        <label for="namaMallInput">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                            Nama Mall
+                        </label>
+                        <input type="text" id="namaMallInput" 
+                               value="{{ $mall->nama_mall ?? '' }}" 
+                               placeholder="Contoh: Grand Mall Batam"
+                               maxlength="100"
+                               required>
+                        <small class="hint-text">Maksimal 100 karakter</small>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="alamatInput">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            Alamat Lengkap
+                        </label>
+                        <textarea id="alamatInput" 
+                                  rows="3" 
+                                  placeholder="Contoh: Jl. Raya Batam Center No. 123, Batam"
+                                  maxlength="255"
+                                  required>{{ $mall->alamat_lengkap ?? $mall->lokasi ?? '' }}</textarea>
+                        <small class="hint-text">Maksimal 255 karakter</small>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="googleMapsUrlInput">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                            </svg>
+                            Link Google Maps
+                        </label>
+                        <input type="url" id="googleMapsUrlInput" 
+                               value="{{ $mall->google_maps_url ?? '' }}" 
+                               placeholder="https://maps.google.com/...">
+                        <small class="hint-text">URL lengkap dari Google Maps (opsional)</small>
+                    </div>
                 </div>
-                
-                <div class="info-group">
-                    <label>Alamat</label>
-                    <p class="info-value">{{ $mall->alamat_lengkap ?? $mall->lokasi ?? '-' }}</p>
-                </div>
+
+                <!-- Divider -->
+                <div class="section-divider"></div>
+
+                <!-- Coordinate Section -->
+                <h4 class="section-title">Koordinat Lokasi</h4>
 
                 <!-- Google Maps Coordinate Input -->
                 <div class="google-maps-input-group">

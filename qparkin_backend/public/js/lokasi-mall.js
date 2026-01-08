@@ -26,6 +26,11 @@
     let parseCoordinatesBtn = null;
     let coordinateError = null;
     
+    // Mall data inputs
+    let namaMallInput = null;
+    let alamatInput = null;
+    let googleMapsUrlInput = null;
+    
     // Config
     let mallName = '';
     let hasCoords = false;
@@ -48,6 +53,11 @@
         googleMapsInput = document.getElementById('googleMapsInput');
         parseCoordinatesBtn = document.getElementById('parseCoordinatesBtn');
         coordinateError = document.getElementById('coordinateError');
+        
+        // Mall data inputs
+        namaMallInput = document.getElementById('namaMallInput');
+        alamatInput = document.getElementById('alamatInput');
+        googleMapsUrlInput = document.getElementById('googleMapsUrlInput');
         
         if (!mapContainer) {
             console.error('[LokasiMall] Map container not found!');
@@ -238,9 +248,18 @@
         .setLngLat([lng, lat])
         .addTo(map);
         
-        // Add popup
+        // Add popup with mall data
+        const mallNameDisplay = namaMallInput ? namaMallInput.value : mallName;
+        const alamatDisplay = alamatInput ? alamatInput.value : '';
+        
+        let popupContent = '<strong>' + mallNameDisplay + '</strong>';
+        if (alamatDisplay) {
+            popupContent += '<br>' + alamatDisplay;
+        }
+        popupContent += '<br>Lat: ' + lat.toFixed(6) + '<br>Lng: ' + lng.toFixed(6);
+        
         const popup = new maplibregl.Popup({ offset: 25 })
-            .setHTML('<strong>' + mallName + '</strong><br>Lat: ' + lat.toFixed(6) + '<br>Lng: ' + lng.toFixed(6));
+            .setHTML(popupContent);
         marker.setPopup(popup);
         
         // Drag event
@@ -259,6 +278,38 @@
     function updateInputs(lat, lng) {
         if (latInput) latInput.value = lat.toFixed(8);
         if (lngInput) lngInput.value = lng.toFixed(8);
+    }
+    
+    /**
+     * Validate mall data inputs
+     */
+    function validateMallData() {
+        const errors = [];
+        
+        // Validate nama mall
+        if (!namaMallInput || !namaMallInput.value.trim()) {
+            errors.push('Nama mall tidak boleh kosong');
+        } else if (namaMallInput.value.length > 100) {
+            errors.push('Nama mall maksimal 100 karakter');
+        }
+        
+        // Validate alamat
+        if (!alamatInput || !alamatInput.value.trim()) {
+            errors.push('Alamat tidak boleh kosong');
+        } else if (alamatInput.value.length > 255) {
+            errors.push('Alamat maksimal 255 karakter');
+        }
+        
+        // Validate Google Maps URL (optional, but must be valid URL if provided)
+        if (googleMapsUrlInput && googleMapsUrlInput.value.trim()) {
+            try {
+                new URL(googleMapsUrlInput.value);
+            } catch (e) {
+                errors.push('Link Google Maps harus berupa URL yang valid');
+            }
+        }
+        
+        return errors;
     }
     
     /**
@@ -341,6 +392,13 @@
      * Handle save button click
      */
     function handleSave() {
+        // Validate mall data first
+        const validationErrors = validateMallData();
+        if (validationErrors.length > 0) {
+            showErrorToast(validationErrors[0]);
+            return;
+        }
+        
         if (!currentLat || !currentLng) {
             showWarningToast('Silakan pilih lokasi pada peta terlebih dahulu');
             return;
@@ -355,10 +413,29 @@
         saveBtn.disabled = true;
         saveBtn.innerHTML = '<span>Menyimpan...</span>';
         
-        console.log('[LokasiMall] Saving:', currentLat, currentLng);
+        console.log('[LokasiMall] Saving:', {
+            nama_mall: namaMallInput.value,
+            alamat: alamatInput.value,
+            google_maps_url: googleMapsUrlInput.value,
+            latitude: currentLat,
+            longitude: currentLng
+        });
         
         // Get CSRF token
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+        
+        // Prepare data
+        const data = {
+            nama_mall: namaMallInput.value.trim(),
+            alamat_lengkap: alamatInput.value.trim(),
+            latitude: parseFloat(currentLat),
+            longitude: parseFloat(currentLng)
+        };
+        
+        // Add Google Maps URL if provided
+        if (googleMapsUrlInput.value.trim()) {
+            data.google_maps_url = googleMapsUrlInput.value.trim();
+        }
         
         // Send request
         fetch(updateUrl, {
@@ -367,16 +444,22 @@
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': csrfToken
             },
-            body: JSON.stringify({
-                latitude: parseFloat(currentLat),
-                longitude: parseFloat(currentLng)
-            })
+            body: JSON.stringify(data)
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                showSuccessToast('Lokasi berhasil disimpan!');
+                showSuccessToast('Data mall berhasil disimpan!');
                 updateStatus(true);
+                
+                // Update map marker popup with new data
+                if (marker) {
+                    const popup = new maplibregl.Popup({ offset: 25 })
+                        .setHTML('<strong>' + namaMallInput.value + '</strong><br>' + 
+                                alamatInput.value + '<br>Lat: ' + currentLat.toFixed(6) + '<br>Lng: ' + currentLng.toFixed(6));
+                    marker.setPopup(popup);
+                }
+                
                 console.log('[LokasiMall] Saved successfully');
             } else {
                 showErrorToast('Gagal menyimpan: ' + (data.message || 'Unknown error'));

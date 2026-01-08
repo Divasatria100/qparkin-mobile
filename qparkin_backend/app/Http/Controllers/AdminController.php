@@ -654,26 +654,42 @@ class AdminController extends Controller
         }
 
         $validated = $request->validate([
+            'nama_mall' => 'required|string|max:100',
+            'alamat_lengkap' => 'required|string|max:255',
+            'google_maps_url' => 'nullable|url|max:500',
             'latitude' => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
         ]);
 
         try {
             $mall = Mall::findOrFail($adminMall->id_mall);
+            
+            // Update mall data
+            $mall->nama_mall = $validated['nama_mall'];
+            $mall->alamat_lengkap = $validated['alamat_lengkap'];
             $mall->latitude = $validated['latitude'];
             $mall->longitude = $validated['longitude'];
+            
+            // Update Google Maps URL if provided
+            if (isset($validated['google_maps_url'])) {
+                $mall->google_maps_url = $validated['google_maps_url'];
+            }
+            
             $mall->save();
 
             return response()->json([
                 'success' => true, 
-                'message' => 'Lokasi mall berhasil diperbarui',
+                'message' => 'Data mall berhasil diperbarui',
                 'data' => [
+                    'nama_mall' => $mall->nama_mall,
+                    'alamat_lengkap' => $mall->alamat_lengkap,
+                    'google_maps_url' => $mall->google_maps_url,
                     'latitude' => $mall->latitude,
                     'longitude' => $mall->longitude
                 ]
             ]);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Gagal memperbarui lokasi: ' . $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Gagal memperbarui data mall: ' . $e->getMessage()], 500);
         }
     }
 }
