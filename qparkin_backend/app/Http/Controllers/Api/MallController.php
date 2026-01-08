@@ -20,7 +20,7 @@ class MallController extends Controller
                 ->select([
                     'mall.id_mall',
                     'mall.nama_mall',
-                    'mall.lokasi',
+                    'mall.alamat_lengkap',
                     'mall.latitude',
                     'mall.longitude',
                     'mall.google_maps_url',
@@ -33,7 +33,7 @@ class MallController extends Controller
                 ->groupBy(
                     'mall.id_mall',
                     'mall.nama_mall',
-                    'mall.lokasi',
+                    'mall.alamat_lengkap',
                     'mall.latitude',
                     'mall.longitude',
                     'mall.google_maps_url',
@@ -46,7 +46,7 @@ class MallController extends Controller
                     return [
                         'id_mall' => $mall->id_mall,
                         'nama_mall' => $mall->nama_mall,
-                        'lokasi' => $mall->lokasi,
+                        'alamat_lengkap' => $mall->alamat_lengkap,
                         'latitude' => $mall->latitude ? (float) $mall->latitude : null,
                         'longitude' => $mall->longitude ? (float) $mall->longitude : null,
                         'google_maps_url' => $mall->google_maps_url,
@@ -93,7 +93,7 @@ class MallController extends Controller
                 'data' => [
                     'id_mall' => $mall->id_mall,
                     'nama_mall' => $mall->nama_mall,
-                    'lokasi' => $mall->lokasi,
+                    'alamat_lengkap' => $mall->alamat_lengkap,
                     'latitude' => $mall->latitude ? (float) $mall->latitude : null,
                     'longitude' => $mall->longitude ? (float) $mall->longitude : null,
                     'google_maps_url' => $mall->google_maps_url,

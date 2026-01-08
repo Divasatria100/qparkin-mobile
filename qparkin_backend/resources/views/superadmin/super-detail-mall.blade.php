@@ -32,7 +32,7 @@
                     </div>
                 </div>
                 <p class="mall-description">
-                    {{ $mall->lokasi ?? 'Lokasi tidak tersedia' }}
+                    {{ $mall->alamat_lengkap ?? 'Alamat tidak tersedia' }}
                 </p>
             </div>
         </div>
@@ -137,8 +137,8 @@
                             <span>{{ $mall->id_mall }}</span>
                         </div>
                         <div class="info-item">
-                            <label>Lokasi</label>
-                            <span>{{ $mall->lokasi ?? '-' }}</span>
+                            <label>Alamat Lengkap</label>
+                            <span>{{ $mall->alamat_lengkap ?? '-' }}</span>
                         </div>
                         <div class="info-item">
                             <label>Status</label>
@@ -175,7 +175,7 @@
                     <div class="info-grid">
                         <div class="info-item">
                             <label>Alamat</label>
-                            <span>{{ $mall->lokasi ?? '-' }}</span>
+                            <span>{{ $mall->alamat_lengkap ?? '-' }}</span>
                         </div>
                         <div class="info-item">
                             <label>Google Maps</label>

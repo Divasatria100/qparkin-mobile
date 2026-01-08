@@ -88,7 +88,7 @@
                                   rows="3" 
                                   placeholder="Contoh: Jl. Raya Batam Center No. 123, Batam"
                                   maxlength="255"
-                                  required>{{ $mall->alamat_lengkap ?? $mall->lokasi ?? '' }}</textarea>
+                                  required>{{ $mall->alamat_lengkap ?? '' }}</textarea>
                         <small class="hint-text">Maksimal 255 karakter</small>
                     </div>
 

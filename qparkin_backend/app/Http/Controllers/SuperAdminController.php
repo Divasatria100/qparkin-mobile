@@ -262,7 +262,9 @@ class SuperAdminController extends Controller
     {
         $validated = $request->validate([
             'nama_mall' => 'required|string|max:255',
-            'lokasi' => 'required|string|max:255',
+            'alamat_lengkap' => 'required|string|max:255',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'kapasitas' => 'required|integer|min:1',
             'alamat_gmaps' => 'nullable|string',
             'has_slot_reservation_enabled' => 'nullable|boolean',
@@ -277,10 +279,13 @@ class SuperAdminController extends Controller
             // Create mall
             $mall = Mall::create([
                 'nama_mall' => $validated['nama_mall'],
-                'lokasi' => $validated['lokasi'],
+                'alamat_lengkap' => $validated['alamat_lengkap'],
+                'latitude' => $validated['latitude'] ?? null,
+                'longitude' => $validated['longitude'] ?? null,
                 'kapasitas' => $validated['kapasitas'],
                 'alamat_gmaps' => $validated['alamat_gmaps'] ?? null,
                 'has_slot_reservation_enabled' => $validated['has_slot_reservation_enabled'] ?? false,
+                'status' => 'active',
             ]);
 
             // Create admin if provided
@@ -327,7 +332,9 @@ class SuperAdminController extends Controller
         
         $validated = $request->validate([
             'nama_mall' => 'required|string|max:255',
-            'lokasi' => 'required|string|max:255',
+            'alamat_lengkap' => 'required|string|max:255',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'kapasitas' => 'required|integer|min:1',
             'alamat_gmaps' => 'nullable|string',
             'has_slot_reservation_enabled' => 'nullable|boolean',
@@ -335,7 +342,9 @@ class SuperAdminController extends Controller
 
         $mall->update([
             'nama_mall' => $validated['nama_mall'],
-            'lokasi' => $validated['lokasi'],
+            'alamat_lengkap' => $validated['alamat_lengkap'],
+            'latitude' => $validated['latitude'] ?? $mall->latitude,
+            'longitude' => $validated['longitude'] ?? $mall->longitude,
             'kapasitas' => $validated['kapasitas'],
             'alamat_gmaps' => $validated['alamat_gmaps'] ?? null,
             'has_slot_reservation_enabled' => $validated['has_slot_reservation_enabled'] ?? false,
@@ -436,7 +445,7 @@ class SuperAdminController extends Controller
             // 1. Buat Mall baru dengan koordinat lengkap
             $mall = Mall::create([
                 'nama_mall' => $user->requested_mall_name,
-                'lokasi' => $user->requested_mall_location,
+                'alamat_lengkap' => $user->requested_mall_location,
                 'latitude' => $latitude,
                 'longitude' => $longitude,
                 'google_maps_url' => $googleMapsUrl,

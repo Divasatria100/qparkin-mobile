@@ -86,7 +86,7 @@
                     <th>Nama Lengkap</th>
                     <th>Email</th>
                     <th>Nama Mall</th>
-                    <th>Lokasi</th>
+                    <th>Link Google Maps</th>
                     <th>Tanggal Pengajuan</th>
                     <th>Status</th>
                     <th>Aksi</th>
@@ -111,7 +111,18 @@
                     </td>
                     <td>{{ $request->email }}</td>
                     <td>{{ $request->requested_mall_name ?? 'N/A' }}</td>
-                    <td>{{ $request->requested_mall_location ?? 'N/A' }}</td>
+                    <td>
+                        @if($request->requested_mall_location)
+                        <a href="{{ $request->requested_mall_location }}" target="_blank" class="maps-link" title="Buka di Google Maps">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                            </svg>
+                            Lihat Lokasi
+                        </a>
+                        @else
+                        N/A
+                        @endif
+                    </td>
                     <td>{{ $request->applied_at ? \Carbon\Carbon::parse($request->applied_at)->format('d M Y H:i') : 'N/A' }}</td>
                     <td>
                         <span class="status-badge {{ $request->application_status == 'pending' ? 'pending' : ($request->application_status == 'approved' ? 'approved' : 'rejected') }}">

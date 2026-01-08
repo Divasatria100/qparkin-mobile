@@ -13,9 +13,12 @@ class MallFactory extends Factory
     {
         return [
             'nama_mall' => $this->faker->company() . ' Mall',
-            'lokasi' => $this->faker->city(),
+            'alamat_lengkap' => $this->faker->address(),
+            'latitude' => $this->faker->latitude(-6.5, -6.0),
+            'longitude' => $this->faker->longitude(106.5, 107.0),
             'kapasitas' => rand(100, 500),
-            'alamat_gmaps' => $this->faker->address(),
+            'status' => 'active',
+            'has_slot_reservation_enabled' => false,
         ];
     }
 }

@@ -87,7 +87,7 @@
                 </div>
                 <div class="mall-info">
                     <h3 class="mall-name">{{ $mall->nama_mall }}</h3>
-                    <p class="mall-location">{{ $mall->lokasi ?? '-' }}</p>
+                    <p class="mall-location">{{ $mall->alamat_lengkap ?? '-' }}</p>
                     <div class="mall-stats">
                         <div class="stat">
                             <span class="stat-value">{{ number_format($mall->kapasitas ?? 0) }}</span>

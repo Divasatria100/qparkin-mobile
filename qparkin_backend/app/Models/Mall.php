@@ -18,7 +18,6 @@ class Mall extends Model
         'kode_mall',
         'kategori',
         'deskripsi',
-        'lokasi',
         'latitude',
         'longitude',
         'google_maps_url',

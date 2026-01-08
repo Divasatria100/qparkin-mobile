@@ -58,9 +58,27 @@
                 </div>
                 
                 <div class="form-group full-width">
-                    <label for="lokasi">Lokasi *</label>
-                    <input type="text" id="lokasi" name="lokasi" value="{{ old('lokasi', $mall->lokasi) }}" required>
-                    @error('lokasi')
+                    <label for="alamatLengkap">Alamat Lengkap *</label>
+                    <textarea id="alamatLengkap" name="alamat_lengkap" rows="3" required>{{ old('alamat_lengkap', $mall->alamat_lengkap) }}</textarea>
+                    @error('alamat_lengkap')
+                    <span class="error-message">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="latitude">Latitude</label>
+                    <input type="number" step="0.00000001" id="latitude" name="latitude" value="{{ old('latitude', $mall->latitude) }}">
+                    <span class="field-hint">Koordinat GPS</span>
+                    @error('latitude')
+                    <span class="error-message">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="longitude">Longitude</label>
+                    <input type="number" step="0.00000001" id="longitude" name="longitude" value="{{ old('longitude', $mall->longitude) }}">
+                    <span class="field-hint">Koordinat GPS</span>
+                    @error('longitude')
                     <span class="error-message">{{ $message }}</span>
                     @enderror
                 </div>

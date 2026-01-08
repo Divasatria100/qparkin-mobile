@@ -21,9 +21,7 @@ class AdminMallRegistrationController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:user,email'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'mall_name' => ['required', 'string', 'max:255'],
-            'location' => ['required', 'string', 'max:500'],
-            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
-            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'google_maps_url' => ['required', 'url', 'max:500'],
             'mall_photo' => ['required', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
         ]);
 
@@ -44,10 +42,9 @@ class AdminMallRegistrationController extends Controller
             // Application fields (FIELD YANG BENAR):
             'application_status' => 'pending',
             'requested_mall_name' => $validated['mall_name'],
-            'requested_mall_location' => $validated['location'],
+            'requested_mall_location' => $validated['google_maps_url'],
             'application_notes' => json_encode([
-                'latitude' => $validated['latitude'] ?? null,
-                'longitude' => $validated['longitude'] ?? null,
+                'google_maps_url' => $validated['google_maps_url'],
                 'photo_path' => $photoPath,
                 'submitted_from' => 'web_registration',
             ]),

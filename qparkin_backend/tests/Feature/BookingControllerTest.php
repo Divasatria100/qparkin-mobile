@@ -47,9 +47,11 @@ class BookingControllerTest extends TestCase
         // Setup test data
         $this->mall = Mall::create([
             'nama_mall' => 'Test Mall',
-            'lokasi' => 'Test Location',
+            'alamat_lengkap' => 'Test Location',
+            'latitude' => -6.2088,
+            'longitude' => 106.8456,
             'kapasitas' => 100,
-            'alamat_gmaps' => 'https://maps.google.com',
+            'status' => 'active',
             'has_slot_reservation_enabled' => false
         ]);
         

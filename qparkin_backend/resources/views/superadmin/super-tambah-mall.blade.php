@@ -44,9 +44,27 @@
                 </div>
                 
                 <div class="form-group full-width">
-                    <label for="lokasi">Lokasi *</label>
-                    <input type="text" id="lokasi" name="lokasi" value="{{ old('lokasi') }}" required placeholder="Contoh: Jakarta Pusat">
-                    @error('lokasi')
+                    <label for="alamatLengkap">Alamat Lengkap *</label>
+                    <textarea id="alamatLengkap" name="alamat_lengkap" rows="3" required placeholder="Contoh: Jl. MH Thamrin No. 1, Jakarta Pusat">{{ old('alamat_lengkap') }}</textarea>
+                    @error('alamat_lengkap')
+                    <span class="error-message">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="latitude">Latitude</label>
+                    <input type="number" step="0.00000001" id="latitude" name="latitude" value="{{ old('latitude') }}" placeholder="-6.2088">
+                    <span class="field-hint">Opsional: Koordinat GPS</span>
+                    @error('latitude')
+                    <span class="error-message">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="longitude">Longitude</label>
+                    <input type="number" step="0.00000001" id="longitude" name="longitude" value="{{ old('longitude') }}" placeholder="106.8456">
+                    <span class="field-hint">Opsional: Koordinat GPS</span>
+                    @error('longitude')
                     <span class="error-message">{{ $message }}</span>
                     @enderror
                 </div>

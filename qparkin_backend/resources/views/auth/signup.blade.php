@@ -38,21 +38,10 @@
 
             <div class="form-group full-width">
                 <div class="input-wrapper">
-                    <div class="location-input-wrapper">
-                        <input type="text" id="location" name="location" placeholder=" " value="{{ old('location') }}" required>
-                        <label for="location">Lokasi Mall</label>
-                        <button type="button" id="locationSearch" class="location-search-btn">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
-                    <div id="mapContainer" class="map-container">
-                        <div id="map" class="map"></div>
-                        <div class="map-overlay">
-                            <p>Search for your mall location above</p>
-                            <small>Or click on the map to set location</small>
-                        </div>
-                    </div>
-                    <span class="error-message" id="locationError">Please select a location</span>
+                    <input type="url" id="googleMapsUrl" name="google_maps_url" placeholder=" " value="{{ old('google_maps_url') }}" required>
+                    <label for="googleMapsUrl">Link Google Maps</label>
+                    <small class="input-hint">Contoh: https://maps.app.goo.gl/xxxxx atau https://www.google.com/maps/place/...</small>
+                    <span class="error-message" id="googleMapsUrlError">Please enter a valid Google Maps URL</span>
                 </div>
             </div>
 
@@ -124,6 +113,5 @@
 @endpush
 
 @push('scripts')
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&libraries=places&callback=initMap" async defer></script>
 <script src="{{ asset('js/signup-ajax.js') }}"></script>
 @endpush
