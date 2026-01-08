@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'list_kendaraan.dart';
 import 'vehicle_detail_page.dart';
 import 'edit_profile_page.dart';
-import 'about_page.dart';
+import 'login_screen.dart';
 import '../widgets/bottom_nav.dart';
 import '/utils/navigation_utils.dart';
 import '/utils/page_transitions.dart';
@@ -912,10 +912,10 @@ class _ProfilePageState extends State<ProfilePage> {
       final navigator = Navigator.of(context);
       navigator.pop(); // Close loading dialog
       
-      // Navigate to about page and clear navigation stack
+      // Navigate to login screen and clear navigation stack
       navigator.pushAndRemoveUntil(
         MaterialPageRoute(
-          builder: (context) => const AboutPage(),
+          builder: (context) => const LoginScreen(),
         ),
         (route) => false, // Remove all routes from stack
       );

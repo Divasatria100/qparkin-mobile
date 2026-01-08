@@ -5,6 +5,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import '../../logic/providers/map_provider.dart';
 import '../../data/services/location_service.dart';
+import '../../data/models/route_data.dart';
+import '../../data/models/mall_model.dart';
+import '../../data/models/search_result_model.dart';
 import '../../utils/map_error_utils.dart';
 import '../dialogs/map_error_dialog.dart';
 import 'map_controls.dart';
@@ -75,6 +78,15 @@ class _MapViewState extends State<MapView> {
   // Debouncing for location updates
   Timer? _locationUpdateDebounceTimer;
   GeoPoint? _pendingLocationUpdate;
+  
+  // Track previous values to avoid unnecessary updates
+  GeoPoint? _previousLocation;
+  RouteData? _previousRoute;
+  MallModel? _previousSelectedMall;
+  SearchResultModel? _previousSearchResult;
+  
+  // Track listener for cleanup
+  VoidCallback? _markerTapListener;
 
   @override
   void initState() {
@@ -85,14 +97,37 @@ class _MapViewState extends State<MapView> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Listen for location changes and update marker
-    _updateLocationMarker();
-    // Listen for route changes and update polyline
-    _updateRoutePolyline();
-    // Listen for mall selection changes and update marker highlight
-    _updateSelectedMarkerHighlight();
-    // Listen for search result selection and update marker
-    _updateSearchResultMarker();
+    
+    // Only update if values actually changed
+    final mapProvider = context.watch<MapProvider>();
+    
+    if (mapProvider.currentLocation != _previousLocation) {
+      _previousLocation = mapProvider.currentLocation;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _updateLocationMarker();
+      });
+    }
+    
+    if (mapProvider.currentRoute != _previousRoute) {
+      _previousRoute = mapProvider.currentRoute;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _updateRoutePolyline();
+      });
+    }
+    
+    if (mapProvider.selectedMall != _previousSelectedMall) {
+      _previousSelectedMall = mapProvider.selectedMall;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _updateSelectedMarkerHighlight();
+      });
+    }
+    
+    if (mapProvider.selectedSearchResult != _previousSearchResult) {
+      _previousSearchResult = mapProvider.selectedSearchResult;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _updateSearchResultMarker();
+      });
+    }
   }
 
   /// Initialize the map when widget is created
@@ -193,12 +228,14 @@ class _MapViewState extends State<MapView> {
       }
 
       // Set up marker tap listener
-      mapProvider.mapController!.listenerMapSingleTapping.addListener(() async {
+      _markerTapListener = () async {
         final tappedPoint = mapProvider.mapController!.listenerMapSingleTapping.value;
-        if (tappedPoint != null) {
+        if (tappedPoint != null && mounted) {
           await _handleMarkerTap(tappedPoint);
         }
-      });
+      };
+      
+      mapProvider.mapController!.listenerMapSingleTapping.addListener(_markerTapListener!);
 
       _markersAdded = true;
       debugPrint('[MapView] Mall markers added successfully');
@@ -671,6 +708,17 @@ class _MapViewState extends State<MapView> {
   void dispose() {
     // Cancel debounce timer to prevent memory leaks
     _locationUpdateDebounceTimer?.cancel();
+    
+    // Remove marker tap listener
+    final mapProvider = context.read<MapProvider>();
+    if (_markerTapListener != null && mapProvider.mapController != null) {
+      try {
+        mapProvider.mapController!.listenerMapSingleTapping.removeListener(_markerTapListener!);
+      } catch (e) {
+        debugPrint('[MapView] Error removing listener: $e');
+      }
+    }
+    
     super.dispose();
   }
 

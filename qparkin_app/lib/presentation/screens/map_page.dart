@@ -18,7 +18,6 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   late TabController _tabController;
-  late MapProvider _mapProvider;
   int? _selectedMallIndex;
   Map<String, dynamic>? _selectedMall;
   bool _isMapFocusMode = false;
@@ -28,13 +27,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     
-    // Initialize MapProvider
-    // The provider maintains state across device rotations because it's
-    // stored in the State object, which persists across configuration changes
-    // Requirements: 6.5
-    _mapProvider = MapProvider();
-    
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
       if (args != null && args['initialTab'] == 1) {
         _tabController.animateTo(1);
@@ -43,6 +37,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   }
 
   void _toggleMapFocusMode() {
+    if (!mounted) return;
     setState(() {
       _isMapFocusMode = !_isMapFocusMode;
     });
@@ -51,15 +46,15 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   @override
   void dispose() {
     _tabController.dispose();
-    _mapProvider.dispose();
     super.dispose();
   }
 
   // Select mall without switching tabs (for card tap)
-  void _selectMall(int index) {
+  void _selectMall(int index, MapProvider mapProvider) {
     // Get the mall from MapProvider's mall list
-    final mall = _mapProvider.malls[index];
+    final mall = mapProvider.malls[index];
     
+    if (!mounted) return;
     setState(() {
       _selectedMallIndex = index;
       _selectedMall = {
@@ -72,10 +67,11 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   }
 
   // Select mall and switch to map tab with route (for route button)
-  Future<void> _selectMallAndShowMap(int index) async {
+  Future<void> _selectMallAndShowMap(int index, MapProvider mapProvider) async {
     // Get the mall from MapProvider's mall list
-    final mall = _mapProvider.malls[index];
+    final mall = mapProvider.malls[index];
     
+    if (!mounted) return;
     setState(() {
       _selectedMallIndex = index;
       _selectedMall = {
@@ -88,32 +84,32 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     
     try {
       // Use MapProvider to select the mall
-      await _mapProvider.selectMall(mall);
+      await mapProvider.selectMall(mall);
       
+      if (!mounted) return;
       // Automatically switch to map tab
       _tabController.animateTo(0);
       
       // Activate map focus mode after a short delay to ensure tab switch completes
       await Future.delayed(const Duration(milliseconds: 300));
-      if (mounted) {
-        setState(() {
-          _isMapFocusMode = true;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _isMapFocusMode = true;
+      });
     } catch (e) {
       debugPrint('[MapPage] Error selecting mall: $e');
       
+      if (!mounted) return;
       // Maintain app stability - still switch to map tab and activate focus mode
       // The mall will be selected, just without route
       _tabController.animateTo(0);
       
       // Activate map focus mode even on error
       await Future.delayed(const Duration(milliseconds: 300));
-      if (mounted) {
-        setState(() {
-          _isMapFocusMode = true;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _isMapFocusMode = true;
+      });
       
       // Show error if it's a route calculation issue
       if (e is RouteCalculationException || e is NetworkException) {
@@ -121,7 +117,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
           MapErrorUtils.showRouteCalculationError(
             context,
             onRetry: () async {
-              await _selectMallAndShowMap(index);
+              await _selectMallAndShowMap(index, mapProvider);
             },
           );
         }
@@ -129,69 +125,70 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     }
   }
 
-  Future<void> _showRouteOnMap(Map<String, dynamic> mallData) async {
+  Future<void> _showRouteOnMap(Map<String, dynamic> mallData, MapProvider mapProvider) async {
+    if (!mounted) return;
     setState(() {
       _selectedMall = mallData;
     });
     
     // Find the corresponding MallModel from MapProvider
-    final mall = _mapProvider.malls.firstWhere(
+    final mall = mapProvider.malls.firstWhere(
       (m) => m.name == mallData['name'],
-      orElse: () => _mapProvider.malls.first,
+      orElse: () => mapProvider.malls.first,
     );
     
     try {
       // Use MapProvider to select the mall (this will trigger route calculation)
-      await _mapProvider.selectMall(mall);
+      await mapProvider.selectMall(mall);
       
+      if (!mounted) return;
       // Switch to map tab and activate focus mode
       _tabController.animateTo(0);
       
       // Activate map focus mode after a short delay to ensure tab switch completes
       await Future.delayed(const Duration(milliseconds: 300));
-      if (mounted) {
-        setState(() {
-          _isMapFocusMode = true;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _isMapFocusMode = true;
+      });
     } on RouteCalculationException catch (_) {
       // Show route calculation error snackbar
       if (mounted) {
         MapErrorUtils.showRouteCalculationError(
           context,
           onRetry: () async {
-            await _showRouteOnMap(mallData);
+            await _showRouteOnMap(mallData, mapProvider);
           },
         );
       }
       
+      if (!mounted) return;
       // Still switch to map tab and activate focus mode to show the mall
       _tabController.animateTo(0);
       await Future.delayed(const Duration(milliseconds: 300));
-      if (mounted) {
-        setState(() {
-          _isMapFocusMode = true;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _isMapFocusMode = true;
+      });
     } on NetworkException catch (_) {
       // Show network error banner
       if (mounted) {
         MapErrorUtils.showNetworkErrorBanner(
           context,
           onRetry: () async {
-            await _showRouteOnMap(mallData);
+            await _showRouteOnMap(mallData, mapProvider);
           },
         );
       }
       
+      if (!mounted) return;
       // Still switch to map tab and activate focus mode to show the mall
       _tabController.animateTo(0);
       await Future.delayed(const Duration(milliseconds: 300));
-      if (mounted) {
-        setState(() {
-          _isMapFocusMode = true;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _isMapFocusMode = true;
+      });
     } catch (e) {
       debugPrint('[MapPage] Error showing route: $e');
       
@@ -201,19 +198,19 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
           context,
           message: 'Gagal menampilkan rute',
           onRetry: () async {
-            await _showRouteOnMap(mallData);
+            await _showRouteOnMap(mallData, mapProvider);
           },
         );
       }
       
+      if (!mounted) return;
       // Still switch to map tab and activate focus mode to show the mall
       _tabController.animateTo(0);
       await Future.delayed(const Duration(milliseconds: 300));
-      if (mounted) {
-        setState(() {
-          _isMapFocusMode = true;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _isMapFocusMode = true;
+      });
     }
   }
 
@@ -251,8 +248,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<MapProvider>.value(
-      value: _mapProvider,
+    return ChangeNotifierProvider<MapProvider>(
+      create: (_) => MapProvider(),
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
@@ -522,7 +519,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                     
                     return Column(
                       children: [
-                        _buildMallCard(mallData, index, isSelected),
+                        _buildMallCard(mallData, index, isSelected, mapProvider),
                         
                         // Booking Button appears right after selected card
                         if (isSelected)
@@ -623,7 +620,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildMallCard(Map<String, dynamic> mall, int index, bool isSelected) {
+  Widget _buildMallCard(Map<String, dynamic> mall, int index, bool isSelected, MapProvider mapProvider) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: AnimatedContainer(
@@ -633,7 +630,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: () => _selectMall(index),
+            onTap: () => _selectMall(index, mapProvider),
             borderRadius: BorderRadius.circular(16),
             child: Container(
               decoration: BoxDecoration(
@@ -783,7 +780,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                     
                     // Route Button
                     TextButton.icon(
-                      onPressed: () => _selectMallAndShowMap(index),
+                      onPressed: () => _selectMallAndShowMap(index, mapProvider),
                       icon: const Icon(
                         Icons.navigation,
                         size: 16,

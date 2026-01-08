@@ -11,13 +11,16 @@ class NavigationUtils {
 
   static void handleNavigation(BuildContext context, int tappedIndex, int currentIndex) {
     if (tappedIndex == currentIndex) return; // No navigation if already on the page
+    
     final route = routes[tappedIndex];
     if (route != null) {
-      Navigator.pushNamed(context, route);
+      // Use pushReplacementNamed to avoid stack overflow
+      // This replaces the current route instead of pushing a new one
+      Navigator.pushReplacementNamed(context, route);
     } else {
       // Handle unimplemented routes, e.g., show a snackbar or do nothing
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Feature not implemented yet')),
+        const SnackBar(content: Text('Feature not implemented yet')),
       );
     }
   }
