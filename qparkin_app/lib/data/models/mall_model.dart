@@ -40,6 +40,7 @@ class MallModel {
   final int availableSlots;
   final String distance;
   final bool hasSlotReservationEnabled;
+  final String? googleMapsUrl;  // Tambah field untuk navigasi eksternal
 
   MallModel({
     required this.id,
@@ -50,6 +51,7 @@ class MallModel {
     required this.availableSlots,
     this.distance = '',
     this.hasSlotReservationEnabled = false,
+    this.googleMapsUrl,  // Tambah parameter
   });
 
   /// Convert latitude and longitude to [GeoPoint] for OSM plugin.
@@ -169,13 +171,13 @@ class MallModel {
       id: json['id']?.toString() ?? json['id_mall']?.toString() ?? '',
       name: json['name']?.toString() ?? json['nama_mall']?.toString() ?? '',
       address: json['address']?.toString() ?? json['lokasi']?.toString() ?? '',
-      // TODO: Replace with parsed coordinates from alamat_gmaps when API is ready
       latitude: _parseDouble(json['latitude']),
       longitude: _parseDouble(json['longitude']),
       availableSlots: _parseInt(json['available_slots'] ?? json['kapasitas']),
       distance: json['distance']?.toString() ?? '',
       hasSlotReservationEnabled: json['has_slot_reservation_enabled'] == true ||
           json['has_slot_reservation_enabled'] == 1,
+      googleMapsUrl: json['google_maps_url']?.toString(),  // Parse dari API
     );
   }
 
@@ -203,6 +205,7 @@ class MallModel {
       'available_slots': availableSlots,
       'distance': distance,
       'has_slot_reservation_enabled': hasSlotReservationEnabled,
+      'google_maps_url': googleMapsUrl,  // Tambah ke JSON
     };
   }
 
@@ -250,6 +253,7 @@ class MallModel {
     int? availableSlots,
     String? distance,
     bool? hasSlotReservationEnabled,
+    String? googleMapsUrl,  // Tambah parameter
   }) {
     return MallModel(
       id: id ?? this.id,
@@ -261,6 +265,7 @@ class MallModel {
       distance: distance ?? this.distance,
       hasSlotReservationEnabled:
           hasSlotReservationEnabled ?? this.hasSlotReservationEnabled,
+      googleMapsUrl: googleMapsUrl ?? this.googleMapsUrl,  // Tambah copy
     );
   }
 
@@ -275,7 +280,8 @@ class MallModel {
         other.longitude == longitude &&
         other.availableSlots == availableSlots &&
         other.distance == distance &&
-        other.hasSlotReservationEnabled == hasSlotReservationEnabled;
+        other.hasSlotReservationEnabled == hasSlotReservationEnabled &&
+        other.googleMapsUrl == googleMapsUrl;  // Tambah comparison
   }
 
   @override
@@ -289,6 +295,7 @@ class MallModel {
       availableSlots,
       distance,
       hasSlotReservationEnabled,
+      googleMapsUrl,  // Tambah ke hash
     );
   }
 
@@ -297,6 +304,7 @@ class MallModel {
     return 'MallModel(id: $id, name: $name, address: $address, '
         'latitude: $latitude, longitude: $longitude, '
         'availableSlots: $availableSlots, distance: $distance, '
-        'hasSlotReservationEnabled: $hasSlotReservationEnabled)';
+        'hasSlotReservationEnabled: $hasSlotReservationEnabled, '
+        'googleMapsUrl: $googleMapsUrl)';  // Tambah ke string
   }
 }

@@ -25,9 +25,9 @@
 
             <div class="form-group">
                 <div class="input-wrapper">
-                    <input type="text" id="username" name="name" value="{{ old('name') }}" required>
-                    <label for="username">Username</label>
-                    <span class="error-message" id="usernameError">Please enter a valid username</span>
+                    <input type="email" id="email" name="email" value="{{ old('email') }}" required>
+                    <label for="email">Email Address</label>
+                    <span class="error-message" id="emailError">Please enter a valid email address</span>
                 </div>
             </div>
 

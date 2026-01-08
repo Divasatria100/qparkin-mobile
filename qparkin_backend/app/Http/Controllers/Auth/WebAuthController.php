@@ -18,11 +18,11 @@ class WebAuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'name' => 'required',
+            'email' => 'required|email',
             'password' => 'required'
         ]);
 
-        $user = User::where('name', $credentials['name'])->first();
+        $user = User::where('email', $credentials['email'])->first();
 
         if ($user && Hash::check($credentials['password'], $user->password)) {
             Auth::login($user);
@@ -40,8 +40,8 @@ class WebAuthController extends Controller
         }
 
         return back()->withErrors([
-            'name' => 'Kredensial tidak cocok dengan data kami.',
-        ])->withInput($request->only('name'));
+            'email' => 'Email atau password tidak cocok dengan data kami.',
+        ])->withInput($request->only('email'));
     }
 
     public function logout(Request $request)

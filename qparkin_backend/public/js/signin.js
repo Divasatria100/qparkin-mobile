@@ -1,11 +1,11 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Elements
     const signinForm = document.getElementById('signinForm');
-    const usernameInput = document.getElementById('username');
+    const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
     const passwordToggle = document.getElementById('passwordToggle');
     const submitBtn = document.getElementById('submitBtn');
-    const usernameError = document.getElementById('usernameError');
+    const emailError = document.getElementById('emailError');
     const passwordError = document.getElementById('passwordError');
     const loginForm = document.getElementById('loginForm');
     const successMessage = document.getElementById('successMessage');
@@ -22,8 +22,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Real-time validation
-    usernameInput.addEventListener('input', function() {
-        validateUsername();
+    emailInput.addEventListener('input', function() {
+        validateEmail();
     });
 
     passwordInput.addEventListener('input', function() {
@@ -34,10 +34,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Just add loading state for better UX
     if (signinForm) {
         signinForm.addEventListener('submit', function(e) {
-            const isUsernameValid = validateUsername();
+            const isEmailValid = validateEmail();
             const isPasswordValid = validatePassword();
             
-            if (isUsernameValid && isPasswordValid) {
+            if (isEmailValid && isPasswordValid) {
                 submitBtn.classList.add('loading');
                 // Form will submit naturally to Laravel backend
             } else {
@@ -72,16 +72,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Validation functions
-    function validateUsername() {
-        const value = usernameInput.value.trim();
-        const isValid = value.length >= 3;
+    function validateEmail() {
+        const value = emailInput.value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const isValid = emailRegex.test(value);
         
         if (value === '') {
-            setFieldError(usernameInput, usernameError, false);
+            setFieldError(emailInput, emailError, false);
             return false;
         }
         
-        setFieldError(usernameInput, usernameError, !isValid);
+        setFieldError(emailInput, emailError, !isValid);
         return isValid;
     }
 

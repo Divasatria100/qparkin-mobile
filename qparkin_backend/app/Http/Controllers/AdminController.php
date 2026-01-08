@@ -627,4 +627,53 @@ class AdminController extends Controller
             return response()->json(['success' => false, 'message' => 'Gagal menghapus parkiran: ' . $e->getMessage()], 500);
         }
     }
+
+    public function lokasiMall()
+    {
+        $user = Auth::user();
+        $userId = $user->id_user ?? $user->id ?? null;
+        $adminMall = $user->adminMall ?? AdminMall::where('id_user', $userId)->first();
+        
+        if (!$adminMall) {
+            abort(404, 'Admin mall data not found.');
+        }
+
+        $mall = Mall::findOrFail($adminMall->id_mall);
+        
+        return view('admin.lokasi-mall', compact('mall'));
+    }
+
+    public function updateLokasiMall(Request $request)
+    {
+        $user = Auth::user();
+        $userId = $user->id_user ?? $user->id ?? null;
+        $adminMall = $user->adminMall ?? AdminMall::where('id_user', $userId)->first();
+        
+        if (!$adminMall) {
+            return response()->json(['success' => false, 'message' => 'Admin mall data not found.'], 404);
+        }
+
+        $validated = $request->validate([
+            'latitude' => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180',
+        ]);
+
+        try {
+            $mall = Mall::findOrFail($adminMall->id_mall);
+            $mall->latitude = $validated['latitude'];
+            $mall->longitude = $validated['longitude'];
+            $mall->save();
+
+            return response()->json([
+                'success' => true, 
+                'message' => 'Lokasi mall berhasil diperbarui',
+                'data' => [
+                    'latitude' => $mall->latitude,
+                    'longitude' => $mall->longitude
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Gagal memperbarui lokasi: ' . $e->getMessage()], 500);
+        }
+    }
 }

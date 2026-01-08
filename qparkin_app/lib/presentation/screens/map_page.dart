@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../widgets/bottom_nav.dart';
 import '../widgets/map_view.dart';
 import '/utils/navigation_utils.dart';
@@ -241,6 +242,57 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
             );
           },
           transitionDuration: const Duration(milliseconds: 300),
+        ),
+      );
+    }
+  }
+
+  /// Open Google Maps for navigation to mall
+  /// 
+  /// Menggunakan google_maps_url dari mall untuk navigasi eksternal
+  /// Fallback ke generate URL dari koordinat jika google_maps_url null
+  Future<void> _openGoogleMapsNavigation(int index, MapProvider mapProvider) async {
+    final mall = mapProvider.malls[index];
+    
+    String url;
+    if (mall.googleMapsUrl != null && mall.googleMapsUrl!.isNotEmpty) {
+      url = mall.googleMapsUrl!;
+    } else {
+      // Fallback: generate URL from coordinates
+      url = 'https://www.google.com/maps/dir/?api=1&destination=${mall.latitude},${mall.longitude}';
+    }
+    
+    await _launchUrl(url);
+  }
+
+  /// Launch URL helper
+  /// 
+  /// Membuka URL di aplikasi eksternal (Google Maps)
+  Future<void> _launchUrl(String urlString) async {
+    try {
+      final url = Uri.parse(urlString);
+      
+      if (await canLaunchUrl(url)) {
+        await launchUrl(
+          url,
+          mode: LaunchMode.externalApplication, // Open in Google Maps app
+        );
+      } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Tidak dapat membuka Google Maps'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('[MapPage] Error launching URL: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
         ),
       );
     }
@@ -778,14 +830,14 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                       ),
                     ),
                     
-                    // Route Button
+                    // Route Button - Open Google Maps
                     TextButton.icon(
-                      onPressed: () => _selectMallAndShowMap(index, mapProvider),
+                      onPressed: () => _openGoogleMapsNavigation(index, mapProvider),
                       icon: const Icon(
-                        Icons.navigation,
+                        Icons.map,
                         size: 16,
                       ),
-                      label: const Text('Rute'),
+                      label: const Text('Lihat Rute'),
                       style: TextButton.styleFrom(
                         foregroundColor: const Color(0xFF573ED1),
                         padding: const EdgeInsets.symmetric(

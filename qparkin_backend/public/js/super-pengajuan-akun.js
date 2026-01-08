@@ -276,35 +276,52 @@ function approveApplications(applicationIds) {
         : `Apakah Anda yakin ingin menyetujui ${applicationIds.length} pengajuan akun?`;
     
     if (confirm(message)) {
-        // Simulate API call
-        console.log('Menyetujui pengajuan:', applicationIds);
-        
-        // Update UI
+        // Send AJAX request to server
         applicationIds.forEach(id => {
-            const row = document.querySelector(`.btn-action[data-id="${id}"]`).closest('tr');
-            const statusBadge = row.querySelector('.status-badge');
-            statusBadge.textContent = 'Disetujui';
-            statusBadge.className = 'status-badge approved';
-            
-            // Disable action buttons
-            row.querySelectorAll('.btn-action').forEach(btn => {
-                btn.disabled = true;
-                btn.style.opacity = '0.5';
-                btn.style.cursor = 'not-allowed';
+            fetch(`/superadmin/pengajuan/${id}/approve`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update UI
+                    const row = document.querySelector(`.btn-action[data-id="${id}"]`).closest('tr');
+                    const statusBadge = row.querySelector('.status-badge');
+                    statusBadge.textContent = 'Disetujui';
+                    statusBadge.className = 'status-badge approved';
+                    
+                    // Disable action buttons
+                    row.querySelectorAll('.btn-action').forEach(btn => {
+                        btn.disabled = true;
+                        btn.style.opacity = '0.5';
+                        btn.style.cursor = 'not-allowed';
+                    });
+                    
+                    // Uncheck the row
+                    const checkbox = row.querySelector('.row-checkbox');
+                    if (checkbox) checkbox.checked = false;
+                    
+                    // Update counts and UI
+                    updateSelectAllCheckbox();
+                    updateBulkActions();
+                    updateNotificationCount();
+                    
+                    // Show success message
+                    showNotification('Pengajuan berhasil disetujui', 'success');
+                } else {
+                    showNotification(data.message || 'Gagal menyetujui pengajuan', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Terjadi kesalahan saat menyetujui pengajuan', 'error');
             });
-            
-            // Uncheck the row
-            const checkbox = row.querySelector('.row-checkbox');
-            checkbox.checked = false;
         });
-        
-        // Update counts and UI
-        updateSelectAllCheckbox();
-        updateBulkActions();
-        updateNotificationCount();
-        
-        // Show success message
-        showNotification(`${applicationIds.length} pengajuan berhasil disetujui`, 'success');
     }
 }
 
@@ -317,35 +334,52 @@ function rejectApplications(applicationIds) {
         : `Apakah Anda yakin ingin menolak ${applicationIds.length} pengajuan akun?`;
     
     if (confirm(message)) {
-        // Simulate API call
-        console.log('Menolak pengajuan:', applicationIds);
-        
-        // Update UI
+        // Send AJAX request to server
         applicationIds.forEach(id => {
-            const row = document.querySelector(`.btn-action[data-id="${id}"]`).closest('tr');
-            const statusBadge = row.querySelector('.status-badge');
-            statusBadge.textContent = 'Ditolak';
-            statusBadge.className = 'status-badge rejected';
-            
-            // Disable action buttons
-            row.querySelectorAll('.btn-action').forEach(btn => {
-                btn.disabled = true;
-                btn.style.opacity = '0.5';
-                btn.style.cursor = 'not-allowed';
+            fetch(`/superadmin/pengajuan/${id}/reject`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update UI
+                    const row = document.querySelector(`.btn-action[data-id="${id}"]`).closest('tr');
+                    const statusBadge = row.querySelector('.status-badge');
+                    statusBadge.textContent = 'Ditolak';
+                    statusBadge.className = 'status-badge rejected';
+                    
+                    // Disable action buttons
+                    row.querySelectorAll('.btn-action').forEach(btn => {
+                        btn.disabled = true;
+                        btn.style.opacity = '0.5';
+                        btn.style.cursor = 'not-allowed';
+                    });
+                    
+                    // Uncheck the row
+                    const checkbox = row.querySelector('.row-checkbox');
+                    if (checkbox) checkbox.checked = false;
+                    
+                    // Update counts and UI
+                    updateSelectAllCheckbox();
+                    updateBulkActions();
+                    updateNotificationCount();
+                    
+                    // Show success message
+                    showNotification('Pengajuan berhasil ditolak', 'success');
+                } else {
+                    showNotification(data.message || 'Gagal menolak pengajuan', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Terjadi kesalahan saat menolak pengajuan', 'error');
             });
-            
-            // Uncheck the row
-            const checkbox = row.querySelector('.row-checkbox');
-            checkbox.checked = false;
         });
-        
-        // Update counts and UI
-        updateSelectAllCheckbox();
-        updateBulkActions();
-        updateNotificationCount();
-        
-        // Show success message
-        showNotification(`${applicationIds.length} pengajuan berhasil ditolak`, 'success');
     }
 }
 

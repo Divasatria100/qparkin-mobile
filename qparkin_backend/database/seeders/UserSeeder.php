@@ -16,8 +16,8 @@ class UserSeeder extends Seeder
             DB::table('user')->insert([
                 'name' => 'qparkin',
                 'nomor_hp' => null,
-                'email' => null,
-                'email_verified_at' => null,
+                'email' => 'superadmin@qparkin.com',
+                'email_verified_at' => now(),
                 'password' => bcrypt('superadmin123'),
                 'provider' => null,
                 'provider_id' => null,

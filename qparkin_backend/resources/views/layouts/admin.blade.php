@@ -8,6 +8,8 @@
     
     <!-- Base Styles -->
     <link rel="stylesheet" href="{{ asset('css/admin-dashboard.css') }}">
+    
+    <!-- Page-specific Styles -->
     @yield('styles')
 </head>
 <body>
@@ -35,6 +37,8 @@
 
     <!-- Base Scripts -->
     <script src="{{ asset('js/admin-dashboard.js') }}"></script>
+    
+    <!-- Page-specific Scripts -->
     @yield('scripts')
 </body>
 </html>

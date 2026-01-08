@@ -110,17 +110,17 @@
                         </div>
                     </td>
                     <td>{{ $request->email }}</td>
-                    <td>{{ $request->mall_name ?? 'N/A' }}</td>
-                    <td>{{ $request->location ?? 'N/A' }}</td>
-                    <td>{{ $request->created_at ? $request->created_at->format('d M Y') : 'N/A' }}</td>
+                    <td>{{ $request->requested_mall_name ?? 'N/A' }}</td>
+                    <td>{{ $request->requested_mall_location ?? 'N/A' }}</td>
+                    <td>{{ $request->applied_at ? \Carbon\Carbon::parse($request->applied_at)->format('d M Y H:i') : 'N/A' }}</td>
                     <td>
-                        <span class="status-badge {{ $request->status == 'pending' ? 'pending' : ($request->status == 'approved' ? 'approved' : 'rejected') }}">
-                            {{ $request->status == 'pending' ? 'Menunggu' : ($request->status == 'approved' ? 'Disetujui' : 'Ditolak') }}
+                        <span class="status-badge {{ $request->application_status == 'pending' ? 'pending' : ($request->application_status == 'approved' ? 'approved' : 'rejected') }}">
+                            {{ $request->application_status == 'pending' ? 'Menunggu' : ($request->application_status == 'approved' ? 'Disetujui' : 'Ditolak') }}
                         </span>
                     </td>
                     <td>
                         <div class="action-buttons">
-                            @if($request->status == 'pending')
+                            @if($request->application_status == 'pending')
                             <button class="btn-action approve" data-id="{{ $request->id_user ?? $request->id }}" title="Setujui">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />

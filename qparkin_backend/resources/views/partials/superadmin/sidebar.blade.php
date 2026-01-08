@@ -32,7 +32,7 @@
                     </svg>
                     <span>Pengajuan Akun</span>
                     @php
-                        $pendingCount = \App\Models\User::where('status', 'pending')->count();
+                        $pendingCount = \App\Models\User::where('application_status', 'pending')->count();
                     @endphp
                     @if($pendingCount > 0)
                         <span class="notification-badge">{{ $pendingCount }}</span>

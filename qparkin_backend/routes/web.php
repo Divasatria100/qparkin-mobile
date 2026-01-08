@@ -32,7 +32,7 @@ Route::middleware('guest')->group(function () {
     Route::get('/register', function () { 
         return view('auth.signup'); 
     })->name('register');
-    Route::post('/register', [RegisteredUserController::class, 'store']);
+    Route::post('/register', [\App\Http\Controllers\Auth\AdminMallRegistrationController::class, 'store']);
     Route::get('/success-signup', function () {
         return view('auth.success-signup');
     })->name('success-signup');
@@ -58,6 +58,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/notifikasi/read-all', [AdminController::class, 'markAllNotificationsAsRead'])->name('notifikasi.readAll');
     Route::delete('/notifikasi/{id}', [AdminController::class, 'deleteNotification'])->name('notifikasi.delete');
     Route::delete('/notifikasi/clear-all', [AdminController::class, 'clearAllNotifications'])->name('notifikasi.clearAll');
+    
+    Route::get('/lokasi-mall', [AdminController::class, 'lokasiMall'])->name('lokasi-mall');
+    Route::post('/lokasi-mall/update', [AdminController::class, 'updateLokasiMall'])->name('lokasi-mall.update');
     
     Route::get('/tiket', [AdminController::class, 'tiket'])->name('tiket');
     Route::get('/tiket/{id}', [AdminController::class, 'tiketDetail'])->name('tiket.detail');

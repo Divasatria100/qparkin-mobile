@@ -18,13 +18,13 @@ class AdminMallRegistrationController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users'],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:user,email'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'mall_name' => ['required', 'string', 'max:255'],
             'location' => ['required', 'string', 'max:500'],
-            'latitude' => ['nullable', 'numeric'],
-            'longitude' => ['nullable', 'numeric'],
-            'mall_photo' => ['required', 'image', 'max:2048'], // 2MB max
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'mall_photo' => ['required', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
         ]);
 
         // Store mall photo
@@ -33,18 +33,33 @@ class AdminMallRegistrationController extends Controller
             $photoPath = $request->file('mall_photo')->store('mall_photos', 'public');
         }
 
-        // Create user with pending status
+        // Create user with pending application status
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'role' => 'admin', // Admin mall role
-            'status' => 'pending', // Pending approval
-            'mall_name' => $validated['mall_name'],
-            'mall_location' => $validated['location'],
-            'mall_latitude' => $validated['latitude'] ?? null,
-            'mall_longitude' => $validated['longitude'] ?? null,
-            'mall_photo' => $photoPath,
+            'role' => 'customer', // Tetap customer dulu, nanti diubah saat approved
+            'status' => 'aktif',  // Status user aktif
+            
+            // Application fields (FIELD YANG BENAR):
+            'application_status' => 'pending',
+            'requested_mall_name' => $validated['mall_name'],
+            'requested_mall_location' => $validated['location'],
+            'application_notes' => json_encode([
+                'latitude' => $validated['latitude'] ?? null,
+                'longitude' => $validated['longitude'] ?? null,
+                'photo_path' => $photoPath,
+                'submitted_from' => 'web_registration',
+            ]),
+            'applied_at' => now(),
+        ]);
+
+        // Log untuk debugging
+        \Log::info('Admin mall registration submitted', [
+            'user_id' => $user->id_user,
+            'email' => $user->email,
+            'mall_name' => $user->requested_mall_name,
+            'application_status' => $user->application_status,
         ]);
 
         // TODO: Send notification to super admin
@@ -53,11 +68,12 @@ class AdminMallRegistrationController extends Controller
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Registration request submitted successfully',
+                'message' => 'Pengajuan registrasi berhasil dikirim. Silakan tunggu verifikasi dari admin.',
                 'redirect' => route('success-signup')
             ]);
         }
 
-        return redirect()->route('success-signup');
+        return redirect()->route('success-signup')
+            ->with('success', 'Pengajuan registrasi berhasil dikirim. Silakan tunggu verifikasi dari admin.');
     }
 }

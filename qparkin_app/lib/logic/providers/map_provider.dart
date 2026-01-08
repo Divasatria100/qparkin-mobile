@@ -8,6 +8,7 @@ import '../../data/models/search_result_model.dart';
 import '../../data/services/location_service.dart';
 import '../../data/services/route_service.dart';
 import '../../data/services/search_service.dart' as search;
+import '../../data/services/mall_service.dart';
 import '../../data/dummy/mall_data.dart';
 import '../../utils/map_logger.dart';
 
@@ -27,6 +28,7 @@ class MapProvider extends ChangeNotifier {
   final LocationService _locationService;
   final RouteService _routeService;
   final search.SearchService _searchService;
+  final MallService _mallService;  // Tambah MallService
 
   // State properties - Map controller
   MapController? _mapController;
@@ -77,9 +79,14 @@ class MapProvider extends ChangeNotifier {
     LocationService? locationService,
     RouteService? routeService,
     search.SearchService? searchService,
+    MallService? mallService,  // Tambah parameter
   })  : _locationService = locationService ?? LocationService(),
         _routeService = routeService ?? RouteService(),
-        _searchService = searchService ?? search.SearchService();
+        _searchService = searchService ?? search.SearchService(),
+        _mallService = mallService ?? MallService(
+          baseUrl: const String.fromEnvironment('API_URL', 
+            defaultValue: 'http://192.168.1.100:8000')
+        );
 
   /// Initialize the map controller.
   ///
@@ -192,33 +199,44 @@ class MapProvider extends ChangeNotifier {
   ///   final mallsData = jsonData['data'] as List<dynamic>;
   ///   _malls = mallsData.map((json) => MallModel.fromJson(json)).toList();
   /// } else {
-  ///   throw Exception('Failed to load malls: ${response.statusCode}');
-  /// }
-  /// ```
+  /// Load mall data from backend API
+  /// 
+  /// Fetches active malls from /api/mall endpoint
+  /// Falls back to dummy data if API call fails
   ///
   /// Requirements: 1.1, 7.1, 7.4
   Future<void> loadMalls() async {
-    debugPrint('[MapProvider] Loading malls...');
+    debugPrint('[MapProvider] Loading malls from API...');
 
     try {
       _isLoading = true;
       _errorMessage = null;
       notifyListeners();
 
-      // TODO: Replace with API call when backend is ready
-      // Current: Load from dummy data
-      // Future: Use the API integration code shown above
-      _malls = getDummyMalls();
+      // Fetch from API
+      _malls = await _mallService.fetchMalls();
 
-      debugPrint('[MapProvider] Loaded ${_malls.length} malls');
+      debugPrint('[MapProvider] Loaded ${_malls.length} malls from API');
+
+      // Validate all malls have coordinates
+      final invalidMalls = _malls.where((m) => !m.validate()).toList();
+      if (invalidMalls.isNotEmpty) {
+        debugPrint('[MapProvider] Warning: ${invalidMalls.length} malls have invalid data');
+        _malls.removeWhere((m) => !m.validate());
+      }
 
       _isLoading = false;
       notifyListeners();
     } catch (e) {
-      _isLoading = false;
-      _errorMessage = 'Gagal memuat data mall: ${e.toString()}';
+      debugPrint('[MapProvider] Error loading malls from API: $e');
       
-      debugPrint('[MapProvider] Error loading malls: $e');
+      // Fallback to dummy data for development
+      debugPrint('[MapProvider] Falling back to dummy data');
+      _malls = getDummyMalls();
+      
+      _isLoading = false;
+      _errorMessage = 'Menggunakan data demo. Koneksi ke server gagal.';
+      
       _logger.logError(
         'MALL_LOAD_ERROR',
         e.toString(),
@@ -226,7 +244,6 @@ class MapProvider extends ChangeNotifier {
       );
       
       notifyListeners();
-      rethrow;
     }
   }
 

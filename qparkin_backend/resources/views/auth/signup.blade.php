@@ -125,5 +125,5 @@
 
 @push('scripts')
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&libraries=places&callback=initMap" async defer></script>
-<script src="{{ asset('js/signup.js') }}"></script>
+<script src="{{ asset('js/signup-ajax.js') }}"></script>
 @endpush

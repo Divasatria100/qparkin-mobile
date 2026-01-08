@@ -38,7 +38,7 @@ class SuperAdminController extends Controller
         $lastMonthAdmins = AdminMall::where('created_at', '>=', Carbon::now()->subMonth())->count();
         
         // Pengajuan Akun Baru
-        $pendingRequests = User::where('status', 'pending')->count();
+        $pendingRequests = User::where('application_status', 'pending')->count();
         
         // Transaksi Hari Ini
         $todayTransactions = TransaksiParkir::whereDate('waktu_masuk', today())->count();
@@ -77,17 +77,17 @@ class SuperAdminController extends Controller
             });
         
         // Pengajuan pending
-        $pendingUsers = User::where('status', 'pending')
-            ->where('role', 'admin')
-            ->orderBy('created_at', 'desc')
+        $pendingUsers = User::where('application_status', 'pending')
+            ->whereNotNull('applied_at')
+            ->orderBy('applied_at', 'desc')
             ->limit(2)
             ->get()
             ->map(function($user) {
                 return (object)[
-                    'time' => Carbon::parse($user->created_at)->diffForHumans(),
+                    'time' => Carbon::parse($user->applied_at)->diffForHumans(),
                     'description' => 'Pengajuan akun baru: ' . ($user->name ?? 'N/A'),
-                    'location' => 'Menunggu verifikasi',
-                    'created_at' => $user->created_at
+                    'location' => $user->requested_mall_name ?? 'Menunggu verifikasi',
+                    'created_at' => $user->applied_at
                 ];
             });
         
@@ -380,7 +380,11 @@ class SuperAdminController extends Controller
 
     public function pengajuan()
     {
-        $requests = User::where('status', 'pending')->get();
+        $requests = User::where('application_status', 'pending')
+            ->whereNotNull('applied_at')
+            ->orderBy('applied_at', 'desc')
+            ->get();
+        
         return view('superadmin.pengajuan', compact('requests'));
     }
 
@@ -390,13 +394,122 @@ class SuperAdminController extends Controller
         return view('superadmin.pengajuan-detail', compact('request'));
     }
 
-    public function approvePengajuan($id)
+    public function approvePengajuan(Request $request, $id)
     {
-        $user = User::findOrFail($id);
-        $user->status = 'approved';
-        $user->save();
-
-        return redirect()->route('superadmin.pengajuan')->with('success', 'Pengajuan disetujui');
+        DB::beginTransaction();
+        try {
+            $user = User::findOrFail($id);
+            
+            // Validasi status pending
+            if ($user->application_status !== 'pending') {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Pengajuan ini sudah diproses sebelumnya.'
+                    ], 400);
+                }
+                return back()->withErrors(['error' => 'Pengajuan ini sudah diproses sebelumnya.']);
+            }
+            
+            // Parse application notes untuk mendapatkan koordinat dan foto
+            $applicationNotes = json_decode($user->application_notes, true) ?? [];
+            $latitude = $applicationNotes['latitude'] ?? null;
+            $longitude = $applicationNotes['longitude'] ?? null;
+            $photoPath = $applicationNotes['photo_path'] ?? null;
+            
+            // Set default coordinates if not provided (Jakarta center)
+            if (empty($latitude) || empty($longitude)) {
+                $latitude = -6.2088;
+                $longitude = 106.8456;
+                \Log::warning('No coordinates provided for mall, using default Jakarta coordinates', [
+                    'user_id' => $user->id_user,
+                    'mall_name' => $user->requested_mall_name
+                ]);
+            }
+            
+            // Generate Google Maps URL
+            $googleMapsUrl = null;
+            if ($latitude && $longitude) {
+                $googleMapsUrl = Mall::generateGoogleMapsUrl($latitude, $longitude);
+            }
+            
+            // 1. Buat Mall baru dengan koordinat lengkap
+            $mall = Mall::create([
+                'nama_mall' => $user->requested_mall_name,
+                'lokasi' => $user->requested_mall_location,
+                'latitude' => $latitude,
+                'longitude' => $longitude,
+                'google_maps_url' => $googleMapsUrl,
+                'status' => 'active',
+                'kapasitas' => 100,  // Default capacity
+                'has_slot_reservation_enabled' => false,
+            ]);
+            
+            // Skip coordinate validation - coordinates are optional or use default
+            // Mall can be updated with correct coordinates later by admin
+            
+            // 2. Update user menjadi admin_mall
+            $user->update([
+                'role' => 'admin_mall',
+                'status' => 'aktif',
+                'application_status' => 'approved',
+                'reviewed_at' => now(),
+                'reviewed_by' => Auth::id(),
+            ]);
+            
+            // 3. Buat entry di admin_mall (link user dengan mall)
+            AdminMall::create([
+                'id_user' => $user->id_user,
+                'id_mall' => $mall->id_mall,
+                'hak_akses' => 'full',
+            ]);
+            
+            DB::commit();
+            
+            \Log::info('Mall approved successfully', [
+                'mall_id' => $mall->id_mall,
+                'mall_name' => $mall->nama_mall,
+                'user_id' => $user->id_user,
+                'coordinates' => [
+                    'lat' => $mall->latitude,
+                    'lng' => $mall->longitude
+                ],
+                'photo_path' => $photoPath
+            ]);
+            
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Pengajuan berhasil disetujui',
+                    'data' => [
+                        'mall_id' => $mall->id_mall,
+                        'mall_name' => $mall->nama_mall,
+                        'status' => $mall->status,
+                        'google_maps_url' => $mall->google_maps_url
+                    ]
+                ]);
+            }
+            
+            return redirect()->route('superadmin.pengajuan')
+                ->with('success', 'Pengajuan berhasil disetujui. Mall telah ditambahkan dan siap digunakan di aplikasi mobile.');
+                
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error approving application', [
+                'error' => $e->getMessage(),
+                'user_id' => $id,
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return back()->withErrors(['error' => 'Gagal menyetujui pengajuan: ' . $e->getMessage()]);
+        }
     }
 
     public function rejectPengajuan($id)
