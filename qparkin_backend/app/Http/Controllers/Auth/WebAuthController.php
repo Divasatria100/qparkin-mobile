@@ -22,9 +22,27 @@ class WebAuthController extends Controller
             'password' => 'required'
         ]);
 
-        $user = User::where('email', $credentials['email'])->first();
+        $email = $credentials['email'];
+        $loginAttemptService = app(\App\Services\LoginAttemptService::class);
+
+        // Check if account is locked (double check)
+        if ($loginAttemptService->isAccountLocked($email)) {
+            $lockout = $loginAttemptService->getActiveLockout($email);
+            
+            if ($lockout) {
+                return back()->withErrors([
+                    'email' => 'Akun Anda terkunci karena terlalu banyak percobaan login yang gagal. ' .
+                               'Silakan coba lagi dalam ' . $lockout->getRemainingTime() . '.'
+                ])->withInput($request->only('email'));
+            }
+        }
+
+        $user = User::where('email', $email)->first();
 
         if ($user && Hash::check($credentials['password'], $user->password)) {
+            // Record successful login
+            $loginAttemptService->recordAttempt($email, true);
+
             Auth::login($user);
             $request->session()->regenerate();
 
@@ -39,8 +57,29 @@ class WebAuthController extends Controller
             return redirect()->intended('/');
         }
 
+        // Record failed login attempt
+        $loginAttemptService->recordAttempt($email, false);
+
+        // Check if account should be locked after this failed attempt
+        if ($loginAttemptService->shouldLockAccount($email)) {
+            $lockout = $loginAttemptService->lockAccount($email);
+            
+            return back()->withErrors([
+                'email' => 'Terlalu banyak percobaan login yang gagal. Akun Anda telah dikunci selama ' . 
+                           $lockout->getRemainingTime() . '. Silakan coba lagi nanti.'
+            ])->withInput($request->only('email'));
+        }
+
+        // Show remaining attempts
+        $remainingAttempts = $loginAttemptService->getRemainingAttempts($email);
+        $errorMessage = 'Email atau password tidak cocok dengan data kami.';
+        
+        if ($remainingAttempts > 0 && $remainingAttempts <= 3) {
+            $errorMessage .= ' Sisa percobaan: ' . $remainingAttempts . ' kali.';
+        }
+
         return back()->withErrors([
-            'email' => 'Email atau password tidak cocok dengan data kami.',
+            'email' => $errorMessage,
         ])->withInput($request->only('email'));
     }
 

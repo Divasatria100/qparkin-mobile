@@ -28,7 +28,11 @@ Route::get('/', function () {
 Route::middleware('guest')->group(function () {
     Route::get('/signin', [WebAuthController::class, 'showLoginForm'])->name('signin');
     Route::get('/login', [WebAuthController::class, 'showLoginForm'])->name('login'); // Laravel default redirect
-    Route::post('/signin', [WebAuthController::class, 'login']);
+    Route::post('/signin', [WebAuthController::class, 'login'])
+        ->middleware([
+            \App\Http\Middleware\SqlInjectionDetector::class,
+            \App\Http\Middleware\CheckLoginAttempts::class
+        ]);
     Route::get('/register', function () { 
         return view('auth.signup'); 
     })->name('register');
