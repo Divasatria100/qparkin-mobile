@@ -9,7 +9,6 @@ import '../../data/services/location_service.dart';
 import '../../data/services/route_service.dart';
 import '../../data/services/search_service.dart' as search;
 import '../../data/services/mall_service.dart';
-import '../../data/dummy/mall_data.dart';
 import '../../utils/map_logger.dart';
 
 /// Provider for managing map state and operations
@@ -202,7 +201,7 @@ class MapProvider extends ChangeNotifier {
   /// Load mall data from backend API
   /// 
   /// Fetches active malls from /api/mall endpoint
-  /// Falls back to dummy data if API call fails
+  /// NO FALLBACK - Shows error state if API fails
   ///
   /// Requirements: 1.1, 7.1, 7.4
   Future<void> loadMalls() async {
@@ -213,7 +212,7 @@ class MapProvider extends ChangeNotifier {
       _errorMessage = null;
       notifyListeners();
 
-      // Fetch from API
+      // Fetch from API - NO FALLBACK
       _malls = await _mallService.fetchMalls();
 
       debugPrint('[MapProvider] Loaded ${_malls.length} malls from API');
@@ -230,12 +229,10 @@ class MapProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint('[MapProvider] Error loading malls from API: $e');
       
-      // Fallback to dummy data for development
-      debugPrint('[MapProvider] Falling back to dummy data');
-      _malls = getDummyMalls();
-      
+      // NO FALLBACK - Clear malls and show error
+      _malls = [];
       _isLoading = false;
-      _errorMessage = 'Menggunakan data demo. Koneksi ke server gagal.';
+      _errorMessage = 'Gagal memuat data mall dari server. Silakan coba lagi.';
       
       _logger.logError(
         'MALL_LOAD_ERROR',
@@ -244,6 +241,7 @@ class MapProvider extends ChangeNotifier {
       );
       
       notifyListeners();
+      rethrow; // Propagate error to UI
     }
   }
 

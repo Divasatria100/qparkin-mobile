@@ -8,3 +8,6 @@ untuk menjalankan mailpit, tulis perintah "cd C:\mailpit" enter dan tulis "./mai
 "time="2026/01/06 00:15:39" level=info msg="[smtpd] starting on [::]:1025 (no encryption)"
 time="2026/01/06 00:15:39" level=info msg="[http] starting on [::]:8025"
 time="2026/01/06 00:15:39" level=info msg="[http] accessible via http://localhost:8025/""
+
+untuk melakukan screenshot di emulator flutter, jalankan perintah berikut :
+adb exec-out screencap -p > screenshot.png

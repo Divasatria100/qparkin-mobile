@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const namaParkiran = document.getElementById('namaParkiran');
     const kodeParkiran = document.getElementById('kodeParkiran');
     const statusParkiran = document.getElementById('statusParkiran');
+    const jenisKendaraan = document.getElementById('jenisKendaraan');
     const jumlahLantai = document.getElementById('jumlahLantai');
     
     // Preview elements
@@ -17,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const previewLantai = document.getElementById('previewLantai');
     const previewSlot = document.getElementById('previewSlot');
     const previewKode = document.getElementById('previewKode');
+    const previewJenisKendaraan = document.getElementById('previewJenisKendaraan');
     const previewLantaiList = document.getElementById('previewLantaiList');
     
     // Initialize
@@ -71,6 +73,17 @@ document.addEventListener('DOMContentLoaded', function() {
                                onchange="updatePreview()">
                         <span class="field-hint">Slot akan ter-generate otomatis dengan kode unik</span>
                     </div>
+                    <div class="lantai-field">
+                        <label for="jenisKendaraanLantai${i}">Jenis Kendaraan *</label>
+                        <select id="jenisKendaraanLantai${i}" name="jenisKendaraanLantai${i}" 
+                                required onchange="updatePreview()">
+                            <option value="Roda Dua">Roda Dua (Motor)</option>
+                            <option value="Roda Tiga">Roda Tiga</option>
+                            <option value="Roda Empat" selected>Roda Empat (Mobil)</option>
+                            <option value="Lebih dari Enam">Lebih dari Enam (Truk/Bus)</option>
+                        </select>
+                        <span class="field-hint">Jenis kendaraan untuk lantai ini</span>
+                    </div>
                 </div>
                 <div class="lantai-info">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -103,15 +116,17 @@ document.addEventListener('DOMContentLoaded', function() {
         for (let i = 1; i <= jumlahLantaiValue; i++) {
             const namaInput = document.getElementById(`namaLantai${i}`);
             const slotInput = document.getElementById(`slotLantai${i}`);
+            const jenisKendaraanInput = document.getElementById(`jenisKendaraanLantai${i}`);
             
-            if (namaInput && slotInput) {
+            if (namaInput && slotInput && jenisKendaraanInput) {
                 const slotCount = parseInt(slotInput.value) || 0;
                 totalSlot += slotCount;
                 
                 lantaiDetails.push({
                     lantai: i,
                     nama: namaInput.value,
-                    slot: slotCount
+                    slot: slotCount,
+                    jenisKendaraan: jenisKendaraanInput.value
                 });
                 
                 // Update slot code preview
@@ -140,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const lantaiItem = document.createElement('div');
             lantaiItem.className = 'preview-lantai-item';
             lantaiItem.innerHTML = `
-                <span>${detail.nama}</span>
+                <span>${detail.nama} (${detail.jenisKendaraan})</span>
                 <span>${detail.slot} slot</span>
             `;
             previewLantaiList.appendChild(lantaiItem);
@@ -192,15 +207,18 @@ document.addEventListener('DOMContentLoaded', function() {
         for (let i = 1; i <= jumlahLantaiValue; i++) {
             const namaInput = document.getElementById(`namaLantai${i}`);
             const slotInput = document.getElementById(`slotLantai${i}`);
+            const jenisKendaraanInput = document.getElementById(`jenisKendaraanLantai${i}`);
             
             console.log(`Floor ${i}:`, {
                 namaInput: namaInput ? namaInput.value : 'NOT FOUND',
-                slotInput: slotInput ? slotInput.value : 'NOT FOUND'
+                slotInput: slotInput ? slotInput.value : 'NOT FOUND',
+                jenisKendaraanInput: jenisKendaraanInput ? jenisKendaraanInput.value : 'NOT FOUND'
             });
             
-            if (namaInput && slotInput) {
+            if (namaInput && slotInput && jenisKendaraanInput) {
                 const namaLantai = namaInput.value.trim();
                 const slotCount = parseInt(slotInput.value) || 0;
+                const jenisKendaraan = jenisKendaraanInput.value;
                 
                 if (!namaLantai) {
                     showNotification(`Nama lantai ${i} tidak boleh kosong`, 'error');
@@ -212,12 +230,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
                 
+                if (!jenisKendaraan) {
+                    showNotification(`Jenis kendaraan lantai ${i} harus dipilih`, 'error');
+                    return;
+                }
+                
                 totalSlot += slotCount;
                 
-                // Format sesuai backend: lantai.*.nama dan lantai.*.jumlah_slot
+                // Format sesuai backend: lantai.*.nama, lantai.*.jumlah_slot, lantai.*.jenis_kendaraan
                 lantaiData.push({
                     nama: namaLantai,
-                    jumlah_slot: slotCount
+                    jumlah_slot: slotCount,
+                    jenis_kendaraan: jenisKendaraan
                 });
             } else {
                 console.error(`Floor ${i} inputs not found!`);

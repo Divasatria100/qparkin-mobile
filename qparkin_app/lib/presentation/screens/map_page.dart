@@ -59,11 +59,22 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     setState(() {
       _selectedMallIndex = index;
       _selectedMall = {
+        'id_mall': int.parse(mall.id), // ✅ Parse id to int for BookingProvider
         'name': mall.name,
+        'nama_mall': mall.name, // Alias for compatibility
         'distance': '', // Will be calculated by MapProvider
         'address': mall.address,
+        'alamat': mall.address, // Alias for compatibility
         'available': mall.availableSlots,
+        'has_slot_reservation_enabled': mall.hasSlotReservationEnabled, // ✅ Add feature flag
       };
+      
+      // Debug log untuk memverifikasi data
+      debugPrint('[MapPage] Selected mall data:');
+      debugPrint('  - id_mall: ${_selectedMall!['id_mall']}');
+      debugPrint('  - name: ${_selectedMall!['name']}');
+      debugPrint('  - available: ${_selectedMall!['available']}');
+      debugPrint('  - has_slot_reservation_enabled: ${_selectedMall!['has_slot_reservation_enabled']}');
     });
   }
 
@@ -76,11 +87,22 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     setState(() {
       _selectedMallIndex = index;
       _selectedMall = {
+        'id_mall': int.parse(mall.id), // ✅ Parse id to int for BookingProvider
         'name': mall.name,
+        'nama_mall': mall.name, // Alias for compatibility
         'distance': '', // Will be calculated by MapProvider
         'address': mall.address,
+        'alamat': mall.address, // Alias for compatibility
         'available': mall.availableSlots,
+        'has_slot_reservation_enabled': mall.hasSlotReservationEnabled, // ✅ Add feature flag
       };
+      
+      // Debug log untuk memverifikasi data
+      debugPrint('[MapPage] Selected mall data (with route):');
+      debugPrint('  - id_mall: ${_selectedMall!['id_mall']}');
+      debugPrint('  - name: ${_selectedMall!['name']}');
+      debugPrint('  - available: ${_selectedMall!['available']}');
+      debugPrint('  - has_slot_reservation_enabled: ${_selectedMall!['has_slot_reservation_enabled']}');
     });
     
     try {
@@ -480,7 +502,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
           );
         }
 
-        // Show error state if there's an error
+        // Show error state if there's an error (API failed)
         if (mapProvider.malls.isEmpty && mapProvider.errorMessage != null) {
           return Center(
             child: Padding(
@@ -489,13 +511,13 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    Icons.error_outline,
+                    Icons.cloud_off,
                     size: 64,
-                    color: Colors.red.shade400,
+                    color: Colors.orange.shade400,
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Gagal memuat daftar mall',
+                    'Koneksi ke Server Gagal',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -504,7 +526,64 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    mapProvider.errorMessage ?? '',
+                    mapProvider.errorMessage ?? 'Tidak dapat terhubung ke server',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      mapProvider.loadMalls();
+                    },
+                    icon: const Icon(Icons.refresh, size: 20),
+                    label: const Text('Coba Lagi'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF573ED1),
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(0, 48),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        // Show empty state if no malls but no error (database empty)
+        if (mapProvider.malls.isEmpty && !mapProvider.isLoading) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.store_mall_directory_outlined,
+                    size: 64,
+                    color: Colors.grey.shade400,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Belum Ada Mall Terdaftar',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.shade800,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Saat ini belum ada mall yang tersedia.\nSilakan hubungi administrator.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
@@ -538,7 +617,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Ketuk mall untuk memilih lokasi parkir',
+                      '${mapProvider.malls.length} mall tersedia',
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.grey.shade600,

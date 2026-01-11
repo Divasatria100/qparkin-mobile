@@ -16,6 +16,7 @@ class ParkingFloor extends Model
         'id_parkiran',
         'floor_name',
         'floor_number',
+        'jenis_kendaraan',
         'total_slots',
         'available_slots',
         'status'
@@ -49,6 +50,14 @@ class ParkingFloor extends Model
     public function reservations()
     {
         return $this->hasMany(SlotReservation::class, 'id_floor', 'id_floor');
+    }
+
+    /**
+     * Scope untuk lantai dengan jenis kendaraan tertentu
+     */
+    public function scopeForVehicleType($query, $jenisKendaraan)
+    {
+        return $query->where('jenis_kendaraan', $jenisKendaraan);
     }
 
     /**

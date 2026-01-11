@@ -467,6 +467,7 @@ class AdminController extends Controller
             'lantai' => 'required|array',
             'lantai.*.nama' => 'required|string',
             'lantai.*.jumlah_slot' => 'required|integer|min:1',
+            'lantai.*.jenis_kendaraan' => 'required|in:Roda Dua,Roda Tiga,Roda Empat,Lebih dari Enam',
             'lantai.*.status' => 'nullable|in:active,maintenance,inactive',
         ]);
 
@@ -488,11 +489,13 @@ class AdminController extends Controller
             // Create floors and slots
             foreach ($validated['lantai'] as $index => $lantaiData) {
                 $floorStatus = $lantaiData['status'] ?? 'active';
+                $jenisKendaraan = $lantaiData['jenis_kendaraan'];
                 
                 $floor = ParkingFloor::create([
                     'id_parkiran' => $parkiran->id_parkiran,
                     'floor_name' => $lantaiData['nama'],
                     'floor_number' => $index + 1,
+                    'jenis_kendaraan' => $jenisKendaraan,
                     'total_slots' => $lantaiData['jumlah_slot'],
                     'available_slots' => $lantaiData['jumlah_slot'],
                     'status' => $floorStatus,
@@ -503,7 +506,7 @@ class AdminController extends Controller
                     ParkingSlot::create([
                         'id_floor' => $floor->id_floor,
                         'slot_code' => $validated['kode_parkiran'] . '-L' . ($index + 1) . '-' . str_pad($i, 3, '0', STR_PAD_LEFT),
-                        'jenis_kendaraan' => 'Roda Empat',
+                        'jenis_kendaraan' => $jenisKendaraan,
                         'status' => 'available',
                         'position_x' => $i,
                         'position_y' => $index + 1,
@@ -547,6 +550,7 @@ class AdminController extends Controller
             'lantai' => 'required|array',
             'lantai.*.nama' => 'required|string',
             'lantai.*.jumlah_slot' => 'required|integer|min:1',
+            'lantai.*.jenis_kendaraan' => 'required|in:Roda Dua,Roda Tiga,Roda Empat,Lebih dari Enam',
             'lantai.*.status' => 'nullable|in:active,maintenance,inactive',
         ]);
 
@@ -575,11 +579,13 @@ class AdminController extends Controller
             // Create new floors and slots
             foreach ($validated['lantai'] as $index => $lantaiData) {
                 $floorStatus = $lantaiData['status'] ?? 'active';
+                $jenisKendaraan = $lantaiData['jenis_kendaraan'];
                 
                 $floor = ParkingFloor::create([
                     'id_parkiran' => $parkiran->id_parkiran,
                     'floor_name' => $lantaiData['nama'],
                     'floor_number' => $index + 1,
+                    'jenis_kendaraan' => $jenisKendaraan,
                     'total_slots' => $lantaiData['jumlah_slot'],
                     'available_slots' => $lantaiData['jumlah_slot'],
                     'status' => $floorStatus,
@@ -590,7 +596,7 @@ class AdminController extends Controller
                     ParkingSlot::create([
                         'id_floor' => $floor->id_floor,
                         'slot_code' => $validated['kode_parkiran'] . '-L' . ($index + 1) . '-' . str_pad($i, 3, '0', STR_PAD_LEFT),
-                        'jenis_kendaraan' => 'Roda Empat',
+                        'jenis_kendaraan' => $jenisKendaraan,
                         'status' => 'available',
                         'position_x' => $i,
                         'position_y' => $index + 1,

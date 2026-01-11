@@ -4,7 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../logic/providers/booking_provider.dart';
 import '../../logic/providers/active_parking_provider.dart';
-import '../../data/services/vehicle_service.dart';
+import '../../logic/providers/profile_provider.dart';
+import '../../data/services/vehicle_api_service.dart';
 import '../../data/models/vehicle_model.dart';
 import '../../utils/responsive_helper.dart';
 import '../widgets/mall_info_card.dart';
@@ -67,7 +68,7 @@ class _BookingPageContent extends StatefulWidget {
 }
 
 class _BookingPageContentState extends State<_BookingPageContent> {
-  VehicleService? _vehicleService;
+  VehicleApiService? _vehicleService;
   String? _authToken;
   String? _baseUrl;
   BookingProvider? _bookingProvider;
@@ -104,9 +105,8 @@ class _BookingPageContentState extends State<_BookingPageContent> {
       });
       
       // Initialize vehicle service with real credentials
-      _vehicleService = VehicleService(
+      _vehicleService = VehicleApiService(
         baseUrl: baseUrl,
-        authToken: token,
       );
       
       // Initialize provider with mall data
@@ -132,9 +132,8 @@ class _BookingPageContentState extends State<_BookingPageContent> {
         _authToken = null;
       });
       
-      _vehicleService = VehicleService(
+      _vehicleService = VehicleApiService(
         baseUrl: baseUrl,
-        authToken: null,
       );
       
       // Initialize provider with mall data
@@ -317,8 +316,10 @@ class _BookingPageContentState extends State<_BookingPageContent> {
                   
                   SizedBox(height: spacing),
                   
-                  // Slot Availability Indicator
-                  if (provider.selectedVehicle != null)
+                  // Slot Availability Indicator - only show when all booking data is set
+                  if (provider.selectedVehicle != null &&
+                      provider.startTime != null &&
+                      provider.bookingDuration != null)
                     SlotAvailabilityIndicator(
                       availableSlots: provider.availableSlots,
                       vehicleType: provider.selectedVehicle!['jenis_kendaraan'] ??
@@ -332,7 +333,9 @@ class _BookingPageContentState extends State<_BookingPageContent> {
                       },
                     ),
                   
-                  if (provider.selectedVehicle != null)
+                  if (provider.selectedVehicle != null &&
+                      provider.startTime != null &&
+                      provider.bookingDuration != null)
                     SizedBox(height: spacing),
                   
                   // Slot unavailability warning with alternatives

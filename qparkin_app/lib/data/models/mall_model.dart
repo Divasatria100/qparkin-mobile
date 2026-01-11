@@ -131,53 +131,44 @@ class MallModel {
 
   /// Create MallModel from JSON
   /// 
-  /// TODO: API Integration - Parse coordinates from alamat_gmaps field
+  /// Maps API response fields to MallModel properties
   /// 
-  /// Expected API response format from GET /api/malls:
+  /// API response format from GET /api/mall:
   /// ```json
   /// {
-  ///   "id_mall": "1",
+  ///   "id_mall": 1,
   ///   "nama_mall": "Mega Mall Batam Centre",
-  ///   "lokasi": "Jl. Engku Putri no.1, Batam Centre",
-  ///   "alamat_gmaps": "https://maps.google.com/?q=1.1191,104.0538",
-  ///   "kapasitas": 45
+  ///   "alamat_lengkap": "Jl. Engku Putri no.1, Batam Centre",
+  ///   "latitude": 1.1191,
+  ///   "longitude": 104.0538,
+  ///   "google_maps_url": "https://maps.google.com/?q=1.1191,104.0538",
+  ///   "status": "active",
+  ///   "kapasitas": 45,
+  ///   "available_slots": 45,
+  ///   "has_slot_reservation_enabled": true
   /// }
   /// ```
   /// 
-  /// The alamat_gmaps field contains a Google Maps URL with coordinates.
-  /// Parse this URL to extract latitude and longitude:
-  /// 
-  /// Example parsing logic:
-  /// ```dart
-  /// static (double, double) _parseGoogleMapsUrl(String url) {
-  ///   final regex = RegExp(r'q=(-?\d+\.?\d*),(-?\d+\.?\d*)');
-  ///   final match = regex.firstMatch(url);
-  ///   if (match != null) {
-  ///     return (double.parse(match.group(1)!), double.parse(match.group(2)!));
-  ///   }
-  ///   return (0.0, 0.0);
-  /// }
-  /// ```
-  /// 
-  /// Current implementation uses direct latitude/longitude fields for dummy data.
-  /// When API is integrated, uncomment the parsing logic above and use:
-  /// ```dart
-  /// final (lat, lng) = _parseGoogleMapsUrl(json['alamat_gmaps'] ?? '');
-  /// latitude: lat,
-  /// longitude: lng,
-  /// ```
+  /// Field mapping:
+  /// - id_mall → id
+  /// - nama_mall → name
+  /// - alamat_lengkap → address
+  /// - latitude → latitude (direct from DB)
+  /// - longitude → longitude (direct from DB)
+  /// - available_slots → availableSlots
+  /// - google_maps_url → googleMapsUrl
   factory MallModel.fromJson(Map<String, dynamic> json) {
     return MallModel(
-      id: json['id']?.toString() ?? json['id_mall']?.toString() ?? '',
-      name: json['name']?.toString() ?? json['nama_mall']?.toString() ?? '',
-      address: json['address']?.toString() ?? json['lokasi']?.toString() ?? '',
+      id: json['id_mall']?.toString() ?? '',
+      name: json['nama_mall']?.toString() ?? '',
+      address: json['alamat_lengkap']?.toString() ?? '',
       latitude: _parseDouble(json['latitude']),
       longitude: _parseDouble(json['longitude']),
-      availableSlots: _parseInt(json['available_slots'] ?? json['kapasitas']),
+      availableSlots: _parseInt(json['available_slots']),
       distance: json['distance']?.toString() ?? '',
       hasSlotReservationEnabled: json['has_slot_reservation_enabled'] == true ||
           json['has_slot_reservation_enabled'] == 1,
-      googleMapsUrl: json['google_maps_url']?.toString(),  // Parse dari API
+      googleMapsUrl: json['google_maps_url']?.toString(),
     );
   }
 

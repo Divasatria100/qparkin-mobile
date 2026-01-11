@@ -38,7 +38,7 @@ class ParkingSlotController extends Controller
                 ->active()
                 ->with('parkiran')
                 ->get()
-                ->map(function ($floor) {
+                ->map(function ($floor) use ($mallId) { // ✅ FIX: Pass $mallId to closure
                     // Calculate real-time slot counts
                     $totalSlots = ParkingSlot::where('id_floor', $floor->id_floor)->count();
                     $availableSlots = ParkingSlot::where('id_floor', $floor->id_floor)
@@ -56,6 +56,7 @@ class ParkingSlotController extends Controller
                         'id_mall' => $mallId,
                         'floor_number' => $floor->floor_number,
                         'floor_name' => $floor->floor_name,
+                        'jenis_kendaraan' => $floor->jenis_kendaraan, // ✅ ADD: Vehicle type per floor
                         'total_slots' => $totalSlots,
                         'available_slots' => $availableSlots,
                         'occupied_slots' => $occupiedSlots,
@@ -72,6 +73,7 @@ class ParkingSlotController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Error fetching floors: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString()); // ✅ Add stack trace for debugging
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to fetch parking floors',

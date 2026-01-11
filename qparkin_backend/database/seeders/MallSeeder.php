@@ -3,50 +3,37 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class MallSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      *
-     * Seed mall data with slot reservation feature flag enabled for testing.
+     * NOTE: Mall data seeding has been DISABLED.
+     * 
+     * Mall data is now created through the Admin Mall Registration flow:
+     * 1. Admin Mall registers via /signup page
+     * 2. SuperAdmin approves the registration via /super/pengajuan-akun
+     * 3. Mall data is automatically created upon approval
+     * 
+     * This ensures:
+     * - 1 Admin Mall = 1 Mall (business logic)
+     * - Proper admin-mall relationship
+     * - Real-world registration workflow
+     * 
+     * If you need test data for development:
+     * - Use the admin mall registration flow
+     * - Or manually insert data via SQL if needed for testing
+     * 
+     * Previous seeder data (for reference):
+     * - Mega Mall Batam Centre
+     * - One Batam Mall
+     * - SNL Food Bengkong
      */
     public function run(): void
     {
-        $malls = [
-            [
-                'nama_mall' => 'Mega Mall Batam Centre',
-                'alamat_lengkap' => 'Jl. Engku Putri no.1, Batam Centre',
-                'latitude' => 1.11910000,
-                'longitude' => 104.04510000,
-                'kapasitas' => 200,
-                'alamat_gmaps' => 'Jl. Engku Putri no.1, Batam Centre',
-                'status' => 'active',
-                'has_slot_reservation_enabled' => true,
-            ],
-            [
-                'nama_mall' => 'One Batam Mall',
-                'alamat_lengkap' => 'Jl. Raja H. Fisabilillah No. 9, Batam Center',
-                'latitude' => 1.12050000,
-                'longitude' => 104.04380000,
-                'kapasitas' => 150,
-                'alamat_gmaps' => 'Jl. Raja H. Fisabilillah No. 9, Batam Center',
-                'status' => 'active',
-                'has_slot_reservation_enabled' => true,
-            ],
-            [
-                'nama_mall' => 'SNL Food Bengkong',
-                'alamat_lengkap' => 'Garden Avenue Square, Bengkong, Batam',
-                'latitude' => 1.13200000,
-                'longitude' => 104.01500000,
-                'kapasitas' => 100,
-                'alamat_gmaps' => 'Garden Avenue Square, Bengkong, Batam',
-                'status' => 'active',
-                'has_slot_reservation_enabled' => false,
-            ],
-        ];
-
-        DB::table('mall')->insert($malls);
+        // Seeder disabled - mall data created via admin mall registration
+        // See: AdminMallRegistrationController and SuperAdminController
     }
 }
+

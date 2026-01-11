@@ -16,7 +16,7 @@ class MallController extends Controller
     public function index()
     {
         try {
-            $malls = Mall::active()
+            $malls = Mall::where('mall.status', 'active')  // ✅ Specify table name
                 ->select([
                     'mall.id_mall',
                     'mall.nama_mall',
@@ -29,7 +29,9 @@ class MallController extends Controller
                     'mall.has_slot_reservation_enabled'
                 ])
                 ->leftJoin('parkiran', 'mall.id_mall', '=', 'parkiran.id_mall')
-                ->selectRaw('COUNT(CASE WHEN parkiran.status = "tersedia" THEN 1 END) as available_slots')
+                ->leftJoin('parking_floors', 'parkiran.id_parkiran', '=', 'parking_floors.id_parkiran')
+                ->selectRaw('COALESCE(SUM(parking_floors.available_slots), 0) as available_slots')
+                ->where('parkiran.status', '=', 'Tersedia')
                 ->groupBy(
                     'mall.id_mall',
                     'mall.nama_mall',
@@ -52,7 +54,7 @@ class MallController extends Controller
                         'google_maps_url' => $mall->google_maps_url,
                         'status' => $mall->status,
                         'kapasitas' => $mall->kapasitas,
-                        'available_slots' => $mall->available_slots ?? 0,
+                        'available_slots' => (int) $mall->available_slots,
                         'has_slot_reservation_enabled' => (bool) $mall->has_slot_reservation_enabled,
                     ];
                 });
@@ -64,6 +66,7 @@ class MallController extends Controller
             ]);
         } catch (\Exception $e) {
             \Log::error('Error fetching malls: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
             
             return response()->json([
                 'success' => false,
@@ -79,12 +82,10 @@ class MallController extends Controller
     public function show($id)
     {
         try {
-            $mall = Mall::active()
-                ->with(['parkiran', 'tarifParkir'])
-                ->findOrFail($id);
+            $mall = Mall::where('status', 'active')->findOrFail($id);
 
             $availableSlots = $mall->parkiran()
-                ->where('status', 'tersedia')
+                ->where('status', 'Tersedia')
                 ->count();
 
             return response()->json([
@@ -102,7 +103,7 @@ class MallController extends Controller
                     'available_slots' => $availableSlots,
                     'has_slot_reservation_enabled' => (bool) $mall->has_slot_reservation_enabled,
                     'parkiran' => $mall->parkiran,
-                    'tarif' => $mall->tarifParkir,
+                    'tarif' => $mall->tarifParkir ?? [],
                 ]
             ]);
         } catch (\Exception $e) {
@@ -119,7 +120,7 @@ class MallController extends Controller
     public function getParkiran($id)
     {
         try {
-            $mall = Mall::active()->findOrFail($id);
+            $mall = Mall::where('status', 'active')->findOrFail($id);
             $parkiran = $mall->parkiran()
                 ->select(['id_parkiran', 'nama_parkiran', 'lantai', 'kapasitas', 'status'])
                 ->get();
@@ -143,7 +144,7 @@ class MallController extends Controller
     public function getTarif($id)
     {
         try {
-            $mall = Mall::active()->findOrFail($id);
+            $mall = Mall::where('status', 'active')->findOrFail($id);
             $tarif = $mall->tarifParkir()
                 ->select(['id_tarif', 'jenis_kendaraan', 'tarif_per_jam', 'tarif_maksimal'])
                 ->get();

@@ -4,6 +4,7 @@ class ParkingFloorModel {
   final String idMall;
   final int floorNumber;
   final String floorName;
+  final String? jenisKendaraan; // ✅ ADD: Vehicle type for this floor
   final int totalSlots;
   final int availableSlots;
   final int occupiedSlots;
@@ -15,6 +16,7 @@ class ParkingFloorModel {
     required this.idMall,
     required this.floorNumber,
     required this.floorName,
+    this.jenisKendaraan, // ✅ ADD: Optional vehicle type
     required this.totalSlots,
     required this.availableSlots,
     required this.occupiedSlots,
@@ -64,6 +66,7 @@ class ParkingFloorModel {
       idMall: json['id_mall']?.toString() ?? '',
       floorNumber: _parseInt(json['floor_number']),
       floorName: json['floor_name']?.toString() ?? '',
+      jenisKendaraan: json['jenis_kendaraan']?.toString(), // ✅ ADD: Parse vehicle type
       totalSlots: _parseInt(json['total_slots']),
       availableSlots: _parseInt(json['available_slots']),
       occupiedSlots: _parseInt(json['occupied_slots']),
@@ -81,6 +84,7 @@ class ParkingFloorModel {
       'id_mall': idMall,
       'floor_number': floorNumber,
       'floor_name': floorName,
+      'jenis_kendaraan': jenisKendaraan, // ✅ ADD: Include vehicle type
       'total_slots': totalSlots,
       'available_slots': availableSlots,
       'occupied_slots': occupiedSlots,
@@ -104,6 +108,7 @@ class ParkingFloorModel {
     String? idMall,
     int? floorNumber,
     String? floorName,
+    String? jenisKendaraan, // ✅ ADD: Vehicle type parameter
     int? totalSlots,
     int? availableSlots,
     int? occupiedSlots,
@@ -115,6 +120,7 @@ class ParkingFloorModel {
       idMall: idMall ?? this.idMall,
       floorNumber: floorNumber ?? this.floorNumber,
       floorName: floorName ?? this.floorName,
+      jenisKendaraan: jenisKendaraan ?? this.jenisKendaraan, // ✅ ADD: Copy vehicle type
       totalSlots: totalSlots ?? this.totalSlots,
       availableSlots: availableSlots ?? this.availableSlots,
       occupiedSlots: occupiedSlots ?? this.occupiedSlots,

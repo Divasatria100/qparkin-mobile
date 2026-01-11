@@ -77,6 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const floorName = floorData.floor_name || `Lantai ${floorNumber}`;
             const totalSlots = floorData.total_slots || 20;
             const floorStatus = floorData.status || 'active';
+            const jenisKendaraan = floorData.jenis_kendaraan || 'Roda Empat';
             
             const lantaiItem = document.createElement('div');
             lantaiItem.className = 'lantai-item';
@@ -98,6 +99,17 @@ document.addEventListener('DOMContentLoaded', function() {
                                min="1" max="200" value="${totalSlots}" required 
                                onchange="updatePreview()">
                         <span class="field-hint">Slot akan ter-generate otomatis dengan kode unik</span>
+                    </div>
+                    <div class="lantai-field">
+                        <label for="jenisKendaraanLantai${floorNumber}">Jenis Kendaraan *</label>
+                        <select id="jenisKendaraanLantai${floorNumber}" name="lantai[${i}][jenis_kendaraan]" 
+                                required onchange="updatePreview()">
+                            <option value="Roda Dua" ${jenisKendaraan === 'Roda Dua' ? 'selected' : ''}>Roda Dua (Motor)</option>
+                            <option value="Roda Tiga" ${jenisKendaraan === 'Roda Tiga' ? 'selected' : ''}>Roda Tiga</option>
+                            <option value="Roda Empat" ${jenisKendaraan === 'Roda Empat' ? 'selected' : ''}>Roda Empat (Mobil)</option>
+                            <option value="Lebih dari Enam" ${jenisKendaraan === 'Lebih dari Enam' ? 'selected' : ''}>Lebih dari Enam (Truk/Bus)</option>
+                        </select>
+                        <span class="field-hint">Jenis kendaraan untuk lantai ini</span>
                     </div>
                     <div class="lantai-field">
                         <label for="statusLantai${floorNumber}">Status Lantai *</label>
@@ -149,8 +161,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const namaInput = document.getElementById(`namaLantai${i}`);
             const slotInput = document.getElementById(`slotLantai${i}`);
             const statusInput = document.getElementById(`statusLantai${i}`);
+            const jenisKendaraanInput = document.getElementById(`jenisKendaraanLantai${i}`);
             
-            if (namaInput && slotInput && statusInput) {
+            if (namaInput && slotInput && statusInput && jenisKendaraanInput) {
                 const slotCount = parseInt(slotInput.value) || 0;
                 totalSlot += slotCount;
                 
@@ -158,7 +171,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     lantai: i,
                     nama: namaInput.value,
                     slot: slotCount,
-                    status: statusInput.value
+                    status: statusInput.value,
+                    jenisKendaraan: jenisKendaraanInput.value
                 });
                 
                 // Update slot code preview
@@ -188,7 +202,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const lantaiItem = document.createElement('div');
             lantaiItem.className = 'preview-lantai-item';
             lantaiItem.innerHTML = `
-                <span>${detail.nama}</span>
+                <span>${detail.nama} (${detail.jenisKendaraan})</span>
                 <span>${detail.slot} slot ${statusBadge}</span>
             `;
             previewLantaiList.appendChild(lantaiItem);
@@ -244,11 +258,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const namaInput = document.getElementById(`namaLantai${i}`);
             const slotInput = document.getElementById(`slotLantai${i}`);
             const statusInput = document.getElementById(`statusLantai${i}`);
+            const jenisKendaraanInput = document.getElementById(`jenisKendaraanLantai${i}`);
             
-            if (namaInput && slotInput && statusInput) {
+            if (namaInput && slotInput && statusInput && jenisKendaraanInput) {
                 const namaLantai = namaInput.value.trim();
                 const slotCount = parseInt(slotInput.value) || 0;
                 const statusLantai = statusInput.value;
+                const jenisKendaraan = jenisKendaraanInput.value;
                 
                 if (!namaLantai) {
                     showNotification(`Nama lantai ${i} tidak boleh kosong`, 'error');
@@ -260,11 +276,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
                 
+                if (!jenisKendaraan) {
+                    showNotification(`Jenis kendaraan lantai ${i} harus dipilih`, 'error');
+                    return;
+                }
+                
                 totalSlot += slotCount;
                 
                 lantaiData.push({
                     nama: namaLantai,
                     jumlah_slot: slotCount,
+                    jenis_kendaraan: jenisKendaraan,
                     status: statusLantai
                 });
             }

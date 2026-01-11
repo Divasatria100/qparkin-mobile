@@ -116,6 +116,10 @@
                                     <span>Kode:</span>
                                     <span id="previewKode">-</span>
                                 </div>
+                                <div class="preview-item">
+                                    <span>Jenis Kendaraan:</span>
+                                    <span id="previewJenisKendaraan">-</span>
+                                </div>
                             </div>
                             <div class="preview-lantai">
                                 <h6>Detail Lantai:</h6>

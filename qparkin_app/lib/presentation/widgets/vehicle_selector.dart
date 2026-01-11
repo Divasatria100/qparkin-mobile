@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import '../../data/models/vehicle_model.dart';
-import '../../data/services/vehicle_service.dart';
+import '../../data/services/vehicle_api_service.dart';
 import 'booking_shimmer_loading.dart';
 import 'validation_error_text.dart';
 
@@ -12,7 +12,7 @@ import 'validation_error_text.dart';
 class VehicleSelector extends StatefulWidget {
   final VehicleModel? selectedVehicle;
   final Function(VehicleModel?) onVehicleSelected;
-  final VehicleService vehicleService;
+  final VehicleApiService vehicleService;
   final String? validationError;
 
   const VehicleSelector({
@@ -46,12 +46,17 @@ class _VehicleSelectorState extends State<VehicleSelector> {
     });
 
     try {
-      final vehicles = await widget.vehicleService.fetchVehicles();
+      debugPrint('[VehicleSelector] Fetching vehicles from API...');
+      final vehicles = await widget.vehicleService.getVehicles();
+      debugPrint('[VehicleSelector] Vehicles fetched successfully: ${vehicles.length} vehicles');
+      
       setState(() {
         _vehicles = vehicles;
         _isLoading = false;
       });
     } catch (e) {
+      debugPrint('[VehicleSelector] Error fetching vehicles: $e');
+      
       setState(() {
         _errorMessage = e.toString();
         _isLoading = false;
@@ -258,8 +263,29 @@ class _VehicleSelectorState extends State<VehicleSelector> {
   }
 
   Widget _buildVehicleDropdown() {
+    // Debug: Log vehicles and selected vehicle
+    debugPrint('[VehicleSelector] Building dropdown with ${_vehicles.length} vehicles');
+    if (widget.selectedVehicle != null) {
+      debugPrint('[VehicleSelector] Selected vehicle ID: ${widget.selectedVehicle!.idKendaraan}');
+      debugPrint('[VehicleSelector] Selected vehicle plat: ${widget.selectedVehicle!.platNomor}');
+    }
+    
+    // Find matching vehicle in list by ID (not by instance)
+    VehicleModel? matchingVehicle;
+    if (widget.selectedVehicle != null) {
+      try {
+        matchingVehicle = _vehicles.firstWhere(
+          (v) => v.idKendaraan == widget.selectedVehicle!.idKendaraan,
+        );
+        debugPrint('[VehicleSelector] Found matching vehicle: ${matchingVehicle.platNomor}');
+      } catch (e) {
+        debugPrint('[VehicleSelector] No matching vehicle found in list');
+        matchingVehicle = null;
+      }
+    }
+    
     return Semantics(
-      label: 'Pilih kendaraan untuk booking. ${widget.selectedVehicle != null ? "Kendaraan terpilih: ${widget.selectedVehicle!.platNomor}, ${widget.selectedVehicle!.jenisKendaraan}, ${widget.selectedVehicle!.merk} ${widget.selectedVehicle!.tipe}" : "Belum ada kendaraan dipilih"}',
+      label: 'Pilih kendaraan untuk booking. ${matchingVehicle != null ? "Kendaraan terpilih: ${matchingVehicle.platNomor}, ${matchingVehicle.jenisKendaraan}, ${matchingVehicle.merk} ${matchingVehicle.tipe}" : "Belum ada kendaraan dipilih"}',
       hint: 'Ketuk untuk memilih kendaraan dari daftar kendaraan terdaftar',
       child: Focus(
         onFocusChange: (hasFocus) {
@@ -268,7 +294,7 @@ class _VehicleSelectorState extends State<VehicleSelector> {
           });
         },
         child: DropdownButtonFormField<VehicleModel>(
-          value: widget.selectedVehicle,
+          value: matchingVehicle, // Use matching vehicle from list, not the passed one
           decoration: InputDecoration(
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 12,
@@ -302,6 +328,7 @@ class _VehicleSelectorState extends State<VehicleSelector> {
             );
           }).toList(),
           onChanged: (VehicleModel? newValue) {
+            debugPrint('[VehicleSelector] Vehicle selected: ${newValue?.platNomor}');
             widget.onVehicleSelected(newValue);
             if (newValue != null) {
               // Announce selection to screen reader
@@ -322,6 +349,7 @@ class _VehicleSelectorState extends State<VehicleSelector> {
   }
 
   Widget _buildVehicleItem(VehicleModel vehicle) {
+    // Simplified single-line layout to avoid overflow
     return Row(
       children: [
         Icon(
@@ -331,27 +359,14 @@ class _VehicleSelectorState extends State<VehicleSelector> {
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                vehicle.platNomor,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-              Text(
-                '${vehicle.merk} ${vehicle.tipe}',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey.shade600,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+          child: Text(
+            '${vehicle.platNomor} - ${vehicle.merk} ${vehicle.tipe}',
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.black87,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],

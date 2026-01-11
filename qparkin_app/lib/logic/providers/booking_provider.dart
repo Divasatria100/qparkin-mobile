@@ -130,9 +130,19 @@ class BookingProvider extends ChangeNotifier {
   ///
   /// Requirements: 17.1-17.9
   bool get isSlotReservationEnabled {
-    if (_selectedMall == null) return false;
-    return _selectedMall!['has_slot_reservation_enabled'] == true ||
+    if (_selectedMall == null) {
+      debugPrint('[BookingProvider] isSlotReservationEnabled: false (no mall selected)');
+      return false;
+    }
+    
+    final enabled = _selectedMall!['has_slot_reservation_enabled'] == true ||
         _selectedMall!['has_slot_reservation_enabled'] == 1;
+    
+    debugPrint('[BookingProvider] isSlotReservationEnabled: $enabled');
+    debugPrint('[BookingProvider] has_slot_reservation_enabled value: ${_selectedMall!['has_slot_reservation_enabled']}');
+    debugPrint('[BookingProvider] has_slot_reservation_enabled type: ${_selectedMall!['has_slot_reservation_enabled'].runtimeType}');
+    
+    return enabled;
   }
 
   bool get canConfirmBooking {
@@ -206,12 +216,14 @@ class BookingProvider extends ChangeNotifier {
   /// Select a vehicle for booking
   ///
   /// Validates vehicle selection and triggers cost calculation if duration is set.
+  /// If slot reservation is enabled, filters floors by vehicle type.
   ///
   /// Parameters:
   /// - [vehicle]: Map containing vehicle information (id, plat, jenis, etc.)
+  /// - [token]: Optional authentication token for loading floors
   ///
-  /// Requirements: 15.1, 15.8
-  void selectVehicle(Map<String, dynamic> vehicle) {
+  /// Requirements: 15.1, 15.8, Vehicle Type Per Floor
+  void selectVehicle(Map<String, dynamic> vehicle, {String? token}) {
     debugPrint('[BookingProvider] Selecting vehicle: ${vehicle['plat_nomor']}');
 
     _selectedVehicle = vehicle;
@@ -224,6 +236,22 @@ class BookingProvider extends ChangeNotifier {
       _validationErrors['vehicleId'] = error;
     } else {
       _validationErrors.remove('vehicleId');
+    }
+
+    // Reset floor and slot selection when vehicle changes
+    _selectedFloor = null;
+    _reservedSlot = null;
+    _slotsVisualization = [];
+
+    // Filter floors by vehicle type if slot reservation is enabled
+    if (isSlotReservationEnabled && token != null) {
+      final jenisKendaraan = vehicle['jenis_kendaraan']?.toString() ?? 
+                             vehicle['jenis']?.toString();
+      
+      if (jenisKendaraan != null && jenisKendaraan.isNotEmpty) {
+        debugPrint('[BookingProvider] Filtering floors for vehicle type: $jenisKendaraan');
+        loadFloorsForVehicle(jenisKendaraan: jenisKendaraan, token: token);
+      }
     }
 
     // Recalculate cost if duration is already set
@@ -688,11 +716,12 @@ class BookingProvider extends ChangeNotifier {
   ///
   /// Queries the API for available slots matching the selected mall,
   /// vehicle type, start time, and duration. Updates availableSlots state.
+  /// Only checks floors that match the selected vehicle type.
   ///
   /// Parameters:
   /// - [token]: Authentication token for API call
   ///
-  /// Requirements: 5.1-5.7, 15.7
+  /// Requirements: 5.1-5.7, 15.7, Vehicle Type Per Floor
   Future<void> checkAvailability({required String token}) async {
     // Validate we have all required data
     if (_selectedMall == null ||
@@ -738,10 +767,30 @@ class BookingProvider extends ChangeNotifier {
 
       debugPrint('[BookingProvider] Available slots: $slots');
 
+      // If slot reservation is enabled, also calculate from filtered floors
+      if (isSlotReservationEnabled && _floors.isNotEmpty) {
+        final matchingFloors = _floors.where((floor) {
+          return floor.jenisKendaraan == vehicleType;
+        }).toList();
+        
+        final floorsAvailableSlots = matchingFloors.fold(
+          0, 
+          (sum, floor) => sum + floor.availableSlots
+        );
+        
+        debugPrint('[BookingProvider] Available slots from matching floors: $floorsAvailableSlots');
+        
+        // Use the minimum of API result and floor calculation for safety
+        if (floorsAvailableSlots < _availableSlots) {
+          _availableSlots = floorsAvailableSlots;
+          debugPrint('[BookingProvider] Adjusted available slots to match floor data: $_availableSlots');
+        }
+      }
+
       // Notify user if slot availability changed significantly
-      if (previousSlots > 0 && slots == 0) {
+      if (previousSlots > 0 && _availableSlots == 0) {
         debugPrint('[BookingProvider] Warning: Slots became unavailable');
-      } else if (previousSlots == 0 && slots > 0) {
+      } else if (previousSlots == 0 && _availableSlots > 0) {
         debugPrint('[BookingProvider] Slots became available');
       }
 
@@ -826,6 +875,126 @@ class BookingProvider extends ChangeNotifier {
   Future<void> refreshAvailability({required String token}) async {
     debugPrint('[BookingProvider] Manual availability refresh triggered');
     await checkAvailability(token: token);
+  }
+
+  /// Load floors filtered by vehicle type
+  ///
+  /// Fetches all floors from API and filters by vehicle type.
+  /// This ensures users only see floors that accept their vehicle type.
+  ///
+  /// Parameters:
+  /// - [jenisKendaraan]: Vehicle type to filter by (e.g., 'Roda Dua', 'Roda Empat')
+  /// - [token]: Authentication token for API call
+  ///
+  /// Requirements: Vehicle Type Per Floor
+  Future<void> loadFloorsForVehicle({
+    required String jenisKendaraan,
+    required String token,
+  }) async {
+    debugPrint('[BookingProvider] Loading floors for vehicle type: $jenisKendaraan');
+
+    if (_selectedMall == null) {
+      debugPrint('[BookingProvider] ERROR: Cannot load floors - no mall selected');
+      _errorMessage = 'Mall tidak dipilih';
+      notifyListeners();
+      return;
+    }
+
+    final mallId = _selectedMall!['id_mall']?.toString() ??
+        _selectedMall!['id']?.toString() ??
+        '';
+
+    if (mallId.isEmpty) {
+      debugPrint('[BookingProvider] ERROR: Cannot load floors - invalid mall ID');
+      _errorMessage = 'ID mall tidak valid';
+      notifyListeners();
+      return;
+    }
+
+    _isLoadingFloors = true;
+    _floors = [];
+    _selectedFloor = null;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      debugPrint('[BookingProvider] Fetching all floors for mall: $mallId');
+      debugPrint('[BookingProvider] Request timestamp: ${DateTime.now().toIso8601String()}');
+
+      // Get all floors from API
+      final allFloors = await _bookingService.getFloorsWithRetry(
+        mallId: mallId,
+        token: token,
+        maxRetries: 2,
+      );
+
+      debugPrint('[BookingProvider] Total floors from API: ${allFloors.length}');
+
+      // Filter floors that match vehicle type
+      _floors = allFloors.where((floor) {
+        final matches = floor.jenisKendaraan == jenisKendaraan;
+        debugPrint('[BookingProvider] Floor ${floor.floorName}: ${floor.jenisKendaraan} ${matches ? "✓" : "✗"}');
+        return matches;
+      }).toList();
+
+      debugPrint('[BookingProvider] Filtered floors: ${_floors.length}');
+      debugPrint('[BookingProvider] Response timestamp: ${DateTime.now().toIso8601String()}');
+
+      _isLoadingFloors = false;
+
+      if (_floors.isEmpty) {
+        _errorMessage = 'Tidak ada lantai parkir untuk jenis kendaraan $jenisKendaraan';
+        debugPrint('[BookingProvider] WARNING: No floors available for vehicle type: $jenisKendaraan');
+      } else {
+        debugPrint('[BookingProvider] SUCCESS: Loaded ${_floors.length} floors for $jenisKendaraan');
+        _floors.forEach((floor) {
+          debugPrint('  - ${floor.floorName}: ${floor.availableSlots} slots available');
+        });
+      }
+
+      notifyListeners();
+    } catch (e, stackTrace) {
+      _isLoadingFloors = false;
+
+      // Log detailed error information for debugging
+      debugPrint('[BookingProvider] ERROR: Failed to load floors for vehicle type');
+      debugPrint('[BookingProvider] Mall ID: $mallId');
+      debugPrint('[BookingProvider] Vehicle type: $jenisKendaraan');
+      debugPrint('[BookingProvider] Error type: ${e.runtimeType}');
+      debugPrint('[BookingProvider] Error message: $e');
+      debugPrint('[BookingProvider] Stack trace: $stackTrace');
+      debugPrint('[BookingProvider] Timestamp: ${DateTime.now().toIso8601String()}');
+
+      // Provide user-friendly error messages based on error type
+      if (e.toString().contains('Unauthorized') || e.toString().contains('401')) {
+        _errorMessage = 'Sesi Anda telah berakhir. Silakan login kembali.';
+        debugPrint('[BookingProvider] ERROR_CODE: AUTH_ERROR');
+      } else if (e.toString().contains('Timeout') || e.toString().contains('timeout')) {
+        _errorMessage = 'Permintaan timeout. Periksa koneksi internet Anda dan coba lagi.';
+        debugPrint('[BookingProvider] ERROR_CODE: TIMEOUT_ERROR');
+      } else if (e.toString().contains('Network') || e.toString().contains('network')) {
+        _errorMessage = 'Gagal memuat data lantai. Periksa koneksi internet Anda.';
+        debugPrint('[BookingProvider] ERROR_CODE: NETWORK_ERROR');
+      } else if (e.toString().contains('SocketException')) {
+        _errorMessage = 'Gagal memuat data lantai. Periksa koneksi internet Anda.';
+        debugPrint('[BookingProvider] ERROR_CODE: SOCKET_ERROR');
+      } else if (e.toString().contains('FormatException')) {
+        _errorMessage = 'Gagal memuat data lantai. Format data tidak valid.';
+        debugPrint('[BookingProvider] ERROR_CODE: FORMAT_ERROR');
+      } else if (e.toString().contains('404') || e.toString().contains('Not Found')) {
+        _errorMessage = 'Gagal memuat data lantai. Data tidak ditemukan.';
+        debugPrint('[BookingProvider] ERROR_CODE: NOT_FOUND');
+      } else if (e.toString().contains('500') || e.toString().contains('Server Error')) {
+        _errorMessage = 'Gagal memuat data lantai. Terjadi kesalahan server.';
+        debugPrint('[BookingProvider] ERROR_CODE: SERVER_ERROR');
+      } else {
+        _errorMessage = 'Gagal memuat data lantai. Silakan coba lagi.';
+        debugPrint('[BookingProvider] ERROR_CODE: UNKNOWN_ERROR');
+      }
+
+      _floors = [];
+      notifyListeners();
+    }
   }
 
   /// Fetch parking floors for the selected mall
@@ -1267,19 +1436,31 @@ class BookingProvider extends ChangeNotifier {
   /// Get alternative floors with available slots
   ///
   /// Returns list of floors that have available slots, excluding the current floor.
+  /// Only returns floors that match the selected vehicle type.
   /// Sorted by availability (most available first).
   ///
-  /// Requirements: 15.1-15.10
+  /// Requirements: 15.1-15.10, Vehicle Type Per Floor
   List<ParkingFloorModel> getAlternativeFloors() {
+    // Get vehicle type from selected vehicle
+    final vehicleType = _selectedVehicle?['jenis_kendaraan']?.toString() ??
+        _selectedVehicle?['jenis']?.toString();
+
     if (_selectedFloor == null) {
-      return _floors.where((floor) => floor.hasAvailableSlots).toList()
+      // Return all floors with available slots, filtered by vehicle type
+      return _floors
+          .where((floor) => 
+              floor.hasAvailableSlots && 
+              (vehicleType == null || floor.jenisKendaraan == vehicleType))
+          .toList()
         ..sort((a, b) => b.availableSlots.compareTo(a.availableSlots));
     }
-    
+
+    // Return alternative floors (excluding current), filtered by vehicle type
     return _floors
-        .where((floor) => 
-            floor.idFloor != _selectedFloor!.idFloor && 
-            floor.hasAvailableSlots)
+        .where((floor) =>
+            floor.idFloor != _selectedFloor!.idFloor &&
+            floor.hasAvailableSlots &&
+            (vehicleType == null || floor.jenisKendaraan == vehicleType))
         .toList()
       ..sort((a, b) => b.availableSlots.compareTo(a.availableSlots));
   }

@@ -1,0 +1,321 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                  VEHICLE TYPE PER FLOOR - FLOW DIAGRAM                       ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          1. USER OPENS BOOKING PAGE                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
+                          ┌───────────────────────┐
+                          │  Mall Selected        │
+                          │  (e.g., Grand Mall)   │
+                          └───────────────────────┘
+                                      │
+                                      ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        2. USER SELECTS VEHICLE                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                    ┌─────────────────┴─────────────────┐
+                    │                                   │
+                    ▼                                   ▼
+        ┌───────────────────────┐         ┌───────────────────────┐
+        │  Motor Selected       │         │  Car Selected         │
+        │  (Roda Dua)          │         │  (Roda Empat)        │
+        └───────────────────────┘         └───────────────────────┘
+                    │                                   │
+                    ▼                                   ▼
+        ┌───────────────────────┐         ┌───────────────────────┐
+        │ selectVehicle()       │         │ selectVehicle()       │
+        │ called with token     │         │ called with token     │
+        └───────────────────────┘         └───────────────────────┘
+                    │                                   │
+                    ▼                                   ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    3. LOAD FLOORS FOR VEHICLE TYPE                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+                    │                                   │
+                    ▼                                   ▼
+    ┌───────────────────────────────┐   ┌───────────────────────────────┐
+    │ loadFloorsForVehicle(         │   │ loadFloorsForVehicle(         │
+    │   jenisKendaraan: "Roda Dua"  │   │   jenisKendaraan: "Roda Empat"│
+    │   token: token                │   │   token: token                │
+    │ )                             │   │ )                             │
+    └───────────────────────────────┘   └───────────────────────────────┘
+                    │                                   │
+                    ▼                                   ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         4. API CALL TO BACKEND                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+                    │                                   │
+                    ▼                                   ▼
+    ┌───────────────────────────────┐   ┌───────────────────────────────┐
+    │ GET /api/parking/floors/4     │   │ GET /api/parking/floors/4     │
+    │ Authorization: Bearer token   │   │ Authorization: Bearer token   │
+    └───────────────────────────────┘   └───────────────────────────────┘
+                    │                                   │
+                    ▼                                   ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      5. BACKEND RETURNS ALL FLOORS                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────┐
+                    │ {                               │
+                    │   "success": true,              │
+                    │   "data": [                     │
+                    │     {                           │
+                    │       "id_floor": 1,            │
+                    │       "floor_name": "Lantai 1", │
+                    │       "jenis_kendaraan": "Roda Dua", │
+                    │       "available_slots": 28     │
+                    │     },                          │
+                    │     {                           │
+                    │       "id_floor": 2,            │
+                    │       "floor_name": "Lantai 2", │
+                    │       "jenis_kendaraan": "Roda Empat", │
+                    │       "available_slots": 15     │
+                    │     },                          │
+                    │     {                           │
+                    │       "id_floor": 3,            │
+                    │       "floor_name": "Lantai 3", │
+                    │       "jenis_kendaraan": "Roda Empat", │
+                    │       "available_slots": 18     │
+                    │     }                           │
+                    │   ]                             │
+                    │ }                               │
+                    └─────────────────────────────────┘
+                                      │
+                                      ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                       6. FLUTTER FILTERS FLOORS                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+                    │                                   │
+                    ▼                                   ▼
+    ┌───────────────────────────────┐   ┌───────────────────────────────┐
+    │ Filter: floor.jenisKendaraan  │   │ Filter: floor.jenisKendaraan  │
+    │         == "Roda Dua"         │   │         == "Roda Empat"       │
+    └───────────────────────────────┘   └───────────────────────────────┘
+                    │                                   │
+                    ▼                                   ▼
+    ┌───────────────────────────────┐   ┌───────────────────────────────┐
+    │ Result:                       │   │ Result:                       │
+    │ - Lantai 1 ✓                  │   │ - Lantai 2 ✓                  │
+    │ - Lantai 2 ✗ (filtered out)   │   │ - Lantai 3 ✓                  │
+    │ - Lantai 3 ✗ (filtered out)   │   │ - Lantai 1 ✗ (filtered out)   │
+    └───────────────────────────────┘   └───────────────────────────────┘
+                    │                                   │
+                    ▼                                   ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        7. UI DISPLAYS FILTERED FLOORS                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+                    │                                   │
+                    ▼                                   ▼
+    ┌───────────────────────────────┐   ┌───────────────────────────────┐
+    │ Floor Selector shows:         │   │ Floor Selector shows:         │
+    │                               │   │                               │
+    │ ┌─────────────────────────┐   │   │ ┌─────────────────────────┐   │
+    │ │ Lantai 1 (Motor)        │   │   │ │ Lantai 2 (Mobil)        │   │
+    │ │ 28 slots available      │   │   │ │ 15 slots available      │   │
+    │ └─────────────────────────┘   │   │ └─────────────────────────┘   │
+    │                               │   │ ┌─────────────────────────┐   │
+    │ (Only motorcycle floors)      │   │ │ Lantai 3 (Mobil)        │   │
+    │                               │   │ │ 18 slots available      │   │
+    │                               │   │ └─────────────────────────┘   │
+    │                               │   │                               │
+    │                               │   │ (Only car floors)             │
+    └───────────────────────────────┘   └───────────────────────────────┘
+                    │                                   │
+                    ▼                                   ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      8. USER SELECTS FLOOR & CONTINUES                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                          DATABASE STRUCTURE                                  ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+BEFORE (Incorrect):
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ parkiran                                                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ id_parkiran: 1                                                              │
+│ nama_parkiran: "Grand Mall"                                                 │
+│ jenis_kendaraan: "Roda Empat" ❌ (Global - applies to all floors)          │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                    ┌─────────────────┼─────────────────┐
+                    ▼                 ▼                 ▼
+        ┌───────────────┐ ┌───────────────┐ ┌───────────────┐
+        │ Lantai 1      │ │ Lantai 2      │ │ Lantai 3      │
+        │ (Roda Empat)  │ │ (Roda Empat)  │ │ (Roda Empat)  │
+        │ ❌ Inherited  │ │ ❌ Inherited  │ │ ❌ Inherited  │
+        └───────────────┘ └───────────────┘ └───────────────┘
+
+AFTER (Correct):
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ parkiran                                                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ id_parkiran: 1                                                              │
+│ nama_parkiran: "Grand Mall"                                                 │
+│ (No jenis_kendaraan field) ✅                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                    ┌─────────────────┼─────────────────┐
+                    ▼                 ▼                 ▼
+        ┌───────────────┐ ┌───────────────┐ ┌───────────────┐
+        │ Lantai 1      │ │ Lantai 2      │ │ Lantai 3      │
+        │ Roda Dua ✅   │ │ Roda Empat ✅ │ │ Roda Empat ✅ │
+        │ (Per floor)   │ │ (Per floor)   │ │ (Per floor)   │
+        └───────────────┘ └───────────────┘ └───────────────┘
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                          CODE FLOW DIAGRAM                                   ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+BookingProvider (Flutter)
+│
+├─ selectVehicle(vehicle, token)
+│  │
+│  ├─ Extract jenisKendaraan from vehicle
+│  │
+│  ├─ Reset floor and slot selection
+│  │
+│  └─ Call loadFloorsForVehicle(jenisKendaraan, token)
+│     │
+│     ├─ Set loading state
+│     │
+│     ├─ Call BookingService.getFloorsWithRetry()
+│     │  │
+│     │  └─ HTTP GET /api/parking/floors/{mallId}
+│     │     │
+│     │     └─ Backend: ParkingSlotController.getFloors()
+│     │        │
+│     │        ├─ Query parking_floors table
+│     │        │
+│     │        ├─ Include jenis_kendaraan in response
+│     │        │
+│     │        └─ Return JSON with all floors
+│     │
+│     ├─ Parse response to List<ParkingFloorModel>
+│     │
+│     ├─ Filter: floors.where((f) => f.jenisKendaraan == jenisKendaraan)
+│     │
+│     ├─ Update _floors list
+│     │
+│     └─ notifyListeners()
+│
+└─ UI rebuilds with filtered floors
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                          EXAMPLE SCENARIOS                                   ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+Scenario 1: Motor User
+─────────────────────────
+User: Budi
+Vehicle: Honda Beat (Roda Dua)
+Mall: Grand Mall
+
+Step 1: Budi selects Honda Beat
+Step 2: System filters floors
+Step 3: Budi sees:
+        ✓ Lantai 1 (Motor) - 28 slots
+        ✗ Lantai 2 (Mobil) - Hidden
+        ✗ Lantai 3 (Mobil) - Hidden
+Step 4: Budi selects Lantai 1
+Step 5: Booking proceeds
+
+Scenario 2: Car User
+────────────────────
+User: Ani
+Vehicle: Toyota Avanza (Roda Empat)
+Mall: Grand Mall
+
+Step 1: Ani selects Toyota Avanza
+Step 2: System filters floors
+Step 3: Ani sees:
+        ✗ Lantai 1 (Motor) - Hidden
+        ✓ Lantai 2 (Mobil) - 15 slots
+        ✓ Lantai 3 (Mobil) - 18 slots
+Step 4: Ani selects Lantai 2
+Step 5: Booking proceeds
+
+Scenario 3: User with Multiple Vehicles
+────────────────────────────────────────
+User: Citra
+Vehicles: 
+  - Honda Beat (Roda Dua)
+  - Toyota Avanza (Roda Empat)
+Mall: Grand Mall
+
+Step 1: Citra selects Honda Beat
+Step 2: System shows: Lantai 1 (Motor)
+Step 3: Citra changes to Toyota Avanza
+Step 4: System updates: Lantai 2, Lantai 3 (Mobil)
+Step 5: Citra selects Lantai 2
+Step 6: Booking proceeds
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                          IMPLEMENTATION STATUS                               ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+✅ Database Migration
+   └─ parking_floors.jenis_kendaraan added
+   └─ parkiran.jenis_kendaraan removed
+
+✅ Backend Models
+   └─ ParkingFloor model updated
+   └─ Parkiran model cleaned
+
+✅ Backend Controllers
+   └─ AdminController.storeParkiran() updated
+   └─ AdminController.updateParkiran() updated
+   └─ ParkingSlotController.getFloors() updated
+
+✅ API Endpoints
+   └─ Returns jenis_kendaraan per floor
+
+✅ Flutter Model
+   └─ ParkingFloorModel.jenisKendaraan added
+
+✅ Flutter Provider
+   └─ loadFloorsForVehicle() implemented
+   └─ selectVehicle() updated
+   └─ checkAvailability() updated
+   └─ getAlternativeFloors() updated
+
+⏳ Admin UI Forms
+   └─ Manual update required (30-45 min)
+
+⏳ End-to-End Testing
+   └─ Pending admin UI completion
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                          NEXT STEPS                                          ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+1. Update Admin Forms
+   └─ Remove global vehicle type dropdown
+   └─ Add vehicle type dropdown per lantai
+   └─ Update JavaScript collection logic
+
+2. Create Test Data
+   └─ Create parkiran with mixed vehicle types
+   └─ Verify database consistency
+
+3. Test Mobile App
+   └─ Test with motor user
+   └─ Test with car user
+   └─ Test vehicle switching
+
+4. Deploy to Production
+   └─ Run migrations
+   └─ Update existing data
+   └─ Monitor for issues

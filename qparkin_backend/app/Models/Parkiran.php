@@ -17,7 +17,6 @@ class Parkiran extends Model
         'id_mall',
         'nama_parkiran',
         'kode_parkiran',
-        'jenis_kendaraan',
         'kapasitas',
         'status',
         'jumlah_lantai'

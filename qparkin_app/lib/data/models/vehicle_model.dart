@@ -80,4 +80,16 @@ class VehicleModel {
   }
 
   String get displayName => '$platNomor - $merk $tipe';
+
+  /// Override equality operator to compare vehicles by ID
+  /// This is crucial for DropdownButton to work correctly
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is VehicleModel && other.idKendaraan == idKendaraan;
+  }
+
+  /// Override hashCode to match equality operator
+  @override
+  int get hashCode => idKendaraan.hashCode;
 }
