@@ -107,10 +107,10 @@ class _BookingPageContentState extends State<_BookingPageContent> {
         baseUrl: baseUrl,
       );
       
-      // Initialize provider with mall data
+      // Initialize provider with mall data (async to fetch parkiran)
       if (mounted) {
         _bookingProvider = Provider.of<BookingProvider>(context, listen: false);
-        _bookingProvider!.initialize(widget.mall);
+        await _bookingProvider!.initialize(widget.mall, token: _authToken);
         
         // Fetch floors for slot reservation
         if (_authToken != null) {
@@ -134,10 +134,10 @@ class _BookingPageContentState extends State<_BookingPageContent> {
         baseUrl: baseUrl,
       );
       
-      // Initialize provider with mall data
+      // Initialize provider with mall data (without token - will fail at booking)
       if (mounted) {
         _bookingProvider = Provider.of<BookingProvider>(context, listen: false);
-        _bookingProvider!.initialize(widget.mall);
+        await _bookingProvider!.initialize(widget.mall);
       }
     }
   }

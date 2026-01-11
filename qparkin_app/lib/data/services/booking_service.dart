@@ -69,7 +69,7 @@ class BookingService {
         );
       }
 
-      final uri = Uri.parse('$_baseUrl/api/booking/create');
+      final uri = Uri.parse('$_baseUrl/api/booking');
       debugPrint('[BookingService] Creating booking at: $uri');
       debugPrint('[BookingService] Request data: ${request.toJson()}');
 
@@ -355,7 +355,7 @@ class BookingService {
         return false;
       }
 
-      final uri = Uri.parse('$_baseUrl/api/booking/check-active');
+      final uri = Uri.parse('$_baseUrl/api/booking/active');
       
       debugPrint('[BookingService] Checking for active booking at: $uri');
 
@@ -933,6 +933,72 @@ class BookingService {
   /// Call this if you want to reuse the service after cancellation
   void resetCancellation() {
     _isCancelled = false;
+  }
+
+  /// Get parkiran (parking areas) for a mall
+  ///
+  /// Fetches the list of parkiran associated with a mall.
+  /// Most malls have one parkiran, but some may have multiple.
+  ///
+  /// Parameters:
+  /// - [mallId]: The mall ID
+  /// - [token]: Authentication token
+  ///
+  /// Returns: List of parkiran data (id_parkiran, nama_parkiran, etc.)
+  Future<List<Map<String, dynamic>>?> getParkiranForMall({
+    required String mallId,
+    required String token,
+  }) async {
+    try {
+      debugPrint('[BookingService] Fetching parkiran for mall: $mallId');
+
+      final uri = Uri.parse('$_baseUrl/api/mall/$mallId/parkiran');
+      debugPrint('[BookingService] Request URL: $uri');
+
+      final response = await _client.get(
+        uri,
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      ).timeout(_timeout);
+
+      debugPrint('[BookingService] Parkiran response status: ${response.statusCode}');
+      debugPrint('[BookingService] Parkiran response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        debugPrint('[BookingService] Parsed JSON: $jsonData');
+
+        if (jsonData['success'] == true && jsonData['data'] != null) {
+          final parkiranList = (jsonData['data'] as List)
+              .map((item) => item as Map<String, dynamic>)
+              .toList();
+
+          debugPrint('[BookingService] ✅ Found ${parkiranList.length} parkiran');
+          debugPrint('[BookingService] Parkiran data: $parkiranList');
+          return parkiranList;
+        } else {
+          debugPrint('[BookingService] ❌ API returned success: false or no data');
+          return null;
+        }
+      } else if (response.statusCode == 404) {
+        debugPrint('[BookingService] ❌ Parkiran not found (404) - mall may not have parkiran');
+        return null;
+      } else if (response.statusCode == 401) {
+        debugPrint('[BookingService] ❌ Unauthorized (401) - token may be invalid');
+        return null;
+      } else {
+        debugPrint('[BookingService] ❌ Failed to fetch parkiran: ${response.statusCode}');
+        debugPrint('[BookingService] Response body: ${response.body}');
+        return null;
+      }
+    } catch (e, stackTrace) {
+      debugPrint('[BookingService] ❌ Error fetching parkiran: $e');
+      debugPrint('[BookingService] Stack trace: $stackTrace');
+      return null;
+    }
   }
 
   /// Dispose the service and clean up resources

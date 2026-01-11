@@ -59,11 +59,10 @@ class BookingRequest {
   /// Convert BookingRequest to JSON for API
   Map<String, dynamic> toJson() {
     return {
-      'id_mall': idMall,
+      'id_parkiran': idMall, // Backend expects id_parkiran (parking area ID)
       'id_kendaraan': idKendaraan,
       'waktu_mulai': waktuMulai.toIso8601String(),
-      'durasi_jam': durasiJam,
-      'waktu_selesai': waktuSelesai.toIso8601String(),
+      'durasi_booking': durasiJam, // Backend expects durasi_booking
       if (notes != null && notes!.isNotEmpty) 'notes': notes,
       if (idSlot != null && idSlot!.isNotEmpty) 'id_slot': idSlot,
       if (reservationId != null && reservationId!.isNotEmpty) 'reservation_id': reservationId,

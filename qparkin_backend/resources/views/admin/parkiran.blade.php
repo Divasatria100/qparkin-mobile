@@ -18,14 +18,39 @@
         <p class="subtitle">Kelola area parkir dan lokasi parkir di mall Anda</p>
     </div>
     <div class="header-actions">
-        <a href="{{ route('admin.parkiran.create') }}" class="btn-tambah">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            Tambah Parkiran
-        </a>
+        @if($hasExistingParkiran)
+            <button class="btn-tambah" disabled style="opacity: 0.5; cursor: not-allowed;" title="Mall sudah memiliki 1 parkiran">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Tambah Parkiran
+            </button>
+        @else
+            <a href="{{ route('admin.parkiran.create') }}" class="btn-tambah">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Tambah Parkiran
+            </a>
+        @endif
     </div>
 </div>
+
+<!-- Info Alert if parkiran already exists -->
+@if($hasExistingParkiran)
+<div class="alert alert-info" style="background: #e0f2fe; border: 1px solid #0ea5e9; border-radius: 8px; padding: 16px; margin-bottom: 24px; display: flex; align-items: start; gap: 12px;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#0ea5e9" style="flex-shrink: 0; margin-top: 2px;">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    <div>
+        <strong style="color: #0369a1; display: block; margin-bottom: 4px;">Batasan Parkiran</strong>
+        <p style="color: #075985; margin: 0; font-size: 14px;">
+            Mall Anda sudah memiliki 1 parkiran. Sistem hanya mengizinkan 1 parkiran per mall untuk konsistensi dengan flow booking. 
+            Anda dapat mengedit parkiran yang sudah ada atau menambah lantai baru di parkiran tersebut.
+        </p>
+    </div>
+</div>
+@endif
 
 <!-- Parkiran Cards -->
 <div class="parkiran-cards">

@@ -76,6 +76,9 @@ class BookingProvider extends ChangeNotifier {
   double _firstHourRate = 5000.0; // Default values
   double _additionalHourRate = 3000.0;
 
+  // Store all tarifs for vehicle type selection
+  List<Map<String, dynamic>> _tarifs = [];
+
   // Cache for frequently accessed data
   static final Map<String, Map<String, dynamic>> _mallCache = {};
   static final Map<String, List<Map<String, dynamic>>> _vehicleCache = {};
@@ -104,6 +107,22 @@ class BookingProvider extends ChangeNotifier {
   int get selectedPoints => _selectedPoints;
   int get pointDiscount => _pointDiscount;
   double get finalCost => _estimatedCost - _pointDiscount;
+
+  // Tarif getters
+  List<Map<String, dynamic>> get tarifs => _tarifs;
+  
+  /// Get tarif for specific vehicle type
+  Map<String, dynamic>? getTarifForVehicleType(String jenisKendaraan) {
+    if (_tarifs.isEmpty) return null;
+    
+    try {
+      return _tarifs.firstWhere(
+        (tarif) => tarif['jenis_kendaraan'] == jenisKendaraan,
+      );
+    } catch (e) {
+      return null;
+    }
+  }
 
   // NEW: Slot reservation getters
   List<ParkingFloorModel> get floors => _floors;
@@ -168,12 +187,14 @@ class BookingProvider extends ChangeNotifier {
   /// Sets up initial state with mall information and default values.
   /// Automatically sets start time to current time + 15 minutes.
   /// Caches mall data for session duration.
+  /// Fetches parkiran ID for the mall (required for booking).
   ///
   /// Parameters:
   /// - [mallData]: Map containing mall information (id, name, address, etc.)
+  /// - [token]: Authentication token for fetching parkiran data
   ///
   /// Requirements: 15.1, 15.8, 13.3
-  void initialize(Map<String, dynamic> mallData) {
+  Future<void> initialize(Map<String, dynamic> mallData, {String? token}) async {
     debugPrint('[BookingProvider] Initializing with mall: ${mallData['name']}');
 
     // Cache mall data
@@ -184,10 +205,28 @@ class BookingProvider extends ChangeNotifier {
 
     _selectedMall = mallData;
 
+    // Fetch parkiran ID for this mall (required for booking)
+    if (token != null && mallId.isNotEmpty) {
+      await _fetchParkiranForMall(mallId, token);
+    }
+
     // Set default start time to current time + 15 minutes
     _startTime = DateTime.now().add(const Duration(minutes: 15));
 
-    // Extract tariff data from mall if available
+    // Extract tarif data from mall if available
+    if (mallData['tarif'] != null && mallData['tarif'] is List) {
+      _tarifs = List<Map<String, dynamic>>.from(mallData['tarif']);
+      debugPrint('[BookingProvider] Loaded ${_tarifs.length} tarifs from mall data');
+      
+      // Log tarifs for debugging
+      for (var tarif in _tarifs) {
+        debugPrint('[BookingProvider]   ${tarif['jenis_kendaraan']}: Rp ${tarif['satu_jam_pertama']} + Rp ${tarif['tarif_parkir_per_jam']}/jam');
+      }
+    } else {
+      debugPrint('[BookingProvider] No tarif data in mall, using defaults');
+    }
+
+    // Extract tariff data from mall if available (backward compatibility)
     if (mallData['firstHourRate'] != null) {
       _firstHourRate = _parseDouble(mallData['firstHourRate']);
     }
@@ -211,6 +250,56 @@ class BookingProvider extends ChangeNotifier {
 
     debugPrint('[BookingProvider] Initialized - Start time: $_startTime');
     notifyListeners();
+  }
+
+  /// Fetch parkiran ID for the selected mall
+  ///
+  /// Queries /api/mall/{id}/parkiran to get the parkiran (parking area) for this mall.
+  /// Assumes the mall has at least one parkiran and uses the first one.
+  /// Updates _selectedMall with id_parkiran for booking creation.
+  ///
+  /// Parameters:
+  /// - [mallId]: The mall ID
+  /// - [token]: Authentication token
+  Future<void> _fetchParkiranForMall(String mallId, String token) async {
+    try {
+      debugPrint('[BookingProvider] Fetching parkiran for mall: $mallId');
+      debugPrint('[BookingProvider] Using token: ${token.substring(0, 20)}...');
+      
+      final parkiran = await _bookingService.getParkiranForMall(
+        mallId: mallId,
+        token: token,
+      );
+
+      debugPrint('[BookingProvider] Parkiran API response: $parkiran');
+      debugPrint('[BookingProvider] Parkiran is null: ${parkiran == null}');
+      debugPrint('[BookingProvider] Parkiran is empty: ${parkiran?.isEmpty ?? true}');
+
+      if (parkiran != null && parkiran.isNotEmpty) {
+        // Use the first parkiran (most malls have one parkiran)
+        final firstParkiran = parkiran[0];
+        debugPrint('[BookingProvider] First parkiran data: $firstParkiran');
+        
+        final idParkiran = firstParkiran['id_parkiran']?.toString() ?? '';
+        debugPrint('[BookingProvider] Extracted id_parkiran: "$idParkiran"');
+        
+        if (idParkiran.isNotEmpty) {
+          // Store parkiran ID in selectedMall for booking
+          _selectedMall!['id_parkiran'] = idParkiran;
+          debugPrint('[BookingProvider] ✅ Parkiran ID set successfully: $idParkiran');
+          debugPrint('[BookingProvider] Mall data now contains: ${_selectedMall!.keys.toList()}');
+        } else {
+          debugPrint('[BookingProvider] ❌ WARNING: Parkiran has no ID');
+        }
+      } else {
+        debugPrint('[BookingProvider] ❌ WARNING: No parkiran found for mall $mallId');
+        debugPrint('[BookingProvider] This mall may not have a parkiran configured in the database');
+      }
+    } catch (e, stackTrace) {
+      debugPrint('[BookingProvider] ❌ Error fetching parkiran: $e');
+      debugPrint('[BookingProvider] Stack trace: $stackTrace');
+      // Don't fail initialization - user will see error when trying to book
+    }
   }
 
   /// Select a vehicle for booking
@@ -238,6 +327,31 @@ class BookingProvider extends ChangeNotifier {
       _validationErrors.remove('vehicleId');
     }
 
+    // Update tarif based on vehicle type
+    final jenisKendaraan = vehicle['jenis_kendaraan']?.toString() ?? 
+                           vehicle['jenis']?.toString();
+    
+    if (jenisKendaraan != null && jenisKendaraan.isNotEmpty && _tarifs.isNotEmpty) {
+      // Find matching tarif for this vehicle type
+      final matchingTarif = _tarifs.firstWhere(
+        (tarif) => tarif['jenis_kendaraan'] == jenisKendaraan,
+        orElse: () => <String, dynamic>{},
+      );
+      
+      if (matchingTarif.isNotEmpty) {
+        _firstHourRate = _parseDouble(matchingTarif['satu_jam_pertama']);
+        _additionalHourRate = _parseDouble(matchingTarif['tarif_parkir_per_jam']);
+        
+        debugPrint('[BookingProvider] ✅ Updated tarif for $jenisKendaraan:');
+        debugPrint('[BookingProvider]   First hour: Rp $_firstHourRate');
+        debugPrint('[BookingProvider]   Additional: Rp $_additionalHourRate');
+      } else {
+        debugPrint('[BookingProvider] ⚠️ No tarif found for $jenisKendaraan, using default');
+      }
+    } else if (jenisKendaraan != null && _tarifs.isEmpty) {
+      debugPrint('[BookingProvider] ⚠️ No tarifs loaded, using default rates');
+    }
+
     // Reset floor and slot selection when vehicle changes
     _selectedFloor = null;
     _reservedSlot = null;
@@ -245,9 +359,6 @@ class BookingProvider extends ChangeNotifier {
 
     // Filter floors by vehicle type if slot reservation is enabled
     if (isSlotReservationEnabled && token != null) {
-      final jenisKendaraan = vehicle['jenis_kendaraan']?.toString() ?? 
-                             vehicle['jenis']?.toString();
-      
       if (jenisKendaraan != null && jenisKendaraan.isNotEmpty) {
         debugPrint('[BookingProvider] Filtering floors for vehicle type: $jenisKendaraan');
         loadFloorsForVehicle(jenisKendaraan: jenisKendaraan, token: token);
@@ -549,10 +660,19 @@ class BookingProvider extends ChangeNotifier {
       // Create booking request
       final durationHours = (_bookingDuration!.inMinutes / 60.0).ceil();
 
+      // Get parkiran ID (should be set during initialize)
+      final idParkiran = _selectedMall!['id_parkiran']?.toString();
+      
+      if (idParkiran == null || idParkiran.isEmpty) {
+        _isLoading = false;
+        _errorMessage = 'Data parkiran tidak tersedia. Silakan pilih mall lagi.';
+        debugPrint('[BookingProvider] ERROR: id_parkiran not found in mall data');
+        notifyListeners();
+        return false;
+      }
+
       final request = BookingRequest(
-        idMall: _selectedMall!['id_mall']?.toString() ??
-            _selectedMall!['id']?.toString() ??
-            '',
+        idMall: idParkiran, // Use parkiran ID (not mall ID)
         idKendaraan: _selectedVehicle!['id_kendaraan']?.toString() ?? '',
         waktuMulai: _startTime!,
         durasiJam: durationHours,

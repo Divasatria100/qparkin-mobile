@@ -365,7 +365,16 @@ class AdminController extends Controller
             abort(404, 'Admin mall data not found.');
         }
 
-        $tarifs = TarifParkir::where('id_mall', $adminMall->id_mall)->get();
+        // Get tarifs dengan validasi
+        $tarifs = TarifParkir::where('id_mall', $adminMall->id_mall)
+            ->orderBy('jenis_kendaraan')
+            ->get();
+        
+        // Log untuk debugging
+        \Log::info('Tarif loaded for mall ' . $adminMall->id_mall . ': ' . $tarifs->count() . ' items');
+        foreach ($tarifs as $tarif) {
+            \Log::info('Tarif ID: ' . $tarif->id_tarif . ', Jenis: ' . $tarif->jenis_kendaraan);
+        }
         
         // Get riwayat perubahan tarif
         $riwayat = collect([]);
@@ -441,11 +450,31 @@ class AdminController extends Controller
                 return $parkiran;
             });
         
-        return view('admin.parkiran', compact('parkingAreas'));
+        // Check if mall already has a parkiran (1 parkiran per mall limit)
+        $hasExistingParkiran = $parkingAreas->count() > 0;
+        
+        return view('admin.parkiran', compact('parkingAreas', 'hasExistingParkiran'));
     }
 
     public function createParkiran()
     {
+        $user = Auth::user();
+        $userId = $user->id_user ?? $user->id ?? null;
+        $adminMall = $user->adminMall ?? AdminMall::where('id_user', $userId)->first();
+        
+        if (!$adminMall) {
+            return redirect()->route('admin.parkiran')
+                ->with('error', 'Admin mall data not found.');
+        }
+
+        // Check if mall already has a parkiran (1 parkiran per mall limit)
+        $existingParkiran = Parkiran::where('id_mall', $adminMall->id_mall)->first();
+        
+        if ($existingParkiran) {
+            return redirect()->route('admin.parkiran')
+                ->with('error', 'Mall Anda sudah memiliki 1 parkiran. Tidak dapat menambah parkiran baru. Silakan edit parkiran yang sudah ada.');
+        }
+        
         return view('admin.tambah-parkiran');
     }
 
@@ -457,6 +486,16 @@ class AdminController extends Controller
         
         if (!$adminMall) {
             return response()->json(['success' => false, 'message' => 'Admin mall data not found.'], 404);
+        }
+
+        // Check if mall already has a parkiran (1 parkiran per mall limit)
+        $existingParkiran = Parkiran::where('id_mall', $adminMall->id_mall)->first();
+        
+        if ($existingParkiran) {
+            return response()->json([
+                'success' => false, 
+                'message' => 'Mall Anda sudah memiliki 1 parkiran. Tidak dapat menambah parkiran baru. Silakan edit parkiran yang sudah ada.'
+            ], 400);
         }
 
         $validated = $request->validate([

@@ -45,6 +45,18 @@ class MallController extends Controller
                 )
                 ->get()
                 ->map(function ($mall) {
+                    // Get tarif for this mall
+                    $tarifs = \App\Models\TarifParkir::where('id_mall', $mall->id_mall)
+                        ->select(['jenis_kendaraan', 'satu_jam_pertama', 'tarif_parkir_per_jam'])
+                        ->get()
+                        ->map(function($tarif) {
+                            return [
+                                'jenis_kendaraan' => $tarif->jenis_kendaraan,
+                                'satu_jam_pertama' => (float) $tarif->satu_jam_pertama,
+                                'tarif_parkir_per_jam' => (float) $tarif->tarif_parkir_per_jam,
+                            ];
+                        });
+
                     return [
                         'id_mall' => $mall->id_mall,
                         'nama_mall' => $mall->nama_mall,
@@ -56,6 +68,7 @@ class MallController extends Controller
                         'kapasitas' => $mall->kapasitas,
                         'available_slots' => (int) $mall->available_slots,
                         'has_slot_reservation_enabled' => (bool) $mall->has_slot_reservation_enabled,
+                        'tarif' => $tarifs,
                     ];
                 });
 
@@ -88,6 +101,18 @@ class MallController extends Controller
                 ->where('status', 'Tersedia')
                 ->count();
 
+            // Get tarif for this mall
+            $tarifs = \App\Models\TarifParkir::where('id_mall', $id)
+                ->select(['jenis_kendaraan', 'satu_jam_pertama', 'tarif_parkir_per_jam'])
+                ->get()
+                ->map(function($tarif) {
+                    return [
+                        'jenis_kendaraan' => $tarif->jenis_kendaraan,
+                        'satu_jam_pertama' => (float) $tarif->satu_jam_pertama,
+                        'tarif_parkir_per_jam' => (float) $tarif->tarif_parkir_per_jam,
+                    ];
+                });
+
             return response()->json([
                 'success' => true,
                 'message' => 'Mall details retrieved successfully',
@@ -103,7 +128,7 @@ class MallController extends Controller
                     'available_slots' => $availableSlots,
                     'has_slot_reservation_enabled' => (bool) $mall->has_slot_reservation_enabled,
                     'parkiran' => $mall->parkiran,
-                    'tarif' => $mall->tarifParkir ?? [],
+                    'tarif' => $tarifs,
                 ]
             ]);
         } catch (\Exception $e) {

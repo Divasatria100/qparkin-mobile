@@ -41,9 +41,16 @@
         @foreach($jenisKendaraan as $jenis => $config)
             @php
                 $tarif = $tarifs->firstWhere('jenis_kendaraan', $jenis);
+                
+                // Jika tarif tidak ditemukan, buat entry default
+                if (!$tarif) {
+                    \Log::warning("Tarif not found for jenis: $jenis");
+                }
+                
                 $tarifPertama = $tarif->satu_jam_pertama ?? 0;
                 $tarifBerikutnya = $tarif->tarif_parkir_per_jam ?? 0;
                 $total3Jam = $tarifPertama + ($tarifBerikutnya * 2);
+                $tarifId = $tarif->id_tarif ?? null;
             @endphp
             
             <div class="tarif-card">
@@ -78,7 +85,11 @@
                     </div>
                 </div>
                 <div class="card-footer">
-                    <a href="{{ route('admin.tarif.edit', $tarif->id_tarif ?? 0) }}" class="btn-edit">Edit</a>
+                    @if($tarifId)
+                        <a href="{{ route('admin.tarif.edit', $tarifId) }}" class="btn-edit">Edit</a>
+                    @else
+                        <span class="btn-edit" style="opacity: 0.5; cursor: not-allowed;" title="Tarif belum tersedia">Edit</span>
+                    @endif
                 </div>
             </div>
         @endforeach
