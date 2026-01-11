@@ -270,13 +270,8 @@ class _BookingPageContentState extends State<_BookingPageContent> {
                   
                   SizedBox(height: spacing),
                   
-                  // NEW: Floor Selection Section (Simplified - Auto-Assignment)
-                  _buildSlotReservationSection(provider, spacing),
-                  
-                  SizedBox(height: spacing),
-                  
-                  // Slot Availability Indicator - only show when vehicle selected and floors loaded
-                  // MOVED UP: Show availability BEFORE time selection so users see it first
+                  // Slot Availability Indicator - show immediately after vehicle selection
+                  // This provides instant feedback about available slots for selected vehicle type
                   if (provider.selectedVehicle != null &&
                       !provider.isLoadingFloors)
                     SlotAvailabilityIndicator(
@@ -303,6 +298,12 @@ class _BookingPageContentState extends State<_BookingPageContent> {
                   if (provider.selectedVehicle != null &&
                       !provider.isLoadingFloors)
                     SizedBox(height: spacing),
+                  
+                  // Floor Selection Section - show after user sees total availability
+                  // User can now make informed decision about which floor to choose
+                  _buildSlotReservationSection(provider, spacing),
+                  
+                  SizedBox(height: spacing),
                   
                   // Unified Time Duration Card (NEW)
                   UnifiedTimeDurationCard(
