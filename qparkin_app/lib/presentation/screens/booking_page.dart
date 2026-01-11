@@ -274,6 +274,35 @@ class _BookingPageContentState extends State<_BookingPageContent> {
                   
                   SizedBox(height: spacing),
                   
+                  // Slot Availability Indicator - only show when vehicle selected and floors loaded
+                  // MOVED UP: Show availability BEFORE time selection so users see it first
+                  if (provider.selectedVehicle != null &&
+                      !provider.isLoadingFloors)
+                    SlotAvailabilityIndicator(
+                      availableSlots: provider.availableSlots,
+                      vehicleType: provider.selectedVehicle!['jenis_kendaraan'] ??
+                          provider.selectedVehicle!['jenis'] ??
+                          '',
+                      isLoading: provider.isLoadingFloors,
+                      onRefresh: () {
+                        // Refresh floors data to get latest slot availability
+                        if (_authToken != null && provider.selectedVehicle != null) {
+                          final jenisKendaraan = provider.selectedVehicle!['jenis_kendaraan']?.toString() ??
+                              provider.selectedVehicle!['jenis']?.toString();
+                          if (jenisKendaraan != null) {
+                            provider.loadFloorsForVehicle(
+                              jenisKendaraan: jenisKendaraan,
+                              token: _authToken!,
+                            );
+                          }
+                        }
+                      },
+                    ),
+                  
+                  if (provider.selectedVehicle != null &&
+                      !provider.isLoadingFloors)
+                    SizedBox(height: spacing),
+                  
                   // Unified Time Duration Card (NEW)
                   UnifiedTimeDurationCard(
                     startTime: provider.startTime,
@@ -304,58 +333,9 @@ class _BookingPageContentState extends State<_BookingPageContent> {
                   
                   SizedBox(height: spacing),
                   
-                  // Slot Availability Indicator - only show when vehicle selected and floors loaded
-                  if (provider.selectedVehicle != null &&
-                      provider.startTime != null &&
-                      provider.bookingDuration != null &&
-                      !provider.isLoadingFloors)
-                    SlotAvailabilityIndicator(
-                      availableSlots: provider.availableSlots,
-                      vehicleType: provider.selectedVehicle!['jenis_kendaraan'] ??
-                          provider.selectedVehicle!['jenis'] ??
-                          '',
-                      isLoading: provider.isLoadingFloors,
-                      onRefresh: () {
-                        // Refresh floors data to get latest slot availability
-                        if (_authToken != null && provider.selectedVehicle != null) {
-                          final jenisKendaraan = provider.selectedVehicle!['jenis_kendaraan']?.toString() ??
-                              provider.selectedVehicle!['jenis']?.toString();
-                          if (jenisKendaraan != null) {
-                            provider.loadFloorsForVehicle(
-                              jenisKendaraan: jenisKendaraan,
-                              token: _authToken!,
-                            );
-                          }
-                        }
-                      },
-                    ),
-                  
-                  if (provider.selectedVehicle != null &&
-                      provider.startTime != null &&
-                      provider.bookingDuration != null &&
-                      !provider.isLoadingFloors)
-                    SizedBox(height: spacing),
-                  
                   // REMOVED: SlotUnavailableWidget - Caused data inconsistency
                   // Slot availability is now solely determined by loadFloorsForVehicle()
                   // which calculates available slots from filtered floors
-                  
-                  // Point Usage Widget - only show when vehicle is selected
-                  if (provider.selectedVehicle != null &&
-                      provider.bookingDuration != null && 
-                      provider.estimatedCost > 0)
-                    PointUsageWidget(
-                      parkingCost: provider.estimatedCost.toInt(),
-                      onPointsSelected: (points) {
-                        provider.setSelectedPoints(points);
-                      },
-                      initialPoints: provider.selectedPoints,
-                    ),
-                  
-                  if (provider.selectedVehicle != null &&
-                      provider.bookingDuration != null && 
-                      provider.estimatedCost > 0)
-                    SizedBox(height: spacing),
                   
                   // Booking Summary Card
                   if (_canShowSummary(provider))
@@ -376,6 +356,22 @@ class _BookingPageContentState extends State<_BookingPageContent> {
                       pointsUsed: provider.selectedPoints > 0 ? provider.selectedPoints : null,
                       pointDiscount: provider.pointDiscount > 0 ? provider.pointDiscount : null,
                       originalCost: provider.selectedPoints > 0 ? provider.estimatedCost : null,
+                    ),
+                  
+                  if (_canShowSummary(provider))
+                    SizedBox(height: spacing),
+                  
+                  // Point Usage Widget - only show when vehicle is selected
+                  // MOVED DOWN: Show AFTER booking summary to keep cost flow uninterrupted
+                  if (provider.selectedVehicle != null &&
+                      provider.bookingDuration != null && 
+                      provider.estimatedCost > 0)
+                    PointUsageWidget(
+                      parkingCost: provider.estimatedCost.toInt(),
+                      onPointsSelected: (points) {
+                        provider.setSelectedPoints(points);
+                      },
+                      initialPoints: provider.selectedPoints,
                     ),
                 ],
               ),

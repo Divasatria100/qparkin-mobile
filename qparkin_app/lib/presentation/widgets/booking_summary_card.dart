@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../utils/responsive_helper.dart';
+import '../../config/design_constants.dart';
 
 /// Widget to display a comprehensive summary of booking details before confirmation
 /// Features organized sections with dividers and purple border for emphasis
@@ -63,14 +63,6 @@ class BookingSummaryCard extends StatelessWidget {
     final durationText = _formatDuration(duration);
     final costText = _formatCurrency(totalCost);
     
-    final borderRadius = ResponsiveHelper.getBorderRadius(context);
-    final padding = ResponsiveHelper.getCardPadding(context);
-    final titleFontSize = ResponsiveHelper.getResponsiveFontSize(context, 18);
-    final bodyFontSize = ResponsiveHelper.getResponsiveFontSize(context, 14);
-    final captionFontSize = ResponsiveHelper.getResponsiveFontSize(context, 12);
-    final costFontSize = ResponsiveHelper.getResponsiveFontSize(context, 18);
-    final iconSize = ResponsiveHelper.getIconSize(context, 20);
-    
     final slotInfo = reservedSlotCode != null && reservedFloorName != null
         ? 'Slot parkir $reservedFloorName - Slot $reservedSlotCode, ${reservedSlotType ?? "Regular Parking"}. '
         : '';
@@ -78,32 +70,30 @@ class BookingSummaryCard extends StatelessWidget {
     return Semantics(
       label: 'Ringkasan booking. Lokasi $mallName, $mallAddress. ${slotInfo}Kendaraan $vehiclePlat, $vehicleType, $vehicleBrand. Waktu mulai $startTimeText, durasi $durationText, selesai $endTimeText. Total estimasi $costText',
       child: Card(
-        elevation: 4,
+        elevation: DesignConstants.cardElevation,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(borderRadius),
-          side: const BorderSide(
-            color: Color(0xFF573ED1),
-            width: 2,
+          borderRadius: BorderRadius.circular(DesignConstants.cardBorderRadius),
+          side: BorderSide(
+            color: DesignConstants.primaryColor,
+            width: DesignConstants.cardBorderWidthFocused,
           ),
         ),
-        color: Colors.white,
-        shadowColor: const Color(0xFF573ED1).withOpacity(0.2),
+        color: DesignConstants.backgroundColor,
+        shadowColor: DesignConstants.cardShadowColor,
         child: SingleChildScrollView(
           child: Padding(
-            padding: padding,
+            padding: DesignConstants.cardPadding,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   'Ringkasan Booking',
-                  style: TextStyle(
-                    fontSize: titleFontSize,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                  style: DesignConstants.getHeadingStyle(
+                    fontSize: DesignConstants.fontSizeH3,
                   ),
                 ),
-              const SizedBox(height: 16),
+              const SizedBox(height: DesignConstants.spaceLg),
               
               // Location Section
               _buildSection(
@@ -115,18 +105,15 @@ class BookingSummaryCard extends StatelessWidget {
                   children: [
                     Text(
                       mallName,
-                      style: TextStyle(
-                        fontSize: bodyFontSize,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                      style: DesignConstants.getBodyStyle(
+                        fontWeight: DesignConstants.fontWeightBold,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: DesignConstants.spaceXs),
                     Text(
                       mallAddress,
-                      style: TextStyle(
-                        fontSize: captionFontSize,
-                        color: Colors.grey.shade600,
+                      style: DesignConstants.getCaptionStyle(
+                        color: DesignConstants.textTertiary,
                       ),
                     ),
                   ],
@@ -134,8 +121,8 @@ class BookingSummaryCard extends StatelessWidget {
               ),
               
               Divider(
-                color: Colors.grey.shade200,
-                height: 24,
+                color: DesignConstants.dividerColor,
+                height: DesignConstants.dividerSpacing,
               ),
               
               // Reserved Slot Section (if available)
@@ -149,26 +136,23 @@ class BookingSummaryCard extends StatelessWidget {
                     children: [
                       Text(
                         '$reservedFloorName - Slot $reservedSlotCode',
-                        style: TextStyle(
-                          fontSize: bodyFontSize,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                        style: DesignConstants.getBodyStyle(
+                          fontWeight: DesignConstants.fontWeightBold,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: DesignConstants.spaceXs),
                       Text(
                         reservedSlotType ?? 'Regular Parking',
-                        style: TextStyle(
-                          fontSize: captionFontSize,
-                          color: Colors.grey.shade600,
+                        style: DesignConstants.getCaptionStyle(
+                          color: DesignConstants.textTertiary,
                         ),
                       ),
                     ],
                   ),
                 ),
                 Divider(
-                  color: Colors.grey.shade200,
-                  height: 24,
+                  color: DesignConstants.dividerColor,
+                  height: DesignConstants.dividerSpacing,
                 ),
               ],
               
@@ -182,18 +166,15 @@ class BookingSummaryCard extends StatelessWidget {
                   children: [
                     Text(
                       vehiclePlat,
-                      style: TextStyle(
-                        fontSize: bodyFontSize,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                      style: DesignConstants.getBodyStyle(
+                        fontWeight: DesignConstants.fontWeightBold,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: DesignConstants.spaceXs),
                     Text(
                       '$vehicleType - $vehicleBrand',
-                      style: TextStyle(
-                        fontSize: captionFontSize,
-                        color: Colors.grey.shade600,
+                      style: DesignConstants.getCaptionStyle(
+                        color: DesignConstants.textTertiary,
                       ),
                     ),
                   ],
@@ -201,8 +182,8 @@ class BookingSummaryCard extends StatelessWidget {
               ),
               
               Divider(
-                color: Colors.grey.shade200,
-                height: 24,
+                color: DesignConstants.dividerColor,
+                height: DesignConstants.dividerSpacing,
               ),
               
               // Time Section
@@ -218,14 +199,14 @@ class BookingSummaryCard extends StatelessWidget {
                       'Mulai',
                       DateFormat('HH:mm, dd MMM yyyy').format(startTime),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: DesignConstants.spaceSm),
                     _buildTimeRow(
                       context,
                       Icons.timer,
                       'Durasi',
                       _formatDuration(duration),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: DesignConstants.spaceSm),
                     _buildTimeRow(
                       context,
                       Icons.event_available,
@@ -237,8 +218,8 @@ class BookingSummaryCard extends StatelessWidget {
               ),
               
               Divider(
-                color: Colors.grey.shade200,
-                height: 24,
+                color: DesignConstants.dividerColor,
+                height: DesignConstants.dividerSpacing,
               ),
               
               // Cost Section with Point Discount
@@ -252,21 +233,19 @@ class BookingSummaryCard extends StatelessWidget {
                       children: [
                         Text(
                           'Biaya Parkir',
-                          style: TextStyle(
-                            fontSize: bodyFontSize,
-                            color: Colors.grey.shade700,
+                          style: DesignConstants.getBodyStyle(
+                            color: DesignConstants.textSecondary,
                           ),
                         ),
                         Text(
                           _formatCurrency(originalCost!),
-                          style: TextStyle(
-                            fontSize: bodyFontSize,
-                            color: Colors.grey.shade700,
+                          style: DesignConstants.getBodyStyle(
+                            color: DesignConstants.textSecondary,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: DesignConstants.spaceSm),
                     
                     // Point Discount
                     Row(
@@ -276,36 +255,34 @@ class BookingSummaryCard extends StatelessWidget {
                           children: [
                             Icon(
                               Icons.stars,
-                              color: const Color(0xFF4CAF50),
-                              size: iconSize * 0.8,
+                              color: DesignConstants.successColor,
+                              size: DesignConstants.iconSizeMedium,
                             ),
-                            const SizedBox(width: 4),
+                            const SizedBox(width: DesignConstants.spaceXs),
                             Text(
                               'Diskon Poin ($pointsUsed poin)',
-                              style: TextStyle(
-                                fontSize: bodyFontSize,
-                                color: const Color(0xFF4CAF50),
-                                fontWeight: FontWeight.w600,
+                              style: DesignConstants.getBodyStyle(
+                                color: DesignConstants.successColor,
+                                fontWeight: DesignConstants.fontWeightSemiBold,
                               ),
                             ),
                           ],
                         ),
                         Text(
                           '- ${_formatCurrency(pointDiscount!.toDouble())}',
-                          style: TextStyle(
-                            fontSize: bodyFontSize,
-                            color: const Color(0xFF4CAF50),
-                            fontWeight: FontWeight.w600,
+                          style: DesignConstants.getBodyStyle(
+                            color: DesignConstants.successColor,
+                            fontWeight: DesignConstants.fontWeightSemiBold,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: DesignConstants.spaceMd),
                     Divider(
-                      color: Colors.grey.shade300,
-                      height: 1,
+                      color: DesignConstants.borderPrimary,
+                      height: DesignConstants.dividerThickness,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: DesignConstants.spaceMd),
                   ],
                   
                   // Total Cost
@@ -324,20 +301,18 @@ class BookingSummaryCard extends StatelessWidget {
                                 label: 'Ikon pembayaran',
                                 child: Icon(
                                   Icons.payments,
-                                  color: const Color(0xFF573ED1),
-                                  size: iconSize,
+                                  color: DesignConstants.primaryColor,
+                                  size: DesignConstants.iconSizeMedium,
                                 ),
                               ),
-                              const SizedBox(width: 8),
+                              const SizedBox(width: DesignConstants.spaceSm),
                               Flexible(
                                 child: Text(
                                   pointsUsed != null && pointsUsed! > 0
                                       ? 'Total Bayar'
                                       : 'Total Estimasi',
-                                  style: TextStyle(
-                                    fontSize: titleFontSize * 0.9,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black87,
+                                  style: DesignConstants.getHeadingStyle(
+                                    fontSize: DesignConstants.fontSizeH4,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -345,14 +320,13 @@ class BookingSummaryCard extends StatelessWidget {
                             ],
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: DesignConstants.spaceSm),
                         Flexible(
                           child: Text(
                             _formatCurrency(totalCost),
-                            style: TextStyle(
-                              fontSize: costFontSize,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFF573ED1),
+                            style: DesignConstants.getHeadingStyle(
+                              fontSize: DesignConstants.fontSizeH3,
+                              color: DesignConstants.primaryColor,
                             ),
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.right,
@@ -364,14 +338,17 @@ class BookingSummaryCard extends StatelessWidget {
                   
                   // Savings indicator
                   if (pointsUsed != null && pointsUsed! > 0 && pointDiscount != null) ...[
-                    const SizedBox(height: 8),
+                    const SizedBox(height: DesignConstants.spaceSm),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: DesignConstants.spaceMd,
+                        vertical: DesignConstants.spaceSm,
+                      ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE8F5E9),
-                        borderRadius: BorderRadius.circular(8),
+                        color: DesignConstants.successSurface,
+                        borderRadius: BorderRadius.circular(DesignConstants.spaceSm),
                         border: Border.all(
-                          color: const Color(0xFF4CAF50).withOpacity(0.3),
+                          color: DesignConstants.successColor.withOpacity(0.3),
                         ),
                       ),
                       child: Row(
@@ -379,17 +356,17 @@ class BookingSummaryCard extends StatelessWidget {
                         children: [
                           Icon(
                             Icons.check_circle,
-                            color: const Color(0xFF4CAF50),
-                            size: captionFontSize + 2,
+                            color: DesignConstants.successColor,
+                            size: DesignConstants.iconSizeSmall,
                           ),
-                          const SizedBox(width: 6),
+                          const SizedBox(width: DesignConstants.spaceXs),
                           Flexible(
                             child: Text(
                               'Anda hemat ${_formatCurrency(pointDiscount!.toDouble())} dengan poin!',
-                              style: TextStyle(
-                                fontSize: captionFontSize,
-                                color: const Color(0xFF2E7D32),
-                                fontWeight: FontWeight.w600,
+                              style: DesignConstants.getCaptionStyle(
+                                color: DesignConstants.successColor,
+                              ).copyWith(
+                                fontWeight: DesignConstants.fontWeightSemiBold,
                               ),
                             ),
                           ),
@@ -413,9 +390,6 @@ class BookingSummaryCard extends StatelessWidget {
     required String title,
     required Widget content,
   }) {
-    final iconSize = ResponsiveHelper.getIconSize(context, 20);
-    final captionFontSize = ResponsiveHelper.getResponsiveFontSize(context, 12);
-    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -423,21 +397,21 @@ class BookingSummaryCard extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: const Color(0xFF573ED1),
-              size: iconSize,
+              color: DesignConstants.primaryColor,
+              size: DesignConstants.iconSizeMedium,
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: DesignConstants.spaceSm),
             Text(
               title,
-              style: TextStyle(
-                fontSize: captionFontSize,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey.shade600,
+              style: DesignConstants.getCaptionStyle(
+                color: DesignConstants.textTertiary,
+              ).copyWith(
+                fontWeight: DesignConstants.fontWeightSemiBold,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: DesignConstants.spaceSm),
         Padding(
           padding: const EdgeInsets.only(left: 28),
           child: content,
@@ -447,31 +421,25 @@ class BookingSummaryCard extends StatelessWidget {
   }
 
   Widget _buildTimeRow(BuildContext context, IconData icon, String label, String value) {
-    final captionFontSize = ResponsiveHelper.getResponsiveFontSize(context, 12);
-    final bodyFontSize = ResponsiveHelper.getResponsiveFontSize(context, 14);
-    
     return Row(
       children: [
         Icon(
           icon,
-          size: captionFontSize + 2,
-          color: Colors.grey.shade600,
+          size: DesignConstants.iconSizeSmall,
+          color: DesignConstants.textTertiary,
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: DesignConstants.spaceSm),
         Text(
           label,
-          style: TextStyle(
-            fontSize: captionFontSize,
-            color: Colors.grey.shade600,
+          style: DesignConstants.getCaptionStyle(
+            color: DesignConstants.textTertiary,
           ),
         ),
         const Spacer(),
         Text(
           value,
-          style: TextStyle(
-            fontSize: bodyFontSize,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
+          style: DesignConstants.getBodyStyle(
+            fontWeight: DesignConstants.fontWeightBold,
           ),
         ),
       ],

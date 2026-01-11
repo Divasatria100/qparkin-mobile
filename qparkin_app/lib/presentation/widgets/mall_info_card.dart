@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../utils/responsive_helper.dart';
+import '../../config/design_constants.dart';
 
 /// Widget to display mall information including name, address, distance, and available slots
 /// Used in the Booking Page to show details of the selected mall
@@ -37,24 +37,18 @@ class MallInfoCard extends StatelessWidget {
             : availableSlots > 0 
                 ? 'Hampir penuh' 
                 : 'Penuh';
-    
-    final borderRadius = ResponsiveHelper.getBorderRadius(context);
-    final padding = ResponsiveHelper.getCardPadding(context);
-    final titleFontSize = ResponsiveHelper.getResponsiveFontSize(context, 18);
-    final bodyFontSize = ResponsiveHelper.getResponsiveFontSize(context, 14);
-    final iconSize = ResponsiveHelper.getIconSize(context, 24);
 
     return Semantics(
       label: 'Informasi mall. $mallName, alamat $address, jarak $distance, $availableSlots slot parkir tersedia, status $slotStatusText',
       child: Card(
-        elevation: 2,
+        elevation: DesignConstants.cardElevation,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(borderRadius),
+          borderRadius: BorderRadius.circular(DesignConstants.cardBorderRadius),
         ),
-        color: Colors.white,
-        shadowColor: Colors.black.withOpacity(0.1),
+        color: DesignConstants.backgroundColor,
+        shadowColor: DesignConstants.cardShadowColor,
         child: Padding(
-          padding: padding,
+          padding: DesignConstants.cardPadding,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -64,19 +58,19 @@ class MallInfoCard extends StatelessWidget {
                   Semantics(
                     label: 'Ikon parkir',
                     child: Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(DesignConstants.spaceSm),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF573ED1).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
+                        color: DesignConstants.primarySurface,
+                        borderRadius: BorderRadius.circular(DesignConstants.spaceSm),
                       ),
                       child: Icon(
                         Icons.local_parking,
-                        color: const Color(0xFF573ED1),
-                        size: iconSize,
+                        color: DesignConstants.primaryColor,
+                        size: DesignConstants.iconSizeLarge,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: DesignConstants.spaceMd),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -85,30 +79,27 @@ class MallInfoCard extends StatelessWidget {
                           label: 'Nama mall',
                           child: Text(
                             mallName,
-                            style: TextStyle(
-                              fontSize: titleFontSize,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
+                            style: DesignConstants.getHeadingStyle(
+                              fontSize: DesignConstants.fontSizeH3,
                             ),
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: DesignConstants.spaceXs),
                         Semantics(
                           label: 'Alamat mall',
                           child: Row(
                             children: [
                               Icon(
                                 Icons.location_on,
-                                size: bodyFontSize,
-                                color: Colors.grey.shade600,
+                                size: DesignConstants.iconSizeSmall,
+                                color: DesignConstants.textTertiary,
                               ),
-                              const SizedBox(width: 4),
+                              const SizedBox(width: DesignConstants.spaceXs),
                               Expanded(
                                 child: Text(
                                   address,
-                                  style: TextStyle(
-                                    fontSize: bodyFontSize,
-                                    color: Colors.grey.shade600,
+                                  style: DesignConstants.getBodyStyle(
+                                    color: DesignConstants.textTertiary,
                                   ),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
@@ -117,22 +108,21 @@ class MallInfoCard extends StatelessWidget {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: DesignConstants.spaceXs),
                         Semantics(
                           label: 'Jarak dari lokasi Anda',
                           child: Row(
                             children: [
                               Icon(
                                 Icons.navigation,
-                                size: bodyFontSize,
-                                color: Colors.grey.shade600,
+                                size: DesignConstants.iconSizeSmall,
+                                color: DesignConstants.textTertiary,
                               ),
-                              const SizedBox(width: 4),
+                              const SizedBox(width: DesignConstants.spaceXs),
                               Text(
                                 distance,
-                                style: TextStyle(
-                                  fontSize: bodyFontSize,
-                                  color: Colors.grey.shade600,
+                                style: DesignConstants.getBodyStyle(
+                                  color: DesignConstants.textTertiary,
                                 ),
                               ),
                             ],
@@ -144,14 +134,14 @@ class MallInfoCard extends StatelessWidget {
                 ],
               ),
               
-              const SizedBox(height: 12),
+              const SizedBox(height: DesignConstants.spaceMd),
               
               Divider(
-                color: Colors.grey.shade200,
-                height: 1,
+                color: DesignConstants.dividerColor,
+                height: DesignConstants.dividerThickness,
               ),
               
-              const SizedBox(height: 12),
+              const SizedBox(height: DesignConstants.spaceMd),
               
               // Available slots indicator
               Semantics(
@@ -160,15 +150,14 @@ class MallInfoCard extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.check_circle,
-                      size: bodyFontSize + 2,
+                      size: DesignConstants.iconSizeMedium,
                       color: slotColor,
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: DesignConstants.spaceSm),
                     Text(
                       '$availableSlots slot tersedia',
-                      style: TextStyle(
-                        fontSize: bodyFontSize,
-                        fontWeight: FontWeight.w600,
+                      style: DesignConstants.getBodyStyle(
+                        fontWeight: DesignConstants.fontWeightSemiBold,
                         color: slotColor,
                       ),
                     ),

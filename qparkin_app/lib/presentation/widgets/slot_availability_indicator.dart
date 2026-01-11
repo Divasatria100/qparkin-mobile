@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import '../../config/design_constants.dart';
 import 'booking_shimmer_loading.dart';
 
 /// Widget to display real-time parking slot availability with color-coded status
@@ -55,14 +56,14 @@ class _SlotAvailabilityIndicatorState
     final statusColor = _getStatusColor();
 
     return Card(
-      elevation: 2,
+      elevation: DesignConstants.cardElevation,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(DesignConstants.cardBorderRadius),
       ),
-      color: Colors.white,
-      shadowColor: Colors.black.withOpacity(0.1),
+      color: DesignConstants.backgroundColor,
+      shadowColor: DesignConstants.cardShadowColor,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: DesignConstants.cardPadding,
         child: widget.isLoading
             ? _buildShimmerLoading()
             : _buildContent(statusColor),
@@ -87,21 +88,21 @@ class _SlotAvailabilityIndicatorState
           Semantics(
             label: 'Indikator status $statusText',
             child: Container(
-              width: 48,
-              height: 48,
+              width: DesignConstants.minTouchTarget,
+              height: DesignConstants.minTouchTarget,
               decoration: BoxDecoration(
                 color: statusColor,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.local_parking,
-                color: Colors.white,
-                size: 24,
+                color: DesignConstants.backgroundColor,
+                size: DesignConstants.iconSizeLarge,
               ),
             ),
           ),
           
-          const SizedBox(width: 16),
+          const SizedBox(width: DesignConstants.spaceLg),
           
           // Availability Info
           Expanded(
@@ -110,26 +111,23 @@ class _SlotAvailabilityIndicatorState
               children: [
                 Text(
                   'Ketersediaan Slot',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey.shade600,
+                  style: DesignConstants.getBodyStyle(
+                    color: DesignConstants.textTertiary,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: DesignConstants.spaceXs),
                 Text(
                   '${widget.availableSlots} slot tersedia',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                  style: DesignConstants.getHeadingStyle(
+                    fontSize: DesignConstants.fontSizeH3,
                     color: statusColor,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: DesignConstants.spaceXs),
                 Text(
                   'Untuk ${widget.vehicleType}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade500,
+                  style: DesignConstants.getCaptionStyle(
+                    color: DesignConstants.textSecondary,
                   ),
                 ),
               ],
@@ -151,8 +149,8 @@ class _SlotAvailabilityIndicatorState
               },
               icon: Icon(
                 Icons.refresh,
-                color: Colors.grey.shade400,
-                size: 20,
+                color: DesignConstants.textSecondary,
+                size: DesignConstants.iconSizeMedium,
               ),
               tooltip: 'Refresh ketersediaan',
             ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import '../../config/design_constants.dart';
 import '../../data/models/vehicle_model.dart';
 import '../../data/services/vehicle_api_service.dart';
 import 'booking_shimmer_loading.dart';
@@ -94,34 +95,32 @@ class _VehicleSelectorState extends State<VehicleSelector> {
     final hasValidationError = widget.validationError != null && widget.validationError!.isNotEmpty;
     
     return Card(
-      elevation: 2,
+      elevation: DesignConstants.cardElevation,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(DesignConstants.cardBorderRadius),
         side: BorderSide(
           color: hasValidationError
-              ? const Color(0xFFF44336)
+              ? DesignConstants.errorColor
               : _isFocused
-                  ? const Color(0xFF573ED1)
+                  ? DesignConstants.primaryColor
                   : Colors.transparent,
-          width: 2,
+          width: DesignConstants.cardBorderWidthFocused,
         ),
       ),
-      color: hasValidationError ? Colors.red.shade50 : Colors.white,
-      shadowColor: Colors.black.withOpacity(0.1),
+      color: hasValidationError ? DesignConstants.errorSurface : DesignConstants.backgroundColor,
+      shadowColor: DesignConstants.cardShadowColor,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: DesignConstants.cardPadding,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Pilih Kendaraan',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
+              style: DesignConstants.getHeadingStyle(
+                fontSize: DesignConstants.fontSizeH4,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: DesignConstants.spaceMd),
             
             if (_isLoading)
               _buildLoadingState()
@@ -156,43 +155,45 @@ class _VehicleSelectorState extends State<VehicleSelector> {
       label: 'Gagal memuat kendaraan',
       hint: 'Terjadi kesalahan saat memuat data kendaraan. Ketuk tombol coba lagi untuk memuat ulang',
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: DesignConstants.cardPadding,
         decoration: BoxDecoration(
-        color: Colors.red.shade50,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          Icon(
-            Icons.error_outline,
-            color: Colors.red.shade700,
-            size: 32,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Gagal memuat kendaraan',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Colors.red.shade700,
+          color: DesignConstants.errorSurface,
+          borderRadius: BorderRadius.circular(DesignConstants.cardBorderRadius),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              Icons.error_outline,
+              color: DesignConstants.errorColor,
+              size: DesignConstants.iconSizeXLarge,
             ),
-          ),
-          const SizedBox(height: 8),
-          Semantics(
-            label: 'Tombol coba lagi',
-            hint: 'Ketuk untuk memuat ulang data kendaraan',
-            button: true,
-            child: TextButton(
-              onPressed: _fetchVehicles,
-              style: TextButton.styleFrom(
-                minimumSize: const Size(48, 48),
+            const SizedBox(height: DesignConstants.spaceSm),
+            Text(
+              'Gagal memuat kendaraan',
+              style: DesignConstants.getBodyStyle(
+                fontWeight: DesignConstants.fontWeightSemiBold,
+                color: DesignConstants.errorColor,
               ),
-              child: const Text('Coba Lagi'),
             ),
-          ),
-        ],
+            const SizedBox(height: DesignConstants.spaceSm),
+            Semantics(
+              label: 'Tombol coba lagi',
+              hint: 'Ketuk untuk memuat ulang data kendaraan',
+              button: true,
+              child: TextButton(
+                onPressed: _fetchVehicles,
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(
+                    DesignConstants.minTouchTarget,
+                    DesignConstants.minTouchTarget,
+                  ),
+                ),
+                child: const Text('Coba Lagi'),
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
     );
   }
 
@@ -200,14 +201,13 @@ class _VehicleSelectorState extends State<VehicleSelector> {
     return Semantics(
       label: 'Belum ada kendaraan terdaftar. Tambahkan kendaraan terlebih dahulu untuk melanjutkan booking',
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: DesignConstants.cardPadding,
         decoration: BoxDecoration(
           border: Border.all(
-            color: Colors.grey.shade300,
-            width: 2,
-            style: BorderStyle.solid,
+            color: DesignConstants.borderPrimary,
+            width: DesignConstants.cardBorderWidthFocused,
           ),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(DesignConstants.cardBorderRadius),
         ),
         child: Column(
           children: [
@@ -215,28 +215,25 @@ class _VehicleSelectorState extends State<VehicleSelector> {
               label: 'Ikon tambah kendaraan',
               child: Icon(
                 Icons.add_circle,
-                color: const Color(0xFF573ED1),
-                size: 32,
+                color: DesignConstants.primaryColor,
+                size: DesignConstants.iconSizeXLarge,
               ),
             ),
-            const SizedBox(height: 8),
-            const Text(
+            const SizedBox(height: DesignConstants.spaceSm),
+            Text(
               'Belum ada kendaraan',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
+              style: DesignConstants.getHeadingStyle(
+                fontSize: DesignConstants.fontSizeH4,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: DesignConstants.spaceXs),
             Text(
               'Tambahkan kendaraan terlebih dahulu',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade600,
+              style: DesignConstants.getBodyStyle(
+                color: DesignConstants.textTertiary,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: DesignConstants.spaceMd),
             Semantics(
               label: 'Tombol tambah kendaraan',
               hint: 'Ketuk untuk menambahkan kendaraan baru',
@@ -244,14 +241,16 @@ class _VehicleSelectorState extends State<VehicleSelector> {
               child: TextButton(
                 onPressed: _navigateToAddVehicle,
                 style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF573ED1),
-                  minimumSize: const Size(48, 48),
+                  foregroundColor: DesignConstants.primaryColor,
+                  minimumSize: const Size(
+                    DesignConstants.minTouchTarget,
+                    DesignConstants.minTouchTarget,
+                  ),
                 ),
-                child: const Text(
+                child: Text(
                   'Tambah Kendaraan',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
+                  style: DesignConstants.getBodyStyle(
+                    fontWeight: DesignConstants.fontWeightSemiBold,
                   ),
                 ),
               ),
@@ -354,17 +353,14 @@ class _VehicleSelectorState extends State<VehicleSelector> {
       children: [
         Icon(
           _getVehicleIcon(vehicle.jenisKendaraan),
-          color: const Color(0xFF573ED1),
-          size: 20,
+          color: DesignConstants.primaryColor,
+          size: DesignConstants.iconSizeMedium,
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: DesignConstants.spaceMd),
         Expanded(
           child: Text(
             '${vehicle.platNomor} - ${vehicle.merk} ${vehicle.tipe}',
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.black87,
-            ),
+            style: DesignConstants.getBodyStyle(),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
