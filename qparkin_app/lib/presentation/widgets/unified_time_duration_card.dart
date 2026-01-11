@@ -35,12 +35,16 @@ class UnifiedTimeDurationCard extends StatefulWidget {
 }
 
 class _UnifiedTimeDurationCardState extends State<UnifiedTimeDurationCard> with SingleTickerProviderStateMixin {
-  // Preset duration options
+  // Preset duration options (1-8 hours)
   final List<Duration> _presetDurations = [
     const Duration(hours: 1),
     const Duration(hours: 2),
     const Duration(hours: 3),
     const Duration(hours: 4),
+    const Duration(hours: 5),
+    const Duration(hours: 6),
+    const Duration(hours: 7),
+    const Duration(hours: 8),
   ];
 
   // Animation controller for end time display
@@ -319,27 +323,56 @@ class _UnifiedTimeDurationCardState extends State<UnifiedTimeDurationCard> with 
     );
   }
 
-  /// Build horizontal scrollable duration chips
+  /// Build grid duration chips (2 rows x 4 columns)
   Widget _buildHorizontalDurationChips(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          ..._presetDurations.map((duration) {
+    // Split into 2 rows of 4 chips each
+    final firstRow = _presetDurations.sublist(0, 4);
+    final secondRow = _presetDurations.sublist(4, 8);
+    
+    return Column(
+      children: [
+        // First row (1-4 hours)
+        Row(
+          children: firstRow.map((duration) {
             final isSelected = widget.duration == duration;
-            return Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: _buildDurationChip(
-                context,
-                '${duration.inHours} Jam',
-                duration,
-                isSelected,
+            return Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  right: duration == firstRow.last ? 0 : 8,
+                ),
+                child: _buildDurationChip(
+                  context,
+                  '${duration.inHours} Jam',
+                  duration,
+                  isSelected,
+                ),
               ),
             );
-          }),
-          _buildCustomDurationChip(context),
-        ],
-      ),
+          }).toList(),
+        ),
+        
+        const SizedBox(height: 8),
+        
+        // Second row (5-8 hours)
+        Row(
+          children: secondRow.map((duration) {
+            final isSelected = widget.duration == duration;
+            return Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  right: duration == secondRow.last ? 0 : 8,
+                ),
+                child: _buildDurationChip(
+                  context,
+                  '${duration.inHours} Jam',
+                  duration,
+                  isSelected,
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
     );
   }
 
@@ -360,7 +393,6 @@ class _UnifiedTimeDurationCardState extends State<UnifiedTimeDurationCard> with 
             ),
           );
         }),
-        _buildCustomDurationChip(context),
       ],
     );
   }
@@ -393,16 +425,18 @@ class _UnifiedTimeDurationCardState extends State<UnifiedTimeDurationCard> with 
           },
           borderRadius: BorderRadius.circular(12),
           child: Container(
-            constraints: const BoxConstraints(
-              minWidth: 80,
-              minHeight: 56,
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            height: 56,
             decoration: BoxDecoration(
               color: isSelected
                   ? const Color(0xFF573ED1)
                   : const Color(0xFFE8E0FF),
               borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isSelected
+                    ? const Color(0xFF573ED1)
+                    : const Color(0xFFE8E0FF),
+                width: 1.5,
+              ),
               boxShadow: isSelected
                   ? [
                       BoxShadow(
@@ -413,27 +447,16 @@ class _UnifiedTimeDurationCardState extends State<UnifiedTimeDurationCard> with 
                     ]
                   : null,
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (isSelected) ...[
-                  Icon(
-                    Icons.check_circle,
-                    color: Colors.white,
-                    size: 16,
-                  ),
-                  const SizedBox(height: 4),
-                ],
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: fontSize,
-                    fontWeight: FontWeight.bold,
-                    color: isSelected ? Colors.white : const Color(0xFF573ED1),
-                  ),
-                  textAlign: TextAlign.center,
+            child: Center(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.bold,
+                  color: isSelected ? Colors.white : const Color(0xFF573ED1),
                 ),
-              ],
+                textAlign: TextAlign.center,
+              ),
             ),
           ),
         ),
