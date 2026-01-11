@@ -2,19 +2,17 @@ import 'package:flutter/material.dart';
 import '../../config/design_constants.dart';
 import 'base_parking_card.dart';
 
-/// Widget to display mall information including name, address, distance, and available slots
+/// Widget to display mall information including name, address, and available slots
 /// Used in the Booking Page to show details of the selected mall
 class MallInfoCard extends StatelessWidget {
   final String mallName;
   final String address;
-  final String distance;
   final int availableSlots;
 
   const MallInfoCard({
     Key? key,
     required this.mallName,
     required this.address,
-    required this.distance,
     required this.availableSlots,
   }) : super(key: key);
 
@@ -41,7 +39,7 @@ class MallInfoCard extends StatelessWidget {
 
     return BaseParkingCard(
       semanticsLabel:
-          'Informasi mall. $mallName, alamat $address, jarak $distance, $availableSlots slot parkir tersedia, status $slotStatusText',
+          'Informasi mall. $mallName, alamat $address, $availableSlots slot parkir tersedia, status $slotStatusText',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -66,66 +64,44 @@ class MallInfoCard extends StatelessWidget {
               ),
               const SizedBox(width: DesignConstants.spaceMd),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Semantics(
-                      label: 'Nama mall',
-                      child: Text(
-                        mallName,
-                        style: DesignConstants.getHeadingStyle(
-                          fontSize: DesignConstants.fontSizeH3,
-                        ),
-                      ),
+                child: Semantics(
+                  label: 'Nama mall',
+                  child: Text(
+                    mallName,
+                    style: DesignConstants.getHeadingStyle(
+                      fontSize: DesignConstants.fontSizeH3,
                     ),
-                    const SizedBox(height: DesignConstants.spaceXs),
-                    Semantics(
-                      label: 'Alamat mall',
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.location_on,
-                            size: DesignConstants.iconSizeSmall,
-                            color: DesignConstants.textTertiary,
-                          ),
-                          const SizedBox(width: DesignConstants.spaceXs),
-                          Expanded(
-                            child: Text(
-                              address,
-                              style: DesignConstants.getBodyStyle(
-                                color: DesignConstants.textTertiary,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: DesignConstants.spaceXs),
-                    Semantics(
-                      label: 'Jarak dari lokasi Anda',
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.navigation,
-                            size: DesignConstants.iconSizeSmall,
-                            color: DesignConstants.textTertiary,
-                          ),
-                          const SizedBox(width: DesignConstants.spaceXs),
-                          Text(
-                            distance,
-                            style: DesignConstants.getBodyStyle(
-                              color: DesignConstants.textTertiary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ],
+          ),
+
+          const SizedBox(height: DesignConstants.spaceMd),
+
+          // Address with location icon
+          Semantics(
+            label: 'Alamat mall',
+            child: Row(
+              children: [
+                Icon(
+                  Icons.location_on,
+                  size: DesignConstants.iconSizeSmall,
+                  color: DesignConstants.textTertiary,
+                ),
+                const SizedBox(width: DesignConstants.spaceXs),
+                Expanded(
+                  child: Text(
+                    address,
+                    style: DesignConstants.getBodyStyle(
+                      color: DesignConstants.textTertiary,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
           ),
 
           const SizedBox(height: DesignConstants.spaceMd),

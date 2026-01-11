@@ -221,7 +221,6 @@ void main() {
             home: MallInfoCard(
               mallName: 'Test Mall',
               address: 'Jl. Test No. 123',
-              distance: '1.5 km',
               availableSlots: 15,
             ),
           ),
@@ -298,7 +297,6 @@ void main() {
             home: MallInfoCard(
               mallName: 'Test Mall',
               address: 'Jl. Test No. 123',
-              distance: '1.5 km',
               availableSlots: 15,
             ),
           ),
@@ -375,7 +373,6 @@ void main() {
             home: MallInfoCard(
               mallName: 'Test Mall',
               address: 'Jl. Test No. 123',
-              distance: '1.5 km',
               availableSlots: 15,
             ),
           ),
@@ -515,7 +512,6 @@ void main() {
             home: MallInfoCard(
               mallName: 'Test Mall',
               address: 'Jl. Test No. 123',
-              distance: '1.5 km',
               availableSlots: 15,
             ),
           ),

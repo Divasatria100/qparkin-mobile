@@ -11,7 +11,6 @@ void main() {
             body: MallInfoCard(
               mallName: 'Mega Mall Batam',
               address: 'Jl. Engku Putri, Batam Centre',
-              distance: '2.5 km',
               availableSlots: 15,
             ),
           ),
@@ -28,7 +27,6 @@ void main() {
             body: MallInfoCard(
               mallName: 'One Batam Mall',
               address: 'Jl. Duyung, Nagoya',
-              distance: '1.2 km',
               availableSlots: 8,
             ),
           ),
@@ -39,24 +37,6 @@ void main() {
       expect(find.byIcon(Icons.location_on), findsOneWidget);
     });
 
-    testWidgets('displays distance with navigation icon', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: MallInfoCard(
-              mallName: 'Test Mall',
-              address: 'Test Address',
-              distance: '3.7 km',
-              availableSlots: 20,
-            ),
-          ),
-        ),
-      );
-
-      expect(find.text('3.7 km'), findsOneWidget);
-      expect(find.byIcon(Icons.navigation), findsOneWidget);
-    });
-
     testWidgets('displays available slots count', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
@@ -64,7 +44,6 @@ void main() {
             body: MallInfoCard(
               mallName: 'Test Mall',
               address: 'Test Address',
-              distance: '1.0 km',
               availableSlots: 12,
             ),
           ),
@@ -82,7 +61,6 @@ void main() {
             body: MallInfoCard(
               mallName: 'Test Mall',
               address: 'Test Address',
-              distance: '1.0 km',
               availableSlots: 15,
             ),
           ),
@@ -100,7 +78,6 @@ void main() {
             body: MallInfoCard(
               mallName: 'Test Mall',
               address: 'Test Address',
-              distance: '1.0 km',
               availableSlots: 5,
             ),
           ),
@@ -118,7 +95,6 @@ void main() {
             body: MallInfoCard(
               mallName: 'Test Mall',
               address: 'Test Address',
-              distance: '1.0 km',
               availableSlots: 2,
             ),
           ),
@@ -136,7 +112,6 @@ void main() {
             body: MallInfoCard(
               mallName: 'Test Mall',
               address: 'Test Address',
-              distance: '1.0 km',
               availableSlots: 10,
             ),
           ),
@@ -155,7 +130,6 @@ void main() {
             body: MallInfoCard(
               mallName: 'Test Mall',
               address: 'Test Address',
-              distance: '1.0 km',
               availableSlots: 10,
             ),
           ),
@@ -179,7 +153,6 @@ void main() {
               child: MallInfoCard(
                 mallName: 'Test Mall',
                 address: 'Very Long Address That Should Be Truncated With Ellipsis',
-                distance: '1.0 km',
                 availableSlots: 10,
               ),
             ),
@@ -201,7 +174,6 @@ void main() {
             body: MallInfoCard(
               mallName: 'Test Mall',
               address: 'Test Address',
-              distance: '1.0 km',
               availableSlots: 10,
             ),
           ),
@@ -218,7 +190,6 @@ void main() {
             body: MallInfoCard(
               mallName: 'Test Mall',
               address: 'Test Address',
-              distance: '1.0 km',
               availableSlots: 0,
             ),
           ),

@@ -239,7 +239,6 @@ class _BookingPageContentState extends State<_BookingPageContent> {
                   MallInfoCard(
                     mallName: widget.mall['name'] ?? widget.mall['nama_mall'] ?? '',
                     address: widget.mall['address'] ?? widget.mall['alamat'] ?? '',
-                    distance: widget.mall['distance'] ?? '0 km',
                     availableSlots: provider.availableSlots,
                   ),
                   
