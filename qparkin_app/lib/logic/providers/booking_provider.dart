@@ -264,11 +264,12 @@ class BookingProvider extends ChangeNotifier {
 
   /// Set booking start time
   ///
-  /// Validates start time and triggers debounced availability check.
+  /// Validates start time. NO LONGER triggers availability check.
+  /// Slots determined by vehicle type only.
   ///
   /// Parameters:
   /// - [time]: The proposed booking start time
-  /// - [token]: Optional authentication token for availability check
+  /// - [token]: Optional authentication token (not used for availability check)
   ///
   /// Requirements: 15.1, 15.8, 13.4
   void setStartTime(DateTime time, {String? token}) {
@@ -285,24 +286,21 @@ class BookingProvider extends ChangeNotifier {
       _validationErrors.remove('startTime');
     }
 
-    // Debounce availability check (500ms) if we have all required data
-    if (_selectedMall != null &&
-        _selectedVehicle != null &&
-        _bookingDuration != null &&
-        token != null) {
-      _debounceAvailabilityCheck(token: token);
-    }
+    // REMOVED: _debounceAvailabilityCheck
+    // Slot availability is determined solely by loadFloorsForVehicle()
+    // Time selection does not affect slot availability
 
     notifyListeners();
   }
 
   /// Set booking duration
   ///
-  /// Validates duration and triggers debounced cost calculation and availability check.
+  /// Validates duration and triggers debounced cost calculation.
+  /// NO LONGER triggers availability check - slots determined by vehicle type only.
   ///
   /// Parameters:
   /// - [duration]: The proposed booking duration
-  /// - [token]: Optional authentication token for availability check
+  /// - [token]: Optional authentication token (not used for availability check)
   ///
   /// Requirements: 15.1, 15.8, 13.4
   void setDuration(Duration duration, {String? token}) {
@@ -323,13 +321,9 @@ class BookingProvider extends ChangeNotifier {
     // Debounce cost calculation (300ms)
     _debounceCostCalculation();
 
-    // Debounce availability check (500ms) if we have all required data
-    if (_selectedMall != null &&
-        _selectedVehicle != null &&
-        _startTime != null &&
-        token != null) {
-      _debounceAvailabilityCheck(token: token);
-    }
+    // REMOVED: _debounceAvailabilityCheck
+    // Slot availability is determined solely by loadFloorsForVehicle()
+    // Duration selection does not affect slot availability
 
     notifyListeners();
   }
@@ -881,6 +875,7 @@ class BookingProvider extends ChangeNotifier {
   ///
   /// Fetches all floors from API and filters by vehicle type.
   /// This ensures users only see floors that accept their vehicle type.
+  /// Also updates available slots count based on filtered floors.
   ///
   /// Parameters:
   /// - [jenisKendaraan]: Vehicle type to filter by (e.g., 'Roda Dua', 'Roda Empat')
@@ -933,17 +928,27 @@ class BookingProvider extends ChangeNotifier {
       // Filter floors that match vehicle type
       _floors = allFloors.where((floor) {
         final matches = floor.jenisKendaraan == jenisKendaraan;
-        debugPrint('[BookingProvider] Floor ${floor.floorName}: ${floor.jenisKendaraan} ${matches ? "✓" : "✗"}');
+        debugPrint('[BookingProvider] Floor ${floor.floorName}: ${floor.jenisKendaraan} ${matches ? "✓" : "✗"} (${floor.availableSlots} slots)');
         return matches;
       }).toList();
 
       debugPrint('[BookingProvider] Filtered floors: ${_floors.length}');
       debugPrint('[BookingProvider] Response timestamp: ${DateTime.now().toIso8601String()}');
 
+      // Calculate total available slots from filtered floors
+      final totalAvailableSlots = _floors.fold(
+        0, 
+        (sum, floor) => sum + floor.availableSlots
+      );
+      
+      _availableSlots = totalAvailableSlots;
+      debugPrint('[BookingProvider] Total available slots for $jenisKendaraan: $_availableSlots');
+
       _isLoadingFloors = false;
 
       if (_floors.isEmpty) {
         _errorMessage = 'Tidak ada lantai parkir untuk jenis kendaraan $jenisKendaraan';
+        _availableSlots = 0;
         debugPrint('[BookingProvider] WARNING: No floors available for vehicle type: $jenisKendaraan');
       } else {
         debugPrint('[BookingProvider] SUCCESS: Loaded ${_floors.length} floors for $jenisKendaraan');
@@ -955,6 +960,7 @@ class BookingProvider extends ChangeNotifier {
       notifyListeners();
     } catch (e, stackTrace) {
       _isLoadingFloors = false;
+      _availableSlots = 0;
 
       // Log detailed error information for debugging
       debugPrint('[BookingProvider] ERROR: Failed to load floors for vehicle type');

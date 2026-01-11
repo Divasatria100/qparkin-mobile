@@ -11,16 +11,12 @@ import '../../utils/responsive_helper.dart';
 import '../widgets/mall_info_card.dart';
 import '../widgets/vehicle_selector.dart';
 import '../widgets/floor_selector_widget.dart';
-import '../widgets/slot_visualization_widget.dart';
-import '../widgets/slot_reservation_button.dart';
-import '../widgets/reserved_slot_info_card.dart';
 import '../widgets/unified_time_duration_card.dart';
 import '../widgets/time_duration_picker.dart';
 import '../widgets/slot_availability_indicator.dart';
 import '../widgets/cost_breakdown_card.dart';
 import '../widgets/booking_summary_card.dart';
 import '../widgets/error_retry_widget.dart';
-import '../widgets/slot_unavailable_widget.dart';
 import '../widgets/booking_conflict_dialog.dart';
 import '../widgets/point_usage_widget.dart';
 import '../dialogs/booking_confirmation_dialog.dart';
@@ -256,17 +252,15 @@ class _BookingPageContentState extends State<_BookingPageContent> {
                           : null,
                       onVehicleSelected: (vehicle) {
                         if (vehicle != null) {
-                          provider.selectVehicle(vehicle.toJson());
+                          // Pass token to selectVehicle for floor filtering
+                          provider.selectVehicle(vehicle.toJson(), token: _authToken);
                           
                           // Clear validation error when user selects vehicle
                           provider.clearValidationErrors();
                           
-                          // Start periodic availability check if all data is set
-                          if (provider.startTime != null &&
-                              provider.bookingDuration != null &&
-                              _authToken != null) {
-                            provider.startPeriodicAvailabilityCheck(token: _authToken!);
-                          }
+                          // REMOVED: startPeriodicAvailabilityCheck
+                          // Slot availability is now determined solely by loadFloorsForVehicle()
+                          // which is called inside selectVehicle()
                         }
                       },
                       vehicleService: _vehicleService!,
@@ -275,7 +269,7 @@ class _BookingPageContentState extends State<_BookingPageContent> {
                   
                   SizedBox(height: spacing),
                   
-                  // NEW: Floor & Slot Reservation Section
+                  // NEW: Floor Selection Section (Simplified - Auto-Assignment)
                   _buildSlotReservationSection(provider, spacing),
                   
                   SizedBox(height: spacing),
@@ -290,12 +284,9 @@ class _BookingPageContentState extends State<_BookingPageContent> {
                       // Clear validation error when user changes time
                       provider.clearValidationErrors();
                       
-                      // Start periodic availability check if all data is set
-                      if (provider.selectedVehicle != null &&
-                          provider.bookingDuration != null &&
-                          _authToken != null) {
-                        provider.startPeriodicAvailabilityCheck(token: _authToken!);
-                      }
+                      // REMOVED: startPeriodicAvailabilityCheck
+                      // Time selection doesn't affect slot availability
+                      // Slots are determined by vehicle type and floor configuration
                     },
                     onDurationChanged: (duration) {
                       provider.setDuration(duration, token: _authToken);
@@ -303,12 +294,9 @@ class _BookingPageContentState extends State<_BookingPageContent> {
                       // Clear validation error when user changes duration
                       provider.clearValidationErrors();
                       
-                      // Start periodic availability check if all data is set
-                      if (provider.selectedVehicle != null &&
-                          provider.startTime != null &&
-                          _authToken != null) {
-                        provider.startPeriodicAvailabilityCheck(token: _authToken!);
-                      }
+                      // REMOVED: startPeriodicAvailabilityCheck
+                      // Duration selection doesn't affect slot availability
+                      // Slots are determined by vehicle type and floor configuration
                     },
                     startTimeError: provider.validationErrors['startTime'],
                     durationError: provider.validationErrors['duration'],
@@ -316,74 +304,46 @@ class _BookingPageContentState extends State<_BookingPageContent> {
                   
                   SizedBox(height: spacing),
                   
-                  // Slot Availability Indicator - only show when all booking data is set
+                  // Slot Availability Indicator - only show when vehicle selected and floors loaded
                   if (provider.selectedVehicle != null &&
                       provider.startTime != null &&
-                      provider.bookingDuration != null)
+                      provider.bookingDuration != null &&
+                      !provider.isLoadingFloors)
                     SlotAvailabilityIndicator(
                       availableSlots: provider.availableSlots,
                       vehicleType: provider.selectedVehicle!['jenis_kendaraan'] ??
                           provider.selectedVehicle!['jenis'] ??
                           '',
-                      isLoading: provider.isCheckingAvailability,
+                      isLoading: provider.isLoadingFloors,
                       onRefresh: () {
-                        if (_authToken != null) {
-                          provider.refreshAvailability(token: _authToken!);
+                        // Refresh floors data to get latest slot availability
+                        if (_authToken != null && provider.selectedVehicle != null) {
+                          final jenisKendaraan = provider.selectedVehicle!['jenis_kendaraan']?.toString() ??
+                              provider.selectedVehicle!['jenis']?.toString();
+                          if (jenisKendaraan != null) {
+                            provider.loadFloorsForVehicle(
+                              jenisKendaraan: jenisKendaraan,
+                              token: _authToken!,
+                            );
+                          }
                         }
                       },
                     ),
                   
                   if (provider.selectedVehicle != null &&
                       provider.startTime != null &&
-                      provider.bookingDuration != null)
-                    SizedBox(height: spacing),
-                  
-                  // Slot unavailability warning with alternatives
-                  if (provider.availableSlots == 0 &&
-                      provider.startTime != null &&
                       provider.bookingDuration != null &&
-                      !provider.isCheckingAvailability)
-                    Padding(
-                      padding: EdgeInsets.only(bottom: spacing),
-                      child: SlotUnavailableWidget(
-                        currentStartTime: provider.startTime!,
-                        currentDuration: provider.bookingDuration!,
-                        onSelectAlternative: (time, duration) {
-                          provider.setStartTime(time, token: _authToken);
-                          provider.setDuration(duration, token: _authToken);
-                          
-                          // Trigger availability check
-                          if (_authToken != null) {
-                            provider.startPeriodicAvailabilityCheck(token: _authToken!);
-                          }
-                        },
-                        onModifyTime: () {
-                          // Scroll to time picker (optional enhancement)
-                          // For now, just show a message
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Silakan ubah waktu dan durasi di atas'),
-                              duration: Duration(seconds: 2),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  
-                  // Cost Breakdown Card
-                  if (provider.bookingDuration != null && provider.costBreakdown != null)
-                    CostBreakdownCard(
-                      firstHourRate: provider.firstHourRate,
-                      additionalHoursRate: provider.costBreakdown!['additionalHoursTotal'] ?? 0.0,
-                      additionalHours: provider.costBreakdown!['additionalHours'] ?? 0,
-                      totalCost: provider.estimatedCost,
-                    ),
-                  
-                  if (provider.bookingDuration != null && provider.costBreakdown != null)
+                      !provider.isLoadingFloors)
                     SizedBox(height: spacing),
                   
-                  // Point Usage Widget
-                  if (provider.bookingDuration != null && provider.estimatedCost > 0)
+                  // REMOVED: SlotUnavailableWidget - Caused data inconsistency
+                  // Slot availability is now solely determined by loadFloorsForVehicle()
+                  // which calculates available slots from filtered floors
+                  
+                  // Point Usage Widget - only show when vehicle is selected
+                  if (provider.selectedVehicle != null &&
+                      provider.bookingDuration != null && 
+                      provider.estimatedCost > 0)
                     PointUsageWidget(
                       parkingCost: provider.estimatedCost.toInt(),
                       onPointsSelected: (points) {
@@ -392,7 +352,9 @@ class _BookingPageContentState extends State<_BookingPageContent> {
                       initialPoints: provider.selectedPoints,
                     ),
                   
-                  if (provider.bookingDuration != null && provider.estimatedCost > 0)
+                  if (provider.selectedVehicle != null &&
+                      provider.bookingDuration != null && 
+                      provider.estimatedCost > 0)
                     SizedBox(height: spacing),
                   
                   // Booking Summary Card
@@ -451,393 +413,10 @@ class _BookingPageContentState extends State<_BookingPageContent> {
         provider.calculatedEndTime != null;
   }
 
-  /// Handle reservation errors with alternative floor suggestions
+  /// Build slot reservation section with floor selector only (auto-assignment)
   ///
-  /// Provides clear guidance when no slots are available and suggests
-  /// alternative floors with available slots. Shows helpful dialog with
-  /// one-tap floor switching.
-  ///
-  /// Requirements: 15.1-15.10
-  void _handleReservationError(BookingProvider provider) {
-    final errorMessage = provider.errorMessage ?? 'Gagal mereservasi slot';
-    
-    // Check if error is due to no slots available (using error code)
-    if (errorMessage.startsWith('NO_SLOTS_AVAILABLE:')) {
-      final floorName = errorMessage.split(':').length > 1 
-          ? errorMessage.split(':')[1] 
-          : 'lantai ini';
-      
-      // Get alternative floors with available slots
-      final alternativeFloors = provider.getAlternativeFloors();
-      
-      if (alternativeFloors.isNotEmpty) {
-        // Show dialog with alternative floor suggestions
-        _showAlternativeFloorsDialog(
-          floorName: floorName,
-          alternativeFloors: alternativeFloors,
-          provider: provider,
-        );
-      } else {
-        // No alternative floors available - show helpful message
-        _showNoAlternativesDialog(floorName: floorName);
-      }
-    } else if (errorMessage.contains('Tidak ada slot tersedia') || 
-               errorMessage.contains('no slots')) {
-      // Legacy error message format - still handle it
-      final alternativeFloors = provider.getAlternativeFloors();
-      
-      if (alternativeFloors.isNotEmpty) {
-        _showAlternativeFloorsDialog(
-          floorName: provider.selectedFloor?.floorName ?? 'lantai ini',
-          alternativeFloors: alternativeFloors,
-          provider: provider,
-        );
-      } else {
-        _showNoAlternativesDialog(
-          floorName: provider.selectedFloor?.floorName ?? 'lantai ini',
-        );
-      }
-    } else {
-      // Other errors - just show snackbar
-      _showErrorSnackbar(errorMessage);
-    }
-  }
-  
-  /// Show dialog with alternative floor suggestions
-  ///
-  /// Requirements: 15.1-15.10
-  void _showAlternativeFloorsDialog({
-    required String floorName,
-    required List<dynamic> alternativeFloors,
-    required BookingProvider provider,
-  }) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: Row(
-          children: [
-            Icon(
-              Icons.info_outline,
-              color: Colors.orange[700],
-              size: 28,
-            ),
-            const SizedBox(width: 12),
-            const Expanded(
-              child: Text(
-                'Slot Tidak Tersedia',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Semua slot di $floorName sudah terisi.',
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.blue[50],
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.blue[200]!),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.lightbulb_outline, color: Colors.blue[700], size: 20),
-                    const SizedBox(width: 8),
-                    const Expanded(
-                      child: Text(
-                        'Coba lantai lain yang masih tersedia:',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-              // Show up to 3 alternative floors
-              ...alternativeFloors.take(3).map((floor) => Card(
-                margin: const EdgeInsets.only(bottom: 8),
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(12),
-                  onTap: () {
-                    Navigator.pop(context);
-                    
-                    // Select the alternative floor
-                    provider.selectFloor(floor, token: _authToken);
-                    
-                    // Start auto-refresh timer for slot visualization
-                    if (_authToken != null) {
-                      provider.startSlotRefreshTimer(token: _authToken!);
-                    }
-                    
-                    // Show success message
-                    _showSuccessSnackbar('Beralih ke ${floor.floorName}');
-                    
-                    // Scroll to floor selector (optional - would need ScrollController)
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF4CAF50).withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(
-                            Icons.local_parking,
-                            color: Color(0xFF4CAF50),
-                            size: 28,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                floor.floorName,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${floor.availableSlots} slot tersedia dari ${floor.totalSlots}',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Icon(
-                          Icons.arrow_forward_ios,
-                          size: 16,
-                          color: Colors.grey[400],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              )),
-              if (alternativeFloors.length > 3) ...[
-                const SizedBox(height: 8),
-                Text(
-                  '+${alternativeFloors.length - 3} lantai lainnya tersedia',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Tutup',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  /// Show dialog when no alternative floors are available
-  ///
-  /// Requirements: 15.1-15.10
-  void _showNoAlternativesDialog({required String floorName}) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: Row(
-          children: [
-            Icon(
-              Icons.warning_amber_rounded,
-              color: Colors.orange[700],
-              size: 28,
-            ),
-            const SizedBox(width: 12),
-            const Expanded(
-              child: Text(
-                'Parkir Penuh',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Semua slot di $floorName sudah terisi.',
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.orange[50],
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.orange[200]!),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.info_outline, color: Colors.orange[700], size: 20),
-                      const SizedBox(width: 8),
-                      const Expanded(
-                        child: Text(
-                          'Saat ini tidak ada lantai lain yang tersedia.',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Saran:',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  _buildSuggestionItem('Coba lagi dalam beberapa menit'),
-                  _buildSuggestionItem('Pilih waktu booking yang berbeda'),
-                  _buildSuggestionItem('Pilih mall lain yang tersedia'),
-                ],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // Navigate back to home to select different mall
-              Navigator.pop(context);
-            },
-            child: const Text(
-              'Pilih Mall Lain',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF573ED1),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text(
-              'Coba Lagi',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  /// Build suggestion item widget
-  Widget _buildSuggestionItem(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            margin: const EdgeInsets.only(top: 6),
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(
-              color: Colors.orange[700],
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              text,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.black87,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Build slot reservation section with floor selector, visualization, and reservation button
-  ///
-  /// Conditionally renders based on mall's hasSlotReservationEnabled feature flag.
-  /// If disabled, returns empty container for seamless UX (auto-assignment will be used).
+  /// Simplified flow: User selects floor → System auto-assigns slot on booking confirmation.
+  /// No manual slot selection or reservation needed.
   ///
   /// Requirements: 3.1-3.12, 17.1-17.9
   Widget _buildSlotReservationSection(BookingProvider provider, double spacing) {
@@ -856,7 +435,7 @@ class _BookingPageContentState extends State<_BookingPageContent> {
         Semantics(
           header: true,
           child: Text(
-            'Pilih Lokasi Parkir',
+            'Pilih Lantai Parkir',
             style: TextStyle(
               fontSize: titleFontSize,
               fontWeight: FontWeight.bold,
@@ -864,6 +443,17 @@ class _BookingPageContentState extends State<_BookingPageContent> {
             ),
           ),
         ),
+        SizedBox(height: spacing * 0.5),
+        
+        // Info text
+        Text(
+          'Pilih lantai parkir yang diinginkan. Slot akan dipilihkan otomatis oleh sistem.',
+          style: TextStyle(
+            fontSize: ResponsiveHelper.getResponsiveFontSize(context, 14),
+            color: Colors.grey[600],
+          ),
+        ),
+        
         SizedBox(height: spacing * 0.75),
         
         // Floor Selector Widget
@@ -874,10 +464,11 @@ class _BookingPageContentState extends State<_BookingPageContent> {
           onFloorSelected: (floor) {
             provider.selectFloor(floor, token: _authToken);
             
-            // Start auto-refresh timer for slot visualization
-            if (_authToken != null) {
-              provider.startSlotRefreshTimer(token: _authToken!);
-            }
+            // Clear any previous error
+            provider.clearError();
+            
+            // Show success feedback
+            _showSuccessSnackbar('Lantai ${floor.floorName} dipilih');
           },
           onRetry: () {
             if (_authToken != null) {
@@ -886,65 +477,100 @@ class _BookingPageContentState extends State<_BookingPageContent> {
           },
         ),
         
-        // Show slot visualization when floor is selected
+        // Show selected floor info
         if (provider.selectedFloor != null) ...[
           SizedBox(height: spacing),
           
-          SlotVisualizationWidget(
-            slots: provider.slotsVisualization,
-            isLoading: provider.isLoadingSlots,
-            errorMessage: provider.errorMessage,
-            lastUpdated: provider.lastAvailabilityCheck,
-            availableCount: provider.selectedFloor?.availableSlots ?? 0,
-            totalCount: provider.selectedFloor?.totalSlots ?? 0,
-            onRefresh: () {
-              if (_authToken != null && provider.selectedFloor != null) {
-                provider.refreshSlotVisualization(token: _authToken!);
-              }
-            },
-          ),
-          
-          SizedBox(height: spacing),
-          
-          // Slot Reservation Button
-          SlotReservationButton(
-            floorName: provider.selectedFloor!.floorName,
-            isLoading: provider.isReservingSlot,
-            isEnabled: provider.selectedFloor!.hasAvailableSlots && !provider.hasReservedSlot,
-            onPressed: () async {
-              if (_authToken != null && provider.selectedFloor != null) {
-                final success = await provider.reserveRandomSlot(
-                  token: _authToken!,
-                  userId: 'user_id', // TODO: Get from auth provider
-                );
-                
-                if (success) {
-                  _showSuccessSnackbar('Slot berhasil direservasi!');
-                  
-                  // Announce to screen reader
-                  SemanticsService.announce(
-                    'Slot ${provider.reservedSlot?.slotCode} berhasil direservasi',
-                    TextDirection.ltr,
-                  );
-                } else if (provider.errorMessage != null) {
-                  // Show error with alternative floor suggestions
-                  _handleReservationError(provider);
-                }
-              }
-            },
-          ),
-        ],
-        
-        // Show reserved slot info card when slot is reserved
-        if (provider.hasReservedSlot) ...[
-          SizedBox(height: spacing),
-          
-          ReservedSlotInfoCard(
-            reservation: provider.reservedSlot!,
-            onClear: () {
-              provider.clearReservation();
-              _showSuccessSnackbar('Reservasi slot dibatalkan');
-            },
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF573ED1).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: const Color(0xFF573ED1).withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF573ED1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.local_parking,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        provider.selectedFloor!.floorName,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${provider.selectedFloor!.availableSlots} slot tersedia',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF4CAF50).withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.check_circle,
+                              size: 14,
+                              color: const Color(0xFF4CAF50),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Slot akan dipilihkan otomatis',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: const Color(0xFF4CAF50),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () {
+                    provider.selectFloor(provider.selectedFloor!, token: null);
+                    // This will deselect the floor
+                    setState(() {});
+                  },
+                  tooltip: 'Batalkan pilihan lantai',
+                ),
+              ],
+            ),
           ),
         ],
       ],
