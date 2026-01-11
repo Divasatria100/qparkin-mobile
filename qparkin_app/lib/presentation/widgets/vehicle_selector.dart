@@ -8,7 +8,7 @@ import 'booking_shimmer_loading.dart';
 import 'validation_error_text.dart';
 
 /// Widget for selecting a vehicle from the user's registered vehicles
-/// Displays a dropdown with vehicle cards showing icons, plat, jenis, and merk
+/// Uses Modal Bottom Sheet for elegant vehicle selection
 ///
 /// Requirements: 3.1-3.7, 11.3, 12.1-12.9, 13.2
 class VehicleSelector extends StatefulWidget {
@@ -33,7 +33,6 @@ class _VehicleSelectorState extends State<VehicleSelector> {
   List<VehicleModel> _vehicles = [];
   bool _isLoading = true;
   String? _errorMessage;
-  bool _isFocused = false;
 
   @override
   void initState() {
@@ -57,6 +56,9 @@ class _VehicleSelectorState extends State<VehicleSelector> {
         _vehicles = vehicles;
         _isLoading = false;
       });
+
+      // Auto-select active vehicle if no vehicle is currently selected
+      _autoSelectActiveVehicle();
     } catch (e) {
       debugPrint('[VehicleSelector] Error fetching vehicles: $e');
 
@@ -64,6 +66,38 @@ class _VehicleSelectorState extends State<VehicleSelector> {
         _errorMessage = e.toString();
         _isLoading = false;
       });
+    }
+  }
+
+  /// Auto-select the active vehicle if available and no vehicle is currently selected
+  void _autoSelectActiveVehicle() {
+    // Only auto-select if no vehicle is currently selected
+    if (widget.selectedVehicle != null) {
+      debugPrint(
+          '[VehicleSelector] Vehicle already selected, skipping auto-selection');
+      return;
+    }
+
+    // Find the first active vehicle
+    try {
+      final activeVehicle = _vehicles.firstWhere(
+        (vehicle) => vehicle.isActive == true,
+      );
+
+      debugPrint(
+          '[VehicleSelector] Auto-selecting active vehicle: ${activeVehicle.platNomor}');
+
+      // Notify parent to update selected vehicle
+      widget.onVehicleSelected(activeVehicle);
+
+      // Announce to screen readers
+      SemanticsService.announce(
+        'Kendaraan aktif ${activeVehicle.platNomor} dipilih secara otomatis',
+        TextDirection.ltr,
+      );
+    } catch (e) {
+      debugPrint(
+          '[VehicleSelector] No active vehicle found for auto-selection');
     }
   }
 
@@ -87,6 +121,30 @@ class _VehicleSelectorState extends State<VehicleSelector> {
       SnackBar(
         content: const Text('Navigasi ke halaman tambah kendaraan'),
         backgroundColor: DesignConstants.primaryColor,
+      ),
+    );
+  }
+
+  /// Show vehicle selection bottom sheet
+  void _showVehicleBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _VehicleSelectionBottomSheet(
+        vehicles: _vehicles,
+        selectedVehicle: widget.selectedVehicle,
+        onVehicleSelected: (vehicle) {
+          widget.onVehicleSelected(vehicle);
+          Navigator.pop(context);
+          if (vehicle != null) {
+            SemanticsService.announce(
+              'Kendaraan ${vehicle.platNomor} dipilih',
+              TextDirection.ltr,
+            );
+          }
+        },
+        getVehicleIcon: _getVehicleIcon,
       ),
     );
   }
@@ -115,7 +173,7 @@ class _VehicleSelectorState extends State<VehicleSelector> {
           else if (_vehicles.isEmpty)
             _buildEmptyState()
           else
-            _buildVehicleDropdown(),
+            _buildVehicleSelector(),
 
           // Validation error display
           if (hasValidationError)
@@ -248,26 +306,15 @@ class _VehicleSelectorState extends State<VehicleSelector> {
     );
   }
 
-  Widget _buildVehicleDropdown() {
-    debugPrint(
-        '[VehicleSelector] Building dropdown with ${_vehicles.length} vehicles');
-    if (widget.selectedVehicle != null) {
-      debugPrint(
-          '[VehicleSelector] Selected vehicle ID: ${widget.selectedVehicle!.idKendaraan}');
-      debugPrint(
-          '[VehicleSelector] Selected vehicle plat: ${widget.selectedVehicle!.platNomor}');
-    }
-
+  /// Build vehicle selector button that opens bottom sheet
+  Widget _buildVehicleSelector() {
     VehicleModel? matchingVehicle;
     if (widget.selectedVehicle != null) {
       try {
         matchingVehicle = _vehicles.firstWhere(
           (v) => v.idKendaraan == widget.selectedVehicle!.idKendaraan,
         );
-        debugPrint(
-            '[VehicleSelector] Found matching vehicle: ${matchingVehicle.platNomor}');
       } catch (e) {
-        debugPrint('[VehicleSelector] No matching vehicle found in list');
         matchingVehicle = null;
       }
     }
@@ -276,89 +323,268 @@ class _VehicleSelectorState extends State<VehicleSelector> {
       label:
           'Pilih kendaraan untuk booking. ${matchingVehicle != null ? "Kendaraan terpilih: ${matchingVehicle.platNomor}, ${matchingVehicle.jenisKendaraan}, ${matchingVehicle.merk} ${matchingVehicle.tipe}" : "Belum ada kendaraan dipilih"}',
       hint: 'Ketuk untuk memilih kendaraan dari daftar kendaraan terdaftar',
-      child: Focus(
-        onFocusChange: (hasFocus) {
-          setState(() {
-            _isFocused = hasFocus;
-          });
-        },
-        child: DropdownButtonFormField<VehicleModel>(
-          value: matchingVehicle,
-          decoration: InputDecoration(
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: DesignConstants.spaceMd,
-              vertical: DesignConstants.spaceSm,
+      button: true,
+      child: InkWell(
+        onTap: _showVehicleBottomSheet,
+        borderRadius: BorderRadius.circular(DesignConstants.cardBorderRadius),
+        child: Container(
+          padding: const EdgeInsets.all(DesignConstants.spaceMd),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: DesignConstants.borderPrimary,
+              width: DesignConstants.cardBorderWidth,
             ),
-            border: OutlineInputBorder(
-              borderRadius:
-                  BorderRadius.circular(DesignConstants.cardBorderRadius),
-              borderSide: BorderSide(color: DesignConstants.borderPrimary),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius:
-                  BorderRadius.circular(DesignConstants.cardBorderRadius),
-              borderSide: BorderSide(color: DesignConstants.borderPrimary),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius:
-                  BorderRadius.circular(DesignConstants.cardBorderRadius),
-              borderSide: BorderSide(
-                color: DesignConstants.primaryColor,
-                width: DesignConstants.cardBorderWidthFocused,
-              ),
-            ),
+            borderRadius:
+                BorderRadius.circular(DesignConstants.cardBorderRadius),
           ),
-          hint: const Text('Pilih kendaraan Anda'),
-          isExpanded: true,
-          items: _vehicles.map((vehicle) {
-            return DropdownMenuItem<VehicleModel>(
-              value: vehicle,
-              child: Semantics(
-                label:
-                    'Kendaraan ${vehicle.platNomor}, ${vehicle.jenisKendaraan}, ${vehicle.merk} ${vehicle.tipe}',
-                child: _buildVehicleItem(vehicle),
+          child: Row(
+            children: [
+              Expanded(
+                child: matchingVehicle != null
+                    ? Row(
+                        children: [
+                          Icon(
+                            _getVehicleIcon(matchingVehicle.jenisKendaraan),
+                            color: DesignConstants.primaryColor,
+                            size: 20,
+                          ),
+                          const SizedBox(width: DesignConstants.spaceMd),
+                          Expanded(
+                            child: Text(
+                              '${matchingVehicle.platNomor} - ${matchingVehicle.merk} ${matchingVehicle.tipe}',
+                              style: DesignConstants.getBodyStyle(),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      )
+                    : Text(
+                        'Pilih kendaraan Anda',
+                        style: DesignConstants.getBodyStyle(
+                          color: DesignConstants.textTertiary,
+                        ),
+                      ),
               ),
-            );
-          }).toList(),
-          onChanged: (VehicleModel? newValue) {
-            debugPrint(
-                '[VehicleSelector] Vehicle selected: ${newValue?.platNomor}');
-            widget.onVehicleSelected(newValue);
-            if (newValue != null) {
-              SemanticsService.announce(
-                'Kendaraan ${newValue.platNomor} dipilih',
-                TextDirection.ltr,
-              );
-            }
-          },
-          selectedItemBuilder: (BuildContext context) {
-            return _vehicles.map((vehicle) {
-              return _buildVehicleItem(vehicle);
-            }).toList();
-          },
+              Icon(
+                Icons.keyboard_arrow_down,
+                color: DesignConstants.primaryColor,
+                size: DesignConstants.iconSizeMedium,
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildVehicleItem(VehicleModel vehicle) {
-    return Row(
-      children: [
-        Icon(
-          _getVehicleIcon(vehicle.jenisKendaraan),
-          color: DesignConstants.primaryColor,
-          size: DesignConstants.iconSizeMedium,
+/// Bottom Sheet for vehicle selection
+class _VehicleSelectionBottomSheet extends StatelessWidget {
+  final List<VehicleModel> vehicles;
+  final VehicleModel? selectedVehicle;
+  final Function(VehicleModel?) onVehicleSelected;
+  final IconData Function(String) getVehicleIcon;
+
+  const _VehicleSelectionBottomSheet({
+    Key? key,
+    required this.vehicles,
+    required this.selectedVehicle,
+    required this.onVehicleSelected,
+    required this.getVehicleIcon,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
         ),
-        const SizedBox(width: DesignConstants.spaceMd),
-        Expanded(
-          child: Text(
-            '${vehicle.platNomor} - ${vehicle.merk} ${vehicle.tipe}',
-            style: DesignConstants.getBodyStyle(),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Handle bar
+          Container(
+            margin: const EdgeInsets.only(top: 12),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade300,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          
+          // Header
+          Padding(
+            padding: const EdgeInsets.all(DesignConstants.spaceLg),
+            child: Row(
+              children: [
+                Text(
+                  'Pilih Kendaraan',
+                  style: DesignConstants.getHeadingStyle(
+                    fontSize: DesignConstants.fontSizeH3,
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                  tooltip: 'Tutup',
+                ),
+              ],
+            ),
+          ),
+          
+          const Divider(height: 1),
+          
+          // Vehicle list
+          Flexible(
+            child: ListView.separated(
+              shrinkWrap: true,
+              padding: const EdgeInsets.symmetric(
+                vertical: DesignConstants.spaceSm,
+              ),
+              itemCount: vehicles.length,
+              separatorBuilder: (context, index) => const Divider(
+                height: 1,
+                indent: DesignConstants.spaceLg,
+                endIndent: DesignConstants.spaceLg,
+              ),
+              itemBuilder: (context, index) {
+                final vehicle = vehicles[index];
+                final isSelected =
+                    selectedVehicle?.idKendaraan == vehicle.idKendaraan;
+                
+                return _buildVehicleItem(
+                  context,
+                  vehicle,
+                  isSelected,
+                );
+              },
+            ),
+          ),
+          
+          // Bottom safe area
+          SizedBox(height: MediaQuery.of(context).padding.bottom),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVehicleItem(
+    BuildContext context,
+    VehicleModel vehicle,
+    bool isSelected,
+  ) {
+    final selectedBackgroundColor = const Color(0xFFF5F3FF); // Soft lavender
+    
+    return Semantics(
+      label:
+          'Kendaraan ${vehicle.platNomor}, ${vehicle.jenisKendaraan}, ${vehicle.merk} ${vehicle.tipe}${vehicle.isActive ? ", kendaraan aktif" : ""}${isSelected ? ", terpilih" : ""}',
+      button: true,
+      selected: isSelected,
+      child: InkWell(
+        onTap: () => onVehicleSelected(vehicle),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: DesignConstants.spaceLg,
+            vertical: DesignConstants.spaceLg,
+          ),
+          color: isSelected ? selectedBackgroundColor : Colors.transparent,
+          child: Row(
+            children: [
+              // Vehicle Icon
+              Icon(
+                getVehicleIcon(vehicle.jenisKendaraan),
+                color: isSelected
+                    ? DesignConstants.primaryColor
+                    : Colors.grey.shade600,
+                size: 24,
+              ),
+              const SizedBox(width: DesignConstants.spaceLg),
+              
+              // Vehicle Details
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Plat Nomor with Active Badge
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            vehicle.platNomor,
+                            style: DesignConstants.getBodyStyle(
+                              fontSize: DesignConstants.fontSizeBodyLarge,
+                              fontWeight: DesignConstants.fontWeightSemiBold,
+                              color: isSelected
+                                  ? DesignConstants.primaryColor
+                                  : DesignConstants.textPrimary,
+                            ),
+                          ),
+                        ),
+                        if (vehicle.isActive) ...[
+                          const SizedBox(width: DesignConstants.spaceXs),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF10B981), // Green
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              'Aktif',
+                              style: DesignConstants.getBodyStyle(
+                                fontSize: 10,
+                                fontWeight: DesignConstants.fontWeightSemiBold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    
+                    // Merk, Tipe, Jenis
+                    Text(
+                      '${vehicle.merk} ${vehicle.tipe}',
+                      style: DesignConstants.getBodyStyle(
+                        fontSize: DesignConstants.fontSizeBody,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      vehicle.jenisKendaraan,
+                      style: DesignConstants.getBodyStyle(
+                        fontSize: DesignConstants.fontSizeBodySmall,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Checkmark Icon
+              if (isSelected)
+                Icon(
+                  Icons.check_circle,
+                  color: DesignConstants.primaryColor,
+                  size: 24,
+                ),
+            ],
           ),
         ),
-      ],
+      ),
     );
   }
 }
+
+
