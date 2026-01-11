@@ -19,6 +19,7 @@ import '../widgets/booking_summary_card.dart';
 import '../widgets/error_retry_widget.dart';
 import '../widgets/booking_conflict_dialog.dart';
 import '../widgets/point_usage_widget.dart';
+import '../widgets/base_parking_card.dart';
 import '../dialogs/booking_confirmation_dialog.dart';
 import '../../logic/providers/point_provider.dart';
 
@@ -424,152 +425,155 @@ class _BookingPageContentState extends State<_BookingPageContent> {
     
     final titleFontSize = ResponsiveHelper.getResponsiveFontSize(context, 18);
     
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Section header
-        Semantics(
-          header: true,
-          child: Text(
-            'Pilih Lantai Parkir',
-            style: TextStyle(
-              fontSize: titleFontSize,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-          ),
-        ),
-        SizedBox(height: spacing * 0.5),
-        
-        // Info text
-        Text(
-          'Pilih lantai parkir yang diinginkan. Slot akan dipilihkan otomatis oleh sistem.',
-          style: TextStyle(
-            fontSize: ResponsiveHelper.getResponsiveFontSize(context, 14),
-            color: Colors.grey[600],
-          ),
-        ),
-        
-        SizedBox(height: spacing * 0.75),
-        
-        // Floor Selector Widget
-        FloorSelectorWidget(
-          floors: provider.floors,
-          selectedFloor: provider.selectedFloor,
-          isLoading: provider.isLoadingFloors,
-          onFloorSelected: (floor) {
-            provider.selectFloor(floor, token: _authToken);
-            
-            // Clear any previous error
-            provider.clearError();
-            
-            // Show success feedback
-            _showSuccessSnackbar('Lantai ${floor.floorName} dipilih');
-          },
-          onRetry: () {
-            if (_authToken != null) {
-              provider.fetchFloors(token: _authToken!);
-            }
-          },
-        ),
-        
-        // Show selected floor info
-        if (provider.selectedFloor != null) ...[
-          SizedBox(height: spacing),
-          
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFF573ED1).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: const Color(0xFF573ED1).withOpacity(0.3),
-                width: 1,
+    // Wrap entire section in ONE BaseParkingCard for consistency
+    return BaseParkingCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section header
+          Semantics(
+            header: true,
+            child: Text(
+              'Pilih Lantai Parkir',
+              style: TextStyle(
+                fontSize: titleFontSize,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
               ),
             ),
-            child: Row(
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF573ED1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.local_parking,
-                    color: Colors.white,
-                    size: 28,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        provider.selectedFloor!.floorName,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${provider.selectedFloor!.availableSlots} slot tersedia',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF4CAF50).withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.check_circle,
-                              size: 14,
-                              color: const Color(0xFF4CAF50),
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Slot akan dipilihkan otomatis',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: const Color(0xFF4CAF50),
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () {
-                    provider.selectFloor(provider.selectedFloor!, token: null);
-                    // This will deselect the floor
-                    setState(() {});
-                  },
-                  tooltip: 'Batalkan pilihan lantai',
-                ),
-              ],
+          ),
+          SizedBox(height: spacing * 0.5),
+          
+          // Info text
+          Text(
+            'Pilih lantai parkir yang diinginkan. Slot akan dipilihkan otomatis oleh sistem.',
+            style: TextStyle(
+              fontSize: ResponsiveHelper.getResponsiveFontSize(context, 14),
+              color: Colors.grey[600],
             ),
           ),
+          
+          SizedBox(height: spacing * 0.75),
+          
+          // Floor Selector Widget (no external card wrapper)
+          FloorSelectorWidget(
+            floors: provider.floors,
+            selectedFloor: provider.selectedFloor,
+            isLoading: provider.isLoadingFloors,
+            onFloorSelected: (floor) {
+              provider.selectFloor(floor, token: _authToken);
+              
+              // Clear any previous error
+              provider.clearError();
+              
+              // Show success feedback
+              _showSuccessSnackbar('Lantai ${floor.floorName} dipilih');
+            },
+            onRetry: () {
+              if (_authToken != null) {
+                provider.fetchFloors(token: _authToken!);
+              }
+            },
+          ),
+          
+          // Show selected floor info
+          if (provider.selectedFloor != null) ...[
+            SizedBox(height: spacing),
+            
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF573ED1).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: const Color(0xFF573ED1).withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF573ED1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.local_parking,
+                      color: Colors.white,
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          provider.selectedFloor!.floorName,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${provider.selectedFloor!.availableSlots} slot tersedia',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF4CAF50).withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.check_circle,
+                                size: 14,
+                                color: const Color(0xFF4CAF50),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Slot akan dipilihkan otomatis',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: const Color(0xFF4CAF50),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () {
+                      provider.selectFloor(provider.selectedFloor!, token: null);
+                      // This will deselect the floor
+                      setState(() {});
+                    },
+                    tooltip: 'Batalkan pilihan lantai',
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
-      ],
+      ),
     );
   }
 

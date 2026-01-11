@@ -3,6 +3,7 @@ import 'package:flutter/semantics.dart';
 import '../../config/design_constants.dart';
 import '../../data/models/vehicle_model.dart';
 import '../../data/services/vehicle_api_service.dart';
+import 'base_parking_card.dart';
 import 'booking_shimmer_loading.dart';
 import 'validation_error_text.dart';
 
@@ -49,15 +50,16 @@ class _VehicleSelectorState extends State<VehicleSelector> {
     try {
       debugPrint('[VehicleSelector] Fetching vehicles from API...');
       final vehicles = await widget.vehicleService.getVehicles();
-      debugPrint('[VehicleSelector] Vehicles fetched successfully: ${vehicles.length} vehicles');
-      
+      debugPrint(
+          '[VehicleSelector] Vehicles fetched successfully: ${vehicles.length} vehicles');
+
       setState(() {
         _vehicles = vehicles;
         _isLoading = false;
       });
     } catch (e) {
       debugPrint('[VehicleSelector] Error fetching vehicles: $e');
-      
+
       setState(() {
         _errorMessage = e.toString();
         _isLoading = false;
@@ -81,68 +83,49 @@ class _VehicleSelectorState extends State<VehicleSelector> {
   }
 
   void _navigateToAddVehicle() {
-    // TODO: Navigate to vehicle registration page
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Navigasi ke halaman tambah kendaraan'),
-        backgroundColor: Color(0xFF573ED1),
+      SnackBar(
+        content: const Text('Navigasi ke halaman tambah kendaraan'),
+        backgroundColor: DesignConstants.primaryColor,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final hasValidationError = widget.validationError != null && widget.validationError!.isNotEmpty;
-    
-    return Card(
-      elevation: DesignConstants.cardElevation,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(DesignConstants.cardBorderRadius),
-        side: BorderSide(
-          color: hasValidationError
-              ? DesignConstants.errorColor
-              : _isFocused
-                  ? DesignConstants.primaryColor
-                  : Colors.transparent,
-          width: DesignConstants.cardBorderWidthFocused,
-        ),
-      ),
-      color: hasValidationError ? DesignConstants.errorSurface : DesignConstants.backgroundColor,
-      shadowColor: DesignConstants.cardShadowColor,
-      child: Padding(
-        padding: DesignConstants.cardPadding,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Pilih Kendaraan',
-              style: DesignConstants.getHeadingStyle(
-                fontSize: DesignConstants.fontSizeH4,
-              ),
+    final hasValidationError =
+        widget.validationError != null && widget.validationError!.isNotEmpty;
+
+    return BaseParkingCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Pilih Kendaraan',
+            style: DesignConstants.getHeadingStyle(
+              fontSize: DesignConstants.fontSizeH4,
             ),
-            const SizedBox(height: DesignConstants.spaceMd),
-            
-            if (_isLoading)
-              _buildLoadingState()
-            else if (_errorMessage != null)
-              _buildErrorState()
-            else if (_vehicles.isEmpty)
-              _buildEmptyState()
-            else
-              _buildVehicleDropdown(),
-            
-            // Validation error display
-            if (hasValidationError)
-              ValidationErrorText(errorText: widget.validationError),
-          ],
-        ),
+          ),
+          const SizedBox(height: DesignConstants.spaceMd),
+
+          if (_isLoading)
+            _buildLoadingState()
+          else if (_errorMessage != null)
+            _buildErrorState()
+          else if (_vehicles.isEmpty)
+            _buildEmptyState()
+          else
+            _buildVehicleDropdown(),
+
+          // Validation error display
+          if (hasValidationError)
+            ValidationErrorText(errorText: widget.validationError),
+        ],
       ),
     );
   }
 
   Widget _buildLoadingState() {
-    // Use shimmer loading for better UX
-    // Requirements: 13.2
     return Semantics(
       label: 'Memuat daftar kendaraan',
       hint: 'Mohon tunggu, sedang memuat data kendaraan Anda',
@@ -153,12 +136,14 @@ class _VehicleSelectorState extends State<VehicleSelector> {
   Widget _buildErrorState() {
     return Semantics(
       label: 'Gagal memuat kendaraan',
-      hint: 'Terjadi kesalahan saat memuat data kendaraan. Ketuk tombol coba lagi untuk memuat ulang',
+      hint:
+          'Terjadi kesalahan saat memuat data kendaraan. Ketuk tombol coba lagi untuk memuat ulang',
       child: Container(
         padding: DesignConstants.cardPadding,
         decoration: BoxDecoration(
           color: DesignConstants.errorSurface,
-          borderRadius: BorderRadius.circular(DesignConstants.cardBorderRadius),
+          borderRadius:
+              BorderRadius.circular(DesignConstants.cardBorderRadius),
         ),
         child: Column(
           children: [
@@ -199,7 +184,8 @@ class _VehicleSelectorState extends State<VehicleSelector> {
 
   Widget _buildEmptyState() {
     return Semantics(
-      label: 'Belum ada kendaraan terdaftar. Tambahkan kendaraan terlebih dahulu untuk melanjutkan booking',
+      label:
+          'Belum ada kendaraan terdaftar. Tambahkan kendaraan terlebih dahulu untuk melanjutkan booking',
       child: Container(
         padding: DesignConstants.cardPadding,
         decoration: BoxDecoration(
@@ -207,7 +193,8 @@ class _VehicleSelectorState extends State<VehicleSelector> {
             color: DesignConstants.borderPrimary,
             width: DesignConstants.cardBorderWidthFocused,
           ),
-          borderRadius: BorderRadius.circular(DesignConstants.cardBorderRadius),
+          borderRadius:
+              BorderRadius.circular(DesignConstants.cardBorderRadius),
         ),
         child: Column(
           children: [
@@ -262,29 +249,32 @@ class _VehicleSelectorState extends State<VehicleSelector> {
   }
 
   Widget _buildVehicleDropdown() {
-    // Debug: Log vehicles and selected vehicle
-    debugPrint('[VehicleSelector] Building dropdown with ${_vehicles.length} vehicles');
+    debugPrint(
+        '[VehicleSelector] Building dropdown with ${_vehicles.length} vehicles');
     if (widget.selectedVehicle != null) {
-      debugPrint('[VehicleSelector] Selected vehicle ID: ${widget.selectedVehicle!.idKendaraan}');
-      debugPrint('[VehicleSelector] Selected vehicle plat: ${widget.selectedVehicle!.platNomor}');
+      debugPrint(
+          '[VehicleSelector] Selected vehicle ID: ${widget.selectedVehicle!.idKendaraan}');
+      debugPrint(
+          '[VehicleSelector] Selected vehicle plat: ${widget.selectedVehicle!.platNomor}');
     }
-    
-    // Find matching vehicle in list by ID (not by instance)
+
     VehicleModel? matchingVehicle;
     if (widget.selectedVehicle != null) {
       try {
         matchingVehicle = _vehicles.firstWhere(
           (v) => v.idKendaraan == widget.selectedVehicle!.idKendaraan,
         );
-        debugPrint('[VehicleSelector] Found matching vehicle: ${matchingVehicle.platNomor}');
+        debugPrint(
+            '[VehicleSelector] Found matching vehicle: ${matchingVehicle.platNomor}');
       } catch (e) {
         debugPrint('[VehicleSelector] No matching vehicle found in list');
         matchingVehicle = null;
       }
     }
-    
+
     return Semantics(
-      label: 'Pilih kendaraan untuk booking. ${matchingVehicle != null ? "Kendaraan terpilih: ${matchingVehicle.platNomor}, ${matchingVehicle.jenisKendaraan}, ${matchingVehicle.merk} ${matchingVehicle.tipe}" : "Belum ada kendaraan dipilih"}',
+      label:
+          'Pilih kendaraan untuk booking. ${matchingVehicle != null ? "Kendaraan terpilih: ${matchingVehicle.platNomor}, ${matchingVehicle.jenisKendaraan}, ${matchingVehicle.merk} ${matchingVehicle.tipe}" : "Belum ada kendaraan dipilih"}',
       hint: 'Ketuk untuk memilih kendaraan dari daftar kendaraan terdaftar',
       child: Focus(
         onFocusChange: (hasFocus) {
@@ -293,25 +283,28 @@ class _VehicleSelectorState extends State<VehicleSelector> {
           });
         },
         child: DropdownButtonFormField<VehicleModel>(
-          value: matchingVehicle, // Use matching vehicle from list, not the passed one
+          value: matchingVehicle,
           decoration: InputDecoration(
             contentPadding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 8,
+              horizontal: DesignConstants.spaceMd,
+              vertical: DesignConstants.spaceSm,
             ),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300),
+              borderRadius:
+                  BorderRadius.circular(DesignConstants.cardBorderRadius),
+              borderSide: BorderSide(color: DesignConstants.borderPrimary),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300),
+              borderRadius:
+                  BorderRadius.circular(DesignConstants.cardBorderRadius),
+              borderSide: BorderSide(color: DesignConstants.borderPrimary),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFF573ED1),
-                width: 2,
+              borderRadius:
+                  BorderRadius.circular(DesignConstants.cardBorderRadius),
+              borderSide: BorderSide(
+                color: DesignConstants.primaryColor,
+                width: DesignConstants.cardBorderWidthFocused,
               ),
             ),
           ),
@@ -321,16 +314,17 @@ class _VehicleSelectorState extends State<VehicleSelector> {
             return DropdownMenuItem<VehicleModel>(
               value: vehicle,
               child: Semantics(
-                label: 'Kendaraan ${vehicle.platNomor}, ${vehicle.jenisKendaraan}, ${vehicle.merk} ${vehicle.tipe}',
+                label:
+                    'Kendaraan ${vehicle.platNomor}, ${vehicle.jenisKendaraan}, ${vehicle.merk} ${vehicle.tipe}',
                 child: _buildVehicleItem(vehicle),
               ),
             );
           }).toList(),
           onChanged: (VehicleModel? newValue) {
-            debugPrint('[VehicleSelector] Vehicle selected: ${newValue?.platNomor}');
+            debugPrint(
+                '[VehicleSelector] Vehicle selected: ${newValue?.platNomor}');
             widget.onVehicleSelected(newValue);
             if (newValue != null) {
-              // Announce selection to screen reader
               SemanticsService.announce(
                 'Kendaraan ${newValue.platNomor} dipilih',
                 TextDirection.ltr,
@@ -348,7 +342,6 @@ class _VehicleSelectorState extends State<VehicleSelector> {
   }
 
   Widget _buildVehicleItem(VehicleModel vehicle) {
-    // Simplified single-line layout to avoid overflow
     return Row(
       children: [
         Icon(

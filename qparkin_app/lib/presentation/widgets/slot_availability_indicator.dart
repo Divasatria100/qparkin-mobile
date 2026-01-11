@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import '../../config/design_constants.dart';
+import 'base_parking_card.dart';
 import 'booking_shimmer_loading.dart';
 
 /// Widget to display real-time parking slot availability with color-coded status
@@ -28,14 +29,13 @@ class SlotAvailabilityIndicator extends StatefulWidget {
 
 class _SlotAvailabilityIndicatorState
     extends State<SlotAvailabilityIndicator> {
-
   Color _getStatusColor() {
     if (widget.availableSlots > 10) {
-      return const Color(0xFF4CAF50); // Green
+      return DesignConstants.successColor;
     } else if (widget.availableSlots >= 3) {
-      return const Color(0xFFFF9800); // Yellow/Orange
+      return DesignConstants.warningColor;
     } else {
-      return const Color(0xFFF44336); // Red
+      return DesignConstants.errorColor;
     }
   }
 
@@ -55,33 +55,23 @@ class _SlotAvailabilityIndicatorState
   Widget build(BuildContext context) {
     final statusColor = _getStatusColor();
 
-    return Card(
-      elevation: DesignConstants.cardElevation,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(DesignConstants.cardBorderRadius),
-      ),
-      color: DesignConstants.backgroundColor,
-      shadowColor: DesignConstants.cardShadowColor,
-      child: Padding(
-        padding: DesignConstants.cardPadding,
-        child: widget.isLoading
-            ? _buildShimmerLoading()
-            : _buildContent(statusColor),
-      ),
+    return BaseParkingCard(
+      child: widget.isLoading
+          ? _buildShimmerLoading()
+          : _buildContent(statusColor),
     );
   }
 
   Widget _buildShimmerLoading() {
-    // Use consistent shimmer loading widget
-    // Requirements: 13.2
     return const SlotAvailabilityShimmer();
   }
 
   Widget _buildContent(Color statusColor) {
     final statusText = _getStatusText();
-    
+
     return Semantics(
-      label: 'Ketersediaan slot parkir. ${widget.availableSlots} slot tersedia untuk ${widget.vehicleType}. Status $statusText',
+      label:
+          'Ketersediaan slot parkir. ${widget.availableSlots} slot tersedia untuk ${widget.vehicleType}. Status $statusText',
       child: Row(
         children: [
           // Status Circle with Icon
@@ -101,9 +91,9 @@ class _SlotAvailabilityIndicatorState
               ),
             ),
           ),
-          
+
           const SizedBox(width: DesignConstants.spaceLg),
-          
+
           // Availability Info
           Expanded(
             child: Column(
@@ -133,7 +123,7 @@ class _SlotAvailabilityIndicatorState
               ],
             ),
           ),
-          
+
           // Refresh Button
           Semantics(
             label: 'Tombol refresh ketersediaan slot',

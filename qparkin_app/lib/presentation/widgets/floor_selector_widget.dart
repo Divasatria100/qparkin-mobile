@@ -221,15 +221,25 @@ class _FloorSelectorWidgetState extends State<FloorSelectorWidget> {
     return Column(
       children: List.generate(widget.floors.length, (index) {
         final floor = widget.floors[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: _FloorCard(
-            floor: floor,
-            isSelected: widget.selectedFloor?.idFloor == floor.idFloor,
-            focusNode: _focusNodes[index]!,
-            onTap: () => _handleFloorSelection(floor),
-            onKeyEvent: (event) => _handleKeyEvent(event, index),
-          ),
+        final isLast = index == widget.floors.length - 1;
+        
+        return Column(
+          children: [
+            _FloorCard(
+              floor: floor,
+              isSelected: widget.selectedFloor?.idFloor == floor.idFloor,
+              focusNode: _focusNodes[index]!,
+              onTap: () => _handleFloorSelection(floor),
+              onKeyEvent: (event) => _handleKeyEvent(event, index),
+            ),
+            // Add divider between items (not after last item)
+            if (!isLast)
+              Divider(
+                height: 1,
+                thickness: 1,
+                color: Colors.grey.shade200,
+              ),
+          ],
         );
       }),
     );
@@ -338,31 +348,20 @@ class _FloorCard extends StatelessWidget {
               color: Colors.transparent,
               child: InkWell(
                 onTap: isEnabled ? onTap : null,
-                borderRadius: BorderRadius.circular(16),
                 child: Container(
                   height: 80,
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? const Color(0xFF573ED1).withOpacity(0.05)
-                        : Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isFocused
-                          ? const Color(0xFF573ED1)
-                          : isSelected
-                              ? const Color(0xFF573ED1)
-                              : Colors.grey.shade200,
-                      width: isFocused || isSelected ? 2 : 1,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+                        ? const Color(0xFF573ED1).withOpacity(0.08)
+                        : Colors.transparent,
+                    border: isFocused
+                        ? Border.all(
+                            color: const Color(0xFF573ED1),
+                            width: 2,
+                          )
+                        : null,
                   ),
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                   child: Row(
                     children: [
                       // Floor number badge

@@ -18,6 +18,9 @@ class DesignConstants {
   /// Primary brand color (Purple)
   static const Color primaryColor = Color(0xFF573ED1);
   
+  /// Primary light color (Purple light for borders)
+  static const Color primaryLight = Color(0xFFE8E0FF);
+  
   /// Success color (Green)
   static const Color successColor = Color(0xFF4CAF50);
   
@@ -82,7 +85,7 @@ class DesignConstants {
   static Color get cardShadowColor => Colors.black.withOpacity(0.08);
   
   /// Card border width
-  static const double cardBorderWidth = 1.0;
+  static const double cardBorderWidth = 1.5;
   
   /// Focused card border width
   static const double cardBorderWidthFocused = 2.0;
