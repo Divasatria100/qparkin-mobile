@@ -164,8 +164,11 @@ return [
 
         /*
          * Package Service Providers...
+         * 
+         * Removed 
+         * 
          */
-        Laravel\Passport\PassportServiceProvider::class,
+        
 
         /*
          * Application Service Providers...

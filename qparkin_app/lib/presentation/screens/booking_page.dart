@@ -22,6 +22,7 @@ import '../widgets/point_usage_widget.dart';
 import '../widgets/base_parking_card.dart';
 import '../dialogs/booking_confirmation_dialog.dart';
 import '../../logic/providers/point_provider.dart';
+import 'midtrans_payment_page.dart';
 
 /// Main booking page for reserving parking slots
 ///
@@ -836,41 +837,11 @@ class _BookingPageContentState extends State<_BookingPageContent> {
     // Pop the booking page first
     Navigator.pop(context);
     
-    // Show confirmation dialog as full-screen route
+    // Navigate to Midtrans payment page
     Navigator.push(
       context,
       MaterialPageRoute(
-        fullscreenDialog: true,
-        builder: (context) => BookingConfirmationDialog(
-          booking: booking,
-          onViewActivity: () async {
-            // Close dialog
-            Navigator.pop(context);
-            
-            // Trigger ActiveParkingProvider to fetch new booking data
-            final activeParkingProvider = Provider.of<ActiveParkingProvider>(
-              context,
-              listen: false,
-            );
-            
-            // Fetch active parking data to display the new booking
-            await activeParkingProvider.fetchActiveParking(token: _authToken);
-            
-            // Navigate to Activity Page with initialTab: 0 (Aktivitas tab)
-            Navigator.pushReplacementNamed(
-              context,
-              '/activity',
-              arguments: {'initialTab': 0},
-            );
-          },
-          onBackToHome: () {
-            // Close dialog
-            Navigator.pop(context);
-            
-            // Navigate to Home Page
-            Navigator.pushReplacementNamed(context, '/home');
-          },
-        ),
+        builder: (context) => MidtransPaymentPage(booking: booking),
       ),
     );
   }
