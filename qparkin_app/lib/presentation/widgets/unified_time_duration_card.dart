@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'base_parking_card.dart';
 
 /// Unified card widget combining time and duration selection
 /// 
@@ -133,59 +134,47 @@ class _UnifiedTimeDurationCardState extends State<UnifiedTimeDurationCard> with 
     final hasStartTimeError = widget.startTimeError != null && widget.startTimeError!.isNotEmpty;
     final hasDurationError = widget.durationError != null && widget.durationError!.isNotEmpty;
     
-    return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: hasStartTimeError || hasDurationError
-            ? const BorderSide(color: Color(0xFFF44336), width: 2)
-            : BorderSide.none,
-      ),
-      color: Colors.white,
-      shadowColor: Colors.black.withOpacity(0.1),
-      child: Padding(
-        padding: EdgeInsets.all(padding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            _buildHeader(context),
-            
-            SizedBox(height: padding * 0.83), // 20px at 24px padding
-            
-            // Date & Time Section
-            _buildDateTimeSection(context, hasError: hasStartTimeError),
-            
-            if (hasStartTimeError) ...[
-              const SizedBox(height: 8),
-              _buildErrorText(widget.startTimeError!),
-            ],
-            
-            SizedBox(height: padding * 0.83),
-            
-            Divider(color: Colors.grey.shade200, height: 1),
-            
-            SizedBox(height: padding * 0.83),
-            
-            // Duration Selection Section
-            _buildDurationSection(context, hasError: hasDurationError),
-            
-            if (hasDurationError) ...[
-              const SizedBox(height: 8),
-              _buildErrorText(widget.durationError!),
-            ],
-            
-            SizedBox(height: padding * 0.67), // 16px at 24px padding
-            
-            Divider(color: Colors.grey.shade200, height: 1),
-            
-            SizedBox(height: padding * 0.67),
-            
-            // Calculated End Time Display
-            if (_calculateEndTime() != null)
-              _buildEndTimeDisplay(context),
+    return BaseParkingCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          _buildHeader(context),
+          
+          SizedBox(height: padding * 0.83), // 20px at 24px padding
+          
+          // Date & Time Section
+          _buildDateTimeSection(context, hasError: hasStartTimeError),
+          
+          if (hasStartTimeError) ...[
+            const SizedBox(height: 8),
+            _buildErrorText(widget.startTimeError!),
           ],
-        ),
+          
+          SizedBox(height: padding * 0.83),
+          
+          Divider(color: Colors.grey.shade200, height: 1),
+          
+          SizedBox(height: padding * 0.83),
+          
+          // Duration Selection Section
+          _buildDurationSection(context, hasError: hasDurationError),
+          
+          if (hasDurationError) ...[
+            const SizedBox(height: 8),
+            _buildErrorText(widget.durationError!),
+          ],
+          
+          SizedBox(height: padding * 0.67), // 16px at 24px padding
+          
+          Divider(color: Colors.grey.shade200, height: 1),
+          
+          SizedBox(height: padding * 0.67),
+          
+          // Calculated End Time Display
+          if (_calculateEndTime() != null)
+            _buildEndTimeDisplay(context),
+        ],
       ),
     );
   }

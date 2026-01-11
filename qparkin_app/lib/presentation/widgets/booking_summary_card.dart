@@ -95,13 +95,15 @@ class BookingSummaryCard extends StatelessWidget {
                   Text(
                     mallName,
                     style: DesignConstants.getBodyStyle(
+                      fontSize: DesignConstants.fontSizeBodyLarge,
                       fontWeight: DesignConstants.fontWeightBold,
                     ),
                   ),
                   const SizedBox(height: DesignConstants.spaceXs),
                   Text(
                     mallAddress,
-                    style: DesignConstants.getCaptionStyle(
+                    style: DesignConstants.getBodyStyle(
+                      fontSize: DesignConstants.fontSizeBody,
                       color: DesignConstants.textTertiary,
                     ),
                   ),
@@ -126,13 +128,15 @@ class BookingSummaryCard extends StatelessWidget {
                     Text(
                       '$reservedFloorName - Slot $reservedSlotCode',
                       style: DesignConstants.getBodyStyle(
+                        fontSize: DesignConstants.fontSizeBodyLarge,
                         fontWeight: DesignConstants.fontWeightBold,
                       ),
                     ),
                     const SizedBox(height: DesignConstants.spaceXs),
                     Text(
                       reservedSlotType ?? 'Regular Parking',
-                      style: DesignConstants.getCaptionStyle(
+                      style: DesignConstants.getBodyStyle(
+                        fontSize: DesignConstants.fontSizeBody,
                         color: DesignConstants.textTertiary,
                       ),
                     ),
@@ -156,13 +160,15 @@ class BookingSummaryCard extends StatelessWidget {
                   Text(
                     vehiclePlat,
                     style: DesignConstants.getBodyStyle(
+                      fontSize: DesignConstants.fontSizeBodyLarge,
                       fontWeight: DesignConstants.fontWeightBold,
                     ),
                   ),
                   const SizedBox(height: DesignConstants.spaceXs),
                   Text(
                     '$vehicleType - $vehicleBrand',
-                    style: DesignConstants.getCaptionStyle(
+                    style: DesignConstants.getBodyStyle(
+                      fontSize: DesignConstants.fontSizeBody,
                       color: DesignConstants.textTertiary,
                     ),
                   ),
@@ -390,22 +396,22 @@ class BookingSummaryCard extends StatelessWidget {
             Icon(
               icon,
               color: DesignConstants.primaryColor,
-              size: DesignConstants.iconSizeMedium,
+              size: DesignConstants.iconSizeLarge,
             ),
             const SizedBox(width: DesignConstants.spaceSm),
             Text(
               title,
-              style: DesignConstants.getCaptionStyle(
-                color: DesignConstants.textTertiary,
-              ).copyWith(
+              style: DesignConstants.getBodyStyle(
+                fontSize: DesignConstants.fontSizeBody,
+                color: DesignConstants.textSecondary,
                 fontWeight: DesignConstants.fontWeightSemiBold,
               ),
             ),
           ],
         ),
-        const SizedBox(height: DesignConstants.spaceSm),
+        const SizedBox(height: DesignConstants.spaceMd),
         Padding(
-          padding: const EdgeInsets.only(left: 28),
+          padding: const EdgeInsets.only(left: 32),
           child: content,
         ),
       ],
@@ -418,13 +424,14 @@ class BookingSummaryCard extends StatelessWidget {
       children: [
         Icon(
           icon,
-          size: DesignConstants.iconSizeSmall,
+          size: DesignConstants.iconSizeMedium,
           color: DesignConstants.textTertiary,
         ),
         const SizedBox(width: DesignConstants.spaceSm),
         Text(
           label,
-          style: DesignConstants.getCaptionStyle(
+          style: DesignConstants.getBodyStyle(
+            fontSize: DesignConstants.fontSizeBody,
             color: DesignConstants.textTertiary,
           ),
         ),
@@ -432,6 +439,7 @@ class BookingSummaryCard extends StatelessWidget {
         Text(
           value,
           style: DesignConstants.getBodyStyle(
+            fontSize: DesignConstants.fontSizeBodyLarge,
             fontWeight: DesignConstants.fontWeightBold,
           ),
         ),

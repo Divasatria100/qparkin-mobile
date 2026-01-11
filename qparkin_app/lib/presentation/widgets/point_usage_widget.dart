@@ -128,10 +128,6 @@ class _PointUsageWidgetState extends State<PointUsageWidget> {
         return Semantics(
           label: 'Penggunaan poin untuk diskon',
           child: Container(
-            margin: EdgeInsets.symmetric(
-              horizontal: isTablet ? 24.0 : 16.0,
-              vertical: 12.0,
-            ),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
