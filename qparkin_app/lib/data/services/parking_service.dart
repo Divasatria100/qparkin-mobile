@@ -18,7 +18,7 @@ class ParkingService {
   /// Throws Exception on network or parsing errors
   Future<ActiveParkingModel?> getActiveParking({required String token}) async {
     try {
-      final uri = Uri.parse('$_baseUrl/api/parking/active');
+      final uri = Uri.parse('$_baseUrl/api/booking/active');
       debugPrint('[ParkingService] Fetching active parking from: $uri');
       
       final response = await http.get(

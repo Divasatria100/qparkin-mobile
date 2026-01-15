@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import '../../data/models/booking_model.dart';
 import '../../logic/providers/active_parking_provider.dart';
 import '../dialogs/booking_confirmation_dialog.dart';
+import 'booking_detail_page.dart';
 
 /// Midtrans Snap Payment Page using WebView
 /// 
@@ -140,6 +141,14 @@ class _MidtransPaymentPageState extends State<MidtransPaymentPage> {
   void _handleNavigationUrl(String url) {
     debugPrint('[MidtransPayment] Handling URL: $url');
 
+    // Handle Midtrans simulator deeplink (payment success)
+    if (url.contains('simulator.sandbox.midtrans.com') && url.contains('deeplink/payment')) {
+      debugPrint('[MidtransPayment] Detected Midtrans simulator success');
+      // Simulator always means success in sandbox
+      _handlePaymentSuccess();
+      return;
+    }
+
     // Check for finish redirect URL from Midtrans
     // Midtrans will redirect to finish_url with query parameters
     if (url.contains('finish') || url.contains('status_code')) {
@@ -171,14 +180,24 @@ class _MidtransPaymentPageState extends State<MidtransPaymentPage> {
 
       if (!mounted) return;
 
-      // Refresh active parking data
+      // Clear and refresh active parking data
       final activeParkingProvider = Provider.of<ActiveParkingProvider>(
         context,
         listen: false,
       );
+      
+      // Clear old data first
+      activeParkingProvider.clear();
+      
+      // Wait a bit for backend to process
+      await Future.delayed(const Duration(milliseconds: 500));
+      
+      // Fetch fresh data
       final token = await _storage.read(key: 'auth_token');
       if (token != null) {
+        debugPrint('[MidtransPayment] Refreshing active parking data...');
         await activeParkingProvider.fetchActiveParking(token: token);
+        debugPrint('[MidtransPayment] Active parking refreshed: ${activeParkingProvider.hasActiveParking}');
       }
 
       // Navigate to confirmation dialog
@@ -303,40 +322,17 @@ class _MidtransPaymentPageState extends State<MidtransPaymentPage> {
     }
   }
 
-  /// Show success dialog and navigate
+  /// Show success dialog and navigate to booking detail page
   void _showSuccessDialog() {
     // Pop payment page
     Navigator.pop(context);
 
-    // Show confirmation dialog
-    Navigator.push(
+    // Navigate directly to booking detail page
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        fullscreenDialog: true,
-        builder: (context) => BookingConfirmationDialog(
+        builder: (context) => BookingDetailPage(
           booking: widget.booking.copyWith(status: 'aktif'),
-          onViewActivity: () async {
-            Navigator.pop(context);
-
-            final activeParkingProvider = Provider.of<ActiveParkingProvider>(
-              context,
-              listen: false,
-            );
-            final token = await _storage.read(key: 'auth_token');
-            if (token != null) {
-              await activeParkingProvider.fetchActiveParking(token: token);
-            }
-
-            Navigator.pushReplacementNamed(
-              context,
-              '/activity',
-              arguments: {'initialTab': 0},
-            );
-          },
-          onBackToHome: () {
-            Navigator.pop(context);
-            Navigator.pushReplacementNamed(context, '/home');
-          },
         ),
       ),
     );

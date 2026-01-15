@@ -113,6 +113,13 @@ class BookingController extends Controller
             $waktuMulai = Carbon::parse($request->waktu_mulai);
             $waktuSelesai = $waktuMulai->copy()->addHours($request->durasi_booking);
 
+            // Calculate estimated cost based on tarif parkir
+            $biayaEstimasi = $this->calculateBookingCost(
+                $request->id_parkiran,
+                $request->id_kendaraan,
+                $request->durasi_booking
+            );
+
             // Create transaksi parkir first
             $transaksi = TransaksiParkir::create([
                 'id_user' => $userId,
@@ -123,7 +130,8 @@ class BookingController extends Controller
                 'status' => 'booked'
             ]);
 
-            // Create booking
+            // Create booking with pending_payment status
+            // User needs to complete payment via Midtrans before booking becomes active
             $booking = Booking::create([
                 'id_transaksi' => $transaksi->id_transaksi,
                 'id_slot' => $idSlot,
@@ -131,7 +139,8 @@ class BookingController extends Controller
                 'waktu_mulai' => $waktuMulai,
                 'waktu_selesai' => $waktuSelesai,
                 'durasi_booking' => $request->durasi_booking,
-                'status' => 'aktif', // Changed from 'confirmed' to match ENUM values
+                'biaya_estimasi' => $biayaEstimasi,
+                'status' => 'aktif', // Will be changed to 'pending_payment' after Midtrans integration
                 'dibooking_pada' => Carbon::now()
             ]);
 
@@ -200,7 +209,7 @@ class BookingController extends Controller
                 'waktu_selesai' => $booking->waktu_selesai,
                 'durasi_booking' => $booking->durasi_booking,
                 'status' => $booking->status,
-                'biaya_estimasi' => 0, // TODO: Calculate from tarif
+                'biaya_estimasi' => $booking->biaya_estimasi ?? $biayaEstimasi,
                 'dibooking_pada' => $booking->dibooking_pada,
                 // Additional display fields
                 'nama_mall' => $mall ? $mall->nama_mall : null,
@@ -327,24 +336,150 @@ class BookingController extends Controller
         try {
             $userId = $request->user()->id_user;
 
-            $activeBookings = Booking::whereHas('transaksiParkir', function ($query) use ($userId) {
+            $activeBooking = Booking::whereHas('transaksiParkir', function ($query) use ($userId) {
                 $query->where('id_user', $userId)
                       ->whereIn('status', ['booked', 'active']);
             })
             ->whereIn('status', ['aktif']) // Changed from 'confirmed', 'active' to match ENUM
-            ->with(['transaksiParkir', 'slot.floor', 'reservation'])
+            ->with([
+                'transaksiParkir.parkiran.mall',
+                'transaksiParkir.kendaraan',
+                'slot.floor',
+                'reservation'
+            ])
             ->orderBy('waktu_mulai', 'desc')
-            ->get();
+            ->first();
+
+            if (!$activeBooking) {
+                return response()->json([
+                    'success' => true,
+                    'data' => null,
+                    'message' => 'No active booking found'
+                ]);
+            }
+
+            // Format response with all fields mobile app expects
+            $transaksiData = $activeBooking->transaksiParkir;
+            $parkiran = $transaksiData ? $transaksiData->parkiran : null;
+            $mall = $parkiran ? $parkiran->mall : null;
+            $kendaraan = $transaksiData ? $transaksiData->kendaraan : null;
+            $slot = $activeBooking->slot;
+            $floor = $slot ? $slot->floor : null;
+
+            $bookingData = [
+                'id_transaksi' => $activeBooking->id_transaksi,
+                'id_booking' => $activeBooking->id_transaksi,
+                'id_mall' => $mall ? $mall->id_mall : null,
+                'id_parkiran' => $transaksiData ? $transaksiData->id_parkiran : null,
+                'id_kendaraan' => $transaksiData ? $transaksiData->id_kendaraan : null,
+                'id_slot' => $activeBooking->id_slot,
+                'reservation_id' => $activeBooking->reservation_id,
+                'qr_code' => $transaksiData ? ($transaksiData->qr_code ?? 'BOOKING-' . $activeBooking->id_transaksi) : '',
+                'waktu_masuk' => $transaksiData ? $transaksiData->waktu_masuk : $activeBooking->waktu_mulai,
+                'waktu_mulai' => $activeBooking->waktu_mulai,
+                'waktu_selesai' => $activeBooking->waktu_selesai,
+                'durasi_booking' => $activeBooking->durasi_booking,
+                'status' => $activeBooking->status,
+                'biaya_estimasi' => $activeBooking->biaya_estimasi ?? 0,
+                'dibooking_pada' => $activeBooking->dibooking_pada,
+                // Additional display fields
+                'nama_mall' => $mall ? $mall->nama_mall : null,
+                'lokasi_mall' => $mall ? $mall->lokasi : null,
+                'plat_nomor' => $kendaraan ? $kendaraan->plat_nomor : null,
+                'jenis_kendaraan' => $kendaraan ? $kendaraan->jenis : null,
+                'kode_slot' => $slot ? $slot->slot_code : null,
+                'floor_name' => $floor ? $floor->nama_lantai : null,
+                'floor_number' => $floor ? $floor->nomor_lantai : null,
+                'slot_type' => $slot ? ($slot->tipe_slot ?? 'regular') : 'regular',
+                // Tarif info for cost calculation
+                'biaya_per_jam' => $activeBooking->biaya_estimasi && $activeBooking->durasi_booking > 0 
+                    ? ($activeBooking->biaya_estimasi / $activeBooking->durasi_booking) 
+                    : 10000,
+            ];
 
             return response()->json([
                 'success' => true,
-                'data' => $activeBookings
+                'data' => $bookingData
             ]);
         } catch (\Exception $e) {
             Log::error('Error fetching active bookings: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to fetch active bookings',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get pending payment bookings for current user
+     * 
+     * Returns bookings that have been created but payment is not yet completed.
+     * These bookings are in 'pending_payment' status.
+     */
+    public function getPendingPayments(Request $request)
+    {
+        try {
+            $userId = $request->user()->id_user;
+
+            $pendingBookings = Booking::whereHas('transaksiParkir', function ($query) use ($userId) {
+                $query->where('id_user', $userId)
+                      ->where('status', 'pending_payment');
+            })
+            ->with([
+                'transaksiParkir.parkiran.mall',
+                'transaksiParkir.kendaraan',
+                'slot.floor',
+                'reservation'
+            ])
+            ->orderBy('dibooking_pada', 'desc')
+            ->get();
+
+            // Format response with all fields mobile app expects
+            $formattedBookings = $pendingBookings->map(function ($booking) {
+                $transaksiData = $booking->transaksiParkir;
+                $parkiran = $transaksiData ? $transaksiData->parkiran : null;
+                $mall = $parkiran ? $parkiran->mall : null;
+                $kendaraan = $transaksiData ? $transaksiData->kendaraan : null;
+                $slot = $booking->slot;
+                $floor = $slot ? $slot->floor : null;
+
+                return [
+                    'id_transaksi' => $booking->id_transaksi,
+                    'id_booking' => $booking->id_transaksi,
+                    'id_mall' => $mall ? $mall->id_mall : null,
+                    'id_parkiran' => $transaksiData ? $transaksiData->id_parkiran : null,
+                    'id_kendaraan' => $transaksiData ? $transaksiData->id_kendaraan : null,
+                    'id_slot' => $booking->id_slot,
+                    'reservation_id' => $booking->reservation_id,
+                    'qr_code' => $transaksiData ? ($transaksiData->qr_code ?? '') : '',
+                    'waktu_mulai' => $booking->waktu_mulai,
+                    'waktu_selesai' => $booking->waktu_selesai,
+                    'durasi_booking' => $booking->durasi_booking,
+                    'status' => 'pending_payment',
+                    'biaya_estimasi' => $booking->biaya_estimasi ?? 0,
+                    'dibooking_pada' => $booking->dibooking_pada,
+                    // Additional display fields
+                    'nama_mall' => $mall ? $mall->nama_mall : null,
+                    'lokasi_mall' => $mall ? $mall->lokasi : null,
+                    'plat_nomor' => $kendaraan ? $kendaraan->plat_nomor : null,
+                    'jenis_kendaraan' => $kendaraan ? $kendaraan->jenis : null,
+                    'kode_slot' => $slot ? $slot->slot_code : null,
+                    'floor_name' => $floor ? $floor->nama_lantai : null,
+                    'floor_number' => $floor ? $floor->nomor_lantai : null,
+                    'slot_type' => $slot ? ($slot->tipe_slot ?? 'regular') : 'regular',
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => $formattedBookings
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error fetching pending payments: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch pending payments',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -438,8 +573,14 @@ class BookingController extends Controller
             $kendaraan = $transaksi ? $transaksi->kendaraan : null;
             $user = $transaksi ? $transaksi->user : null;
             
-            // Calculate amount (for now use biaya_estimasi, later calculate from tarif)
-            $amount = $booking->biaya_estimasi > 0 ? $booking->biaya_estimasi : 10000; // Default Rp 10.000
+            // Calculate amount (use biaya_estimasi from booking)
+            $amount = $booking->biaya_estimasi > 0 ? $booking->biaya_estimasi : 10000; // Default Rp 10.000 if not set
+            
+            Log::info('[Payment] Using booking cost', [
+                'booking_id' => $id,
+                'biaya_estimasi' => $booking->biaya_estimasi,
+                'amount_used' => $amount
+            ]);
             
             // Prepare transaction details for Midtrans
             $orderId = 'BOOKING-' . $id . '-' . time();
@@ -553,6 +694,189 @@ class BookingController extends Controller
                 'message' => 'Failed to generate snap token',
                 'error' => $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * Update payment status after Midtrans payment
+     * 
+     * This endpoint is called by the mobile app after payment is completed.
+     * It updates the booking status from 'pending_payment' to 'aktif' when payment is successful.
+     * 
+     * @param Request $request
+     * @param int $id Booking ID (id_transaksi)
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updatePaymentStatus(Request $request, $id)
+    {
+        $request->validate([
+            'payment_status' => 'required|in:PAID,PENDING,FAILED'
+        ]);
+
+        DB::beginTransaction();
+        try {
+            Log::info('[Payment] Updating payment status', [
+                'booking_id' => $id,
+                'payment_status' => $request->payment_status
+            ]);
+
+            // Find booking
+            $booking = Booking::with(['transaksiParkir'])
+                ->where('id_transaksi', $id)
+                ->first();
+
+            if (!$booking) {
+                Log::warning('[Payment] Booking not found', ['booking_id' => $id]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Booking not found'
+                ], 404);
+            }
+
+            $paymentStatus = $request->payment_status;
+
+            if ($paymentStatus === 'PAID') {
+                // Update booking status to aktif
+                $booking->update(['status' => 'aktif']);
+
+                // Update transaksi status to active
+                if ($booking->transaksiParkir) {
+                    $booking->transaksiParkir->update([
+                        'status' => 'active',
+                        'waktu_masuk' => Carbon::now()
+                    ]);
+                }
+
+                Log::info('[Payment] Payment successful, booking activated', [
+                    'booking_id' => $id,
+                    'booking_status' => 'aktif',
+                    'transaksi_status' => 'active'
+                ]);
+
+                DB::commit();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Pembayaran berhasil, booking aktif',
+                    'data' => [
+                        'id_booking' => $id,
+                        'status' => 'aktif',
+                        'payment_status' => 'PAID'
+                    ]
+                ]);
+            } elseif ($paymentStatus === 'PENDING') {
+                // Keep status as pending_payment or update to pending
+                $booking->update(['status' => 'pending_payment']);
+
+                Log::info('[Payment] Payment pending', ['booking_id' => $id]);
+
+                DB::commit();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Pembayaran sedang diproses',
+                    'data' => [
+                        'id_booking' => $id,
+                        'status' => 'pending_payment',
+                        'payment_status' => 'PENDING'
+                    ]
+                ]);
+            } else {
+                // Payment failed - cancel booking
+                $booking->update(['status' => 'cancelled']);
+
+                if ($booking->transaksiParkir) {
+                    $booking->transaksiParkir->update(['status' => 'cancelled']);
+                }
+
+                // Release the slot
+                if ($booking->slot) {
+                    $booking->slot->markAsAvailable();
+                }
+
+                Log::info('[Payment] Payment failed, booking cancelled', ['booking_id' => $id]);
+
+                DB::commit();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Pembayaran gagal, booking dibatalkan',
+                    'data' => [
+                        'id_booking' => $id,
+                        'status' => 'cancelled',
+                        'payment_status' => 'FAILED'
+                    ]
+                ]);
+            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('[Payment] Error updating payment status', [
+                'booking_id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update payment status',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Calculate booking cost based on tarif parkir
+     * 
+     * @param string $idParkiran Parkiran ID
+     * @param string $idKendaraan Kendaraan ID
+     * @param int $durasiBooking Duration in hours
+     * @return float Estimated cost
+     */
+    private function calculateBookingCost($idParkiran, $idKendaraan, $durasiBooking)
+    {
+        try {
+            // Get vehicle type
+            $kendaraan = \App\Models\Kendaraan::find($idKendaraan);
+            if (!$kendaraan) {
+                Log::warning("Vehicle not found: {$idKendaraan}");
+                return 10000; // Default fallback
+            }
+
+            $jenisKendaraan = $kendaraan->jenis;
+
+            // Get tarif parkir for this parkiran and vehicle type
+            $tarif = \App\Models\TarifParkir::where('id_parkiran', $idParkiran)
+                ->where('jenis_kendaraan', $jenisKendaraan)
+                ->first();
+
+            if (!$tarif) {
+                Log::warning("Tarif not found for parkiran {$idParkiran} and vehicle type {$jenisKendaraan}");
+                return 10000; // Default fallback
+            }
+
+            // Calculate cost: first hour + additional hours
+            $biayaJamPertama = $tarif->biaya_jam_pertama;
+            $biayaJamBerikutnya = $tarif->biaya_jam_berikutnya;
+
+            if ($durasiBooking <= 1) {
+                return $biayaJamPertama;
+            }
+
+            $additionalHours = $durasiBooking - 1;
+            $totalCost = $biayaJamPertama + ($additionalHours * $biayaJamBerikutnya);
+
+            Log::info("Calculated booking cost: Rp {$totalCost} for {$durasiBooking} hours", [
+                'parkiran' => $idParkiran,
+                'vehicle_type' => $jenisKendaraan,
+                'first_hour' => $biayaJamPertama,
+                'additional_hours' => $additionalHours,
+                'hourly_rate' => $biayaJamBerikutnya
+            ]);
+
+            return $totalCost;
+        } catch (\Exception $e) {
+            Log::error("Error calculating booking cost: " . $e->getMessage());
+            return 10000; // Default fallback
         }
     }
 }

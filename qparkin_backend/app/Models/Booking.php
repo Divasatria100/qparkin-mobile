@@ -22,6 +22,7 @@ class Booking extends Model
         'waktu_mulai',
         'waktu_selesai',
         'durasi_booking',
+        'biaya_estimasi',
         'status',
         'dibooking_pada'
     ];

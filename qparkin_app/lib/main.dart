@@ -22,6 +22,7 @@ import 'presentation/screens/profile_page.dart';
 import 'presentation/screens/list_kendaraan.dart';
 import 'presentation/screens/point_page.dart';
 import 'presentation/screens/notification_screen.dart';
+import 'presentation/screens/booking_detail_page.dart';
 
 void main() async {
   // Ensure Flutter binding is initialized
@@ -120,6 +121,20 @@ class MyApp extends StatelessWidget {
           '/list-kendaraan': (context) => const VehicleListPage(),
           '/point': (context) => const PointPage(),
           '/notifikasi': (context) => const NotificationScreen(),
+        },
+        onGenerateRoute: (settings) {
+          // Handle booking detail route with arguments
+          if (settings.name == '/booking-detail') {
+            final booking = settings.arguments;
+            if (booking != null) {
+              return MaterialPageRoute(
+                builder: (context) => BookingDetailPage(
+                  booking: booking as dynamic,
+                ),
+              );
+            }
+          }
+          return null;
         },
       ),
     );

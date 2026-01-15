@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '/config/app_theme.dart';
-import '../screens/qr_scan_screen.dart';
+import '../screens/gate_simulation_page.dart';
 
 typedef _LetIndexPage = bool Function(int value);
 
@@ -105,13 +105,13 @@ class CurvedNavigationBarState extends State<CurvedNavigationBar> {
                     onPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => const QrScanScreen(),
+                          builder: (context) => const GateSimulationPage(),
                         ),
                       );
                     },
                     backgroundColor: widget.buttonBackgroundColor,
                     elevation: 6,
-                    child: const Icon(Icons.qr_code_scanner,
+                    child: const Icon(Icons.qr_code_2,
                         color: Colors.white, size: 32),
                   ),
                 ),
@@ -194,7 +194,7 @@ class BottomNavWithFab extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: onFabPressed,
         backgroundColor: AppTheme.primaryOrange,
-        child: const Icon(Icons.qr_code_scanner, color: Colors.white, size: 32),
+        child: const Icon(Icons.qr_code_2, color: Colors.white, size: 32),
         elevation: 6,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,

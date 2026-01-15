@@ -1014,6 +1014,101 @@ class BookingService {
     }
   }
 
+  /// Get pending payment bookings for current user
+  ///
+  /// Returns list of bookings that are waiting for payment completion
+  /// These bookings have been created but payment is not yet completed
+  ///
+  /// Requirements: Midtrans Integration
+  Future<List<BookingModel>> getPendingPayments({
+    required String token,
+  }) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/api/booking/pending-payments');
+      debugPrint('[BookingService] Fetching pending payments from: $uri');
+
+      final response = await _client.get(
+        uri,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      ).timeout(_timeout);
+
+      debugPrint('[BookingService] Pending payments response status: ${response.statusCode}');
+      debugPrint('[BookingService] Pending payments response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+
+        if (jsonData['success'] == true && jsonData['data'] != null) {
+          final bookingsList = (jsonData['data'] as List)
+              .map((item) => BookingModel.fromJson(item as Map<String, dynamic>))
+              .toList();
+
+          debugPrint('[BookingService] ✅ Found ${bookingsList.length} pending payments');
+          return bookingsList;
+        } else {
+          debugPrint('[BookingService] No pending payments found');
+          return [];
+        }
+      } else if (response.statusCode == 401) {
+        debugPrint('[BookingService] ❌ Unauthorized (401) - token may be invalid');
+        throw Exception('Unauthorized');
+      } else {
+        debugPrint('[BookingService] ❌ Failed to fetch pending payments: ${response.statusCode}');
+        throw Exception('Failed to fetch pending payments');
+      }
+    } on TimeoutException catch (e) {
+      debugPrint('[BookingService] Request timeout: $e');
+      throw Exception('Request timeout');
+    } catch (e) {
+      debugPrint('[BookingService] ❌ Error fetching pending payments: $e');
+      rethrow;
+    }
+  }
+
+  /// Cancel a pending payment booking
+  ///
+  /// Cancels a booking that is waiting for payment
+  /// Releases the reserved slot and updates booking status
+  ///
+  /// Requirements: Midtrans Integration
+  Future<bool> cancelPendingPayment({
+    required String bookingId,
+    required String token,
+  }) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/api/booking/$bookingId/cancel');
+      debugPrint('[BookingService] Cancelling booking: $bookingId');
+
+      final response = await _client.put(
+        uri,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      ).timeout(_timeout);
+
+      debugPrint('[BookingService] Cancel response status: ${response.statusCode}');
+      debugPrint('[BookingService] Cancel response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        if (jsonData['success'] == true) {
+          debugPrint('[BookingService] ✅ Booking cancelled successfully');
+          return true;
+        }
+      }
+
+      debugPrint('[BookingService] ❌ Failed to cancel booking');
+      return false;
+    } catch (e) {
+      debugPrint('[BookingService] ❌ Error cancelling booking: $e');
+      return false;
+    }
+  }
+
   /// Dispose the service and clean up resources
   ///
   /// Requirements: 15.7

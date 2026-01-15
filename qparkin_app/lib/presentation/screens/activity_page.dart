@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../widgets/bottom_nav.dart';
 import '../widgets/circular_timer_widget.dart';
 import '../widgets/booking_detail_card.dart';
 import '../widgets/qr_exit_button.dart';
 import '../widgets/shimmer_loading.dart';
+import '../widgets/pending_payment_card.dart';
 import '/utils/navigation_utils.dart';
 import '/logic/providers/active_parking_provider.dart';
+import '/data/services/booking_service.dart';
+import '/data/models/booking_model.dart';
 import 'detail_history.dart';
+import 'midtrans_payment_page.dart';
 
 class ActivityPage extends StatefulWidget {
   const ActivityPage({Key? key}) : super(key: key);
@@ -19,6 +24,10 @@ class ActivityPage extends StatefulWidget {
 class _ActivityPageState extends State<ActivityPage> with TickerProviderStateMixin {
   late TabController _tabController;
   String? _lastErrorShown;
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  final BookingService _bookingService = BookingService();
+  List<BookingModel> _pendingPayments = [];
+  bool _isLoadingPendingPayments = false;
 
   @override
   void initState() {
@@ -31,13 +40,131 @@ class _ActivityPageState extends State<ActivityPage> with TickerProviderStateMix
       }
       // Fetch active parking data
       _fetchActiveParkingWithErrorHandling();
+      // Fetch pending payments
+      _fetchPendingPayments();
     });
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _bookingService.dispose();
     super.dispose();
+  }
+
+  /// Fetch pending payments
+  Future<void> _fetchPendingPayments() async {
+    setState(() {
+      _isLoadingPendingPayments = true;
+    });
+
+    try {
+      final token = await _storage.read(key: 'auth_token');
+      if (token == null) {
+        debugPrint('[ActivityPage] No auth token found');
+        return;
+      }
+
+      final pendingPayments = await _bookingService.getPendingPayments(token: token);
+      
+      if (mounted) {
+        setState(() {
+          _pendingPayments = pendingPayments;
+          _isLoadingPendingPayments = false;
+        });
+        
+        debugPrint('[ActivityPage] Loaded ${pendingPayments.length} pending payments');
+      }
+    } catch (e) {
+      debugPrint('[ActivityPage] Error fetching pending payments: $e');
+      if (mounted) {
+        setState(() {
+          _isLoadingPendingPayments = false;
+        });
+      }
+    }
+  }
+
+  /// Handle continue payment action
+  Future<void> _handleContinuePayment(BookingModel booking) async {
+    // Navigate to Midtrans payment page
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MidtransPaymentPage(booking: booking),
+      ),
+    ).then((_) {
+      // Refresh pending payments after returning from payment page
+      _fetchPendingPayments();
+      _fetchActiveParkingWithErrorHandling();
+    });
+  }
+
+  /// Handle cancel payment action
+  Future<void> _handleCancelPayment(BookingModel booking) async {
+    // Show confirmation dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Batalkan Booking?'),
+        content: const Text(
+          'Apakah Anda yakin ingin membatalkan booking ini? '
+          'Tindakan ini tidak dapat dibatalkan.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Tidak'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+            ),
+            child: const Text('Ya, Batalkan'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    // Show loading
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+
+    try {
+      final token = await _storage.read(key: 'auth_token');
+      if (token == null) {
+        throw Exception('Token tidak ditemukan');
+      }
+
+      final success = await _bookingService.cancelPendingPayment(
+        bookingId: booking.idBooking,
+        token: token,
+      );
+
+      // Close loading dialog
+      if (mounted) Navigator.pop(context);
+
+      if (success) {
+        // Show success message
+        _showSuccessSnackbar('Booking berhasil dibatalkan');
+        // Refresh pending payments
+        _fetchPendingPayments();
+      } else {
+        _showErrorSnackbar('Gagal membatalkan booking. Silakan coba lagi.');
+      }
+    } catch (e) {
+      // Close loading dialog
+      if (mounted) Navigator.pop(context);
+      _showErrorSnackbar('Terjadi kesalahan: ${e.toString()}');
+    }
   }
 
   /// Fetch active parking and show snackbar on error
@@ -283,50 +410,91 @@ class _ActivityPageState extends State<ActivityPage> with TickerProviderStateMix
                     }
 
                     if (provider.activeParking == null) {
-                      // Empty State
+                      // Empty State - but check for pending payments first
                       return Container(
                         color: Colors.white,
-                        child: Center(
-                          child: Semantics(
-                            label: 'Tidak ada parkir aktif. Mulai parkir untuk melihat aktivitas Anda',
+                        child: RefreshIndicator(
+                          onRefresh: () async {
+                            await _fetchActiveParkingWithErrorHandling();
+                            await _fetchPendingPayments();
+                            if (mounted && provider.errorMessage == null) {
+                              _showSuccessSnackbar('Data berhasil diperbarui');
+                            }
+                          },
+                          color: const Color(0xFF573ED1),
+                          child: SingleChildScrollView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                             child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Semantics(
-                                  label: 'Ikon mobil',
-                                  child: Container(
-                                    padding: const EdgeInsets.all(24),
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.shade100,
-                                      borderRadius: BorderRadius.circular(50),
-                                    ),
-                                    child: Icon(
-                                      Icons.directions_car,
-                                      size: 48,
-                                      color: Colors.grey.shade400,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                ExcludeSemantics(
-                                  child: const Text(
-                                    'Tidak ada parkir aktif',
+                                // Pending Payments Section
+                                if (_pendingPayments.isNotEmpty) ...[
+                                  const Text(
+                                    'Menunggu Pembayaran',
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.black87,
                                     ),
                                   ),
-                                ),
-                                const SizedBox(height: 8),
-                                ExcludeSemantics(
-                                  child: Text(
-                                    'Mulai parkir untuk melihat aktivitas Anda',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey.shade600,
+                                  const SizedBox(height: 12),
+                                  ..._pendingPayments.map((booking) => PendingPaymentCard(
+                                    booking: booking,
+                                    onContinuePayment: () => _handleContinuePayment(booking),
+                                    onCancel: () => _handleCancelPayment(booking),
+                                  )),
+                                  const SizedBox(height: 24),
+                                  const Divider(),
+                                  const SizedBox(height: 24),
+                                ],
+                                
+                                // Empty state for active parking
+                                Center(
+                                  child: Semantics(
+                                    label: 'Tidak ada parkir aktif. Mulai parkir untuk melihat aktivitas Anda',
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Semantics(
+                                          label: 'Ikon mobil',
+                                          child: Container(
+                                            padding: const EdgeInsets.all(24),
+                                            decoration: BoxDecoration(
+                                              color: Colors.grey.shade100,
+                                              borderRadius: BorderRadius.circular(50),
+                                            ),
+                                            child: Icon(
+                                              Icons.directions_car,
+                                              size: 48,
+                                              color: Colors.grey.shade400,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        ExcludeSemantics(
+                                          child: const Text(
+                                            'Tidak ada parkir aktif',
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black87,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        ExcludeSemantics(
+                                          child: Text(
+                                            'Mulai parkir untuk melihat aktivitas Anda',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.grey.shade600,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    textAlign: TextAlign.center,
                                   ),
                                 ),
                               ],
@@ -370,6 +538,7 @@ class _ActivityPageState extends State<ActivityPage> with TickerProviderStateMix
                       child: RefreshIndicator(
                         onRefresh: () async {
                           await _fetchActiveParkingWithErrorHandling();
+                          await _fetchPendingPayments();
                           if (mounted && provider.errorMessage == null) {
                             _showSuccessSnackbar('Data berhasil diperbarui');
                           }
@@ -379,7 +548,38 @@ class _ActivityPageState extends State<ActivityPage> with TickerProviderStateMix
                           physics: const AlwaysScrollableScrollPhysics(),
                           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                           child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              // Pending Payments Section
+                              if (_pendingPayments.isNotEmpty) ...[
+                                const Text(
+                                  'Menunggu Pembayaran',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                ..._pendingPayments.map((booking) => PendingPaymentCard(
+                                  booking: booking,
+                                  onContinuePayment: () => _handleContinuePayment(booking),
+                                  onCancel: () => _handleCancelPayment(booking),
+                                )),
+                                const SizedBox(height: 24),
+                                const Divider(),
+                                const SizedBox(height: 24),
+                                const Text(
+                                  'Parkir Aktif',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                              ],
+                              
                               // CircularTimerWidget at top as focal point
                               CircularTimerWidget(
                                 startTime: parking.waktuMasuk,
