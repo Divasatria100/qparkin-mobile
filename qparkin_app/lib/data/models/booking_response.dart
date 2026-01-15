@@ -87,6 +87,11 @@ class BookingResponse {
       // Some APIs might return booking data directly in 'data' field
       booking = BookingModel.fromJson(json['data'] as Map<String, dynamic>);
     }
+    
+    // Debug logging
+    if (booking != null) {
+      print('[BookingResponse] Parsed booking - idBooking: ${booking.idBooking}, idTransaksi: ${booking.idTransaksi}');
+    }
 
     return BookingResponse(
       success: success,

@@ -92,6 +92,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{id}/cancel', [BookingController::class, 'cancel']);
         Route::get('/active', [BookingController::class, 'getActive']);
     });
+    
+    // Payment endpoints (outside booking prefix to match mobile app URL)
+    Route::post('/bookings/{id}/payment/snap-token', [BookingController::class, 'getSnapToken']);
 
     // Parking Transactions
     Route::prefix('transaksi')->group(function () {

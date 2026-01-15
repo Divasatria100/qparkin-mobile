@@ -60,6 +60,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       _selectedMallIndex = index;
       _selectedMall = {
         'id_mall': int.parse(mall.id), // ✅ Parse id to int for BookingProvider
+        'id_parkiran': mall.idParkiran ?? mall.id, // ✅ Use id_parkiran from API
         'name': mall.name,
         'nama_mall': mall.name, // Alias for compatibility
         'distance': '', // Will be calculated by MapProvider
@@ -72,6 +73,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       // Debug log untuk memverifikasi data
       debugPrint('[MapPage] Selected mall data:');
       debugPrint('  - id_mall: ${_selectedMall!['id_mall']}');
+      debugPrint('  - id_parkiran: ${_selectedMall!['id_parkiran']}');
       debugPrint('  - name: ${_selectedMall!['name']}');
       debugPrint('  - available: ${_selectedMall!['available']}');
       debugPrint('  - has_slot_reservation_enabled: ${_selectedMall!['has_slot_reservation_enabled']}');
@@ -88,6 +90,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       _selectedMallIndex = index;
       _selectedMall = {
         'id_mall': int.parse(mall.id), // ✅ Parse id to int for BookingProvider
+        'id_parkiran': mall.idParkiran ?? mall.id, // ✅ Use id_parkiran from API
         'name': mall.name,
         'nama_mall': mall.name, // Alias for compatibility
         'distance': '', // Will be calculated by MapProvider
@@ -100,6 +103,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       // Debug log untuk memverifikasi data
       debugPrint('[MapPage] Selected mall data (with route):');
       debugPrint('  - id_mall: ${_selectedMall!['id_mall']}');
+      debugPrint('  - id_parkiran: ${_selectedMall!['id_parkiran']}');
       debugPrint('  - name: ${_selectedMall!['name']}');
       debugPrint('  - available: ${_selectedMall!['available']}');
       debugPrint('  - has_slot_reservation_enabled: ${_selectedMall!['has_slot_reservation_enabled']}');

@@ -136,9 +136,13 @@ class BookingModel {
 
   /// Create BookingModel from JSON
   factory BookingModel.fromJson(Map<String, dynamic> json) {
+    // Handle id_booking with fallback to id_transaksi
+    final idBookingValue = json['id_booking'] ?? json['id_transaksi'];
+    final idTransaksiValue = json['id_transaksi'];
+    
     return BookingModel(
-      idTransaksi: json['id_transaksi']?.toString() ?? '',
-      idBooking: json['id_booking']?.toString() ?? '',
+      idTransaksi: idTransaksiValue?.toString() ?? '',
+      idBooking: idBookingValue?.toString() ?? idTransaksiValue?.toString() ?? '',
       idMall: json['id_mall']?.toString() ?? '',
       idParkiran: json['id_parkiran']?.toString() ?? '',
       idKendaraan: json['id_kendaraan']?.toString() ?? '',

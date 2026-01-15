@@ -33,6 +33,7 @@ import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 /// ```
 class MallModel {
   final String id;
+  final String? idParkiran;  // ID parkiran for booking
   final String name;
   final String address;
   final double latitude;
@@ -44,6 +45,7 @@ class MallModel {
 
   MallModel({
     required this.id,
+    this.idParkiran,
     required this.name,
     required this.address,
     required this.latitude,
@@ -160,6 +162,7 @@ class MallModel {
   factory MallModel.fromJson(Map<String, dynamic> json) {
     return MallModel(
       id: json['id_mall']?.toString() ?? '',
+      idParkiran: json['id_parkiran']?.toString(),
       name: json['nama_mall']?.toString() ?? '',
       address: json['alamat_lengkap']?.toString() ?? '',
       latitude: _parseDouble(json['latitude']),
@@ -189,6 +192,7 @@ class MallModel {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'id_parkiran': idParkiran,
       'name': name,
       'address': address,
       'latitude': latitude,
@@ -237,6 +241,7 @@ class MallModel {
   /// ```
   MallModel copyWith({
     String? id,
+    String? idParkiran,
     String? name,
     String? address,
     double? latitude,
@@ -248,6 +253,7 @@ class MallModel {
   }) {
     return MallModel(
       id: id ?? this.id,
+      idParkiran: idParkiran ?? this.idParkiran,
       name: name ?? this.name,
       address: address ?? this.address,
       latitude: latitude ?? this.latitude,
@@ -265,6 +271,7 @@ class MallModel {
     if (identical(this, other)) return true;
     return other is MallModel &&
         other.id == id &&
+        other.idParkiran == idParkiran &&
         other.name == name &&
         other.address == address &&
         other.latitude == latitude &&
@@ -279,6 +286,7 @@ class MallModel {
   int get hashCode {
     return Object.hash(
       id,
+      idParkiran,
       name,
       address,
       latitude,
@@ -292,7 +300,7 @@ class MallModel {
 
   @override
   String toString() {
-    return 'MallModel(id: $id, name: $name, address: $address, '
+    return 'MallModel(id: $id, idParkiran: $idParkiran, name: $name, address: $address, '
         'latitude: $latitude, longitude: $longitude, '
         'availableSlots: $availableSlots, distance: $distance, '
         'hasSlotReservationEnabled: $hasSlotReservationEnabled, '

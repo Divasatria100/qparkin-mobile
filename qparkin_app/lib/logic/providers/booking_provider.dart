@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:flutter/widgets.dart';
 import '../../data/models/booking_model.dart';
 import '../../data/models/booking_request.dart';
@@ -195,19 +196,38 @@ class BookingProvider extends ChangeNotifier {
   ///
   /// Requirements: 15.1, 15.8, 13.3
   Future<void> initialize(Map<String, dynamic> mallData, {String? token}) async {
+    debugPrint('[BookingProvider] ========== INITIALIZE START ==========');
     debugPrint('[BookingProvider] Initializing with mall: ${mallData['name']}');
+    debugPrint('[BookingProvider] Token provided: ${token != null}');
+    if (token != null) {
+      debugPrint('[BookingProvider] Token length: ${token.length}');
+      debugPrint('[BookingProvider] Token preview: ${token.substring(0, min(20, token.length))}...');
+    }
 
     // Cache mall data
     final mallId = mallData['id_mall']?.toString() ?? mallData['id']?.toString() ?? '';
+    debugPrint('[BookingProvider] Mall ID extracted: "$mallId"');
+    
     if (mallId.isNotEmpty) {
       _cacheMallData(mallId, mallData);
+    } else {
+      debugPrint('[BookingProvider] ⚠️ WARNING: Mall ID is empty!');
     }
 
     _selectedMall = mallData;
+    debugPrint('[BookingProvider] _selectedMall set with keys: ${_selectedMall!.keys.toList()}');
 
     // Fetch parkiran ID for this mall (required for booking)
     if (token != null && mallId.isNotEmpty) {
+      debugPrint('[BookingProvider] Calling _fetchParkiranForMall...');
       await _fetchParkiranForMall(mallId, token);
+      debugPrint('[BookingProvider] _fetchParkiranForMall completed');
+      debugPrint('[BookingProvider] _selectedMall keys after fetch: ${_selectedMall!.keys.toList()}');
+      debugPrint('[BookingProvider] id_parkiran value: ${_selectedMall!['id_parkiran']}');
+    } else {
+      debugPrint('[BookingProvider] ⚠️ SKIPPING _fetchParkiranForMall:');
+      debugPrint('[BookingProvider]   - token is null: ${token == null}');
+      debugPrint('[BookingProvider]   - mallId is empty: ${mallId.isEmpty}');
     }
 
     // Set default start time to current time + 15 minutes
@@ -249,6 +269,7 @@ class BookingProvider extends ChangeNotifier {
     _createdBooking = null;
 
     debugPrint('[BookingProvider] Initialized - Start time: $_startTime');
+    debugPrint('[BookingProvider] ========== INITIALIZE END ==========');
     notifyListeners();
   }
 
@@ -286,19 +307,26 @@ class BookingProvider extends ChangeNotifier {
         if (idParkiran.isNotEmpty) {
           // Store parkiran ID in selectedMall for booking
           _selectedMall!['id_parkiran'] = idParkiran;
+          // Also store parkiran name for display
+          _selectedMall!['nama_parkiran'] = firstParkiran['nama_parkiran']?.toString() ?? '';
           debugPrint('[BookingProvider] ✅ Parkiran ID set successfully: $idParkiran');
           debugPrint('[BookingProvider] Mall data now contains: ${_selectedMall!.keys.toList()}');
         } else {
           debugPrint('[BookingProvider] ❌ WARNING: Parkiran has no ID');
+          // Set error message for user
+          _errorMessage = 'Parkiran tidak tersedia. Silakan pilih mall lain.';
         }
       } else {
         debugPrint('[BookingProvider] ❌ WARNING: No parkiran found for mall $mallId');
         debugPrint('[BookingProvider] This mall may not have a parkiran configured in the database');
+        // Set user-friendly error message
+        _errorMessage = 'Parkiran tidak tersedia untuk mall ini. Silakan pilih mall lain atau hubungi admin mall.';
       }
     } catch (e, stackTrace) {
       debugPrint('[BookingProvider] ❌ Error fetching parkiran: $e');
       debugPrint('[BookingProvider] Stack trace: $stackTrace');
-      // Don't fail initialization - user will see error when trying to book
+      // Set error message for user
+      _errorMessage = 'Gagal memuat data parkiran. Silakan coba lagi.';
     }
   }
 
@@ -665,8 +693,15 @@ class BookingProvider extends ChangeNotifier {
       
       if (idParkiran == null || idParkiran.isEmpty) {
         _isLoading = false;
-        _errorMessage = 'Data parkiran tidak tersedia. Silakan pilih mall lagi.';
+        
+        // Check if error message was already set during initialization
+        if (_errorMessage == null || _errorMessage!.isEmpty) {
+          _errorMessage = 'Parkiran tidak tersedia untuk mall ini. Silakan pilih mall lain atau hubungi admin mall.';
+        }
+        
         debugPrint('[BookingProvider] ERROR: id_parkiran not found in mall data');
+        debugPrint('[BookingProvider] Mall: ${_selectedMall!['name'] ?? _selectedMall!['nama_mall']}');
+        debugPrint('[BookingProvider] Available keys: ${_selectedMall!.keys.toList()}');
         notifyListeners();
         return false;
       }

@@ -429,6 +429,19 @@ class BookingService {
       if (response.statusCode == 200 || response.statusCode == 201) {
         // Success response
         debugPrint('[BookingService] Booking created successfully');
+        debugPrint('[BookingService] Response data keys: ${data.keys.toList()}');
+        
+        // Log the booking data structure
+        if (data['data'] != null) {
+          debugPrint('[BookingService] data.data keys: ${(data['data'] as Map).keys.toList()}');
+          debugPrint('[BookingService] id_booking value: ${data['data']['id_booking']}');
+          debugPrint('[BookingService] id_transaksi value: ${data['data']['id_transaksi']}');
+        } else if (data['booking'] != null) {
+          debugPrint('[BookingService] data.booking keys: ${(data['booking'] as Map).keys.toList()}');
+          debugPrint('[BookingService] id_booking value: ${data['booking']['id_booking']}');
+          debugPrint('[BookingService] id_transaksi value: ${data['booking']['id_transaksi']}');
+        }
+        
         return BookingResponse.fromJson(data);
       } else if (response.statusCode == 400) {
         // Validation error

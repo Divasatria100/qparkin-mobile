@@ -11,8 +11,12 @@ class Booking extends Model
 
     protected $table = 'booking';
     protected $primaryKey = 'id_transaksi';
+    
+    // Disable timestamps since table doesn't have created_at/updated_at columns
+    public $timestamps = false;
 
     protected $fillable = [
+        'id_transaksi', // Added - this is the primary key and foreign key to transaksi_parkir
         'id_slot',
         'reservation_id',
         'waktu_mulai',

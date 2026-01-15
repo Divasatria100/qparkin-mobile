@@ -131,7 +131,7 @@ class BookingController extends Controller
                 'waktu_mulai' => $waktuMulai,
                 'waktu_selesai' => $waktuSelesai,
                 'durasi_booking' => $request->durasi_booking,
-                'status' => 'confirmed',
+                'status' => 'aktif', // Changed from 'confirmed' to match ENUM values
                 'dibooking_pada' => Carbon::now()
             ]);
 
@@ -148,21 +148,112 @@ class BookingController extends Controller
 
             DB::commit();
 
+            // IMPORTANT: After commit, reload the booking to get the actual saved values
+            // Since id_transaksi is the primary key and set manually, we need to reload
+            $booking = Booking::where('id_transaksi', $transaksi->id_transaksi)->first();
+            
+            if (!$booking) {
+                Log::error('[BookingService] Booking created but not found after commit', [
+                    'transaksi_id' => $transaksi->id_transaksi
+                ]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Booking created but verification failed',
+                    'error' => 'Internal error'
+                ], 500);
+            }
+            
+            $bookingId = $transaksi->id_transaksi; // Use transaksi ID directly
+            
+            Log::info('[BookingService] Booking committed', [
+                'booking_id_transaksi' => $bookingId,
+                'transaksi_id' => $transaksi->id_transaksi,
+                'booking_exists' => $booking !== null
+            ]);
+
             // Load relationships for response
-            $booking->load(['transaksiParkir', 'slot.floor', 'reservation']);
+            $booking->load([
+                'transaksiParkir.parkiran.mall',
+                'transaksiParkir.kendaraan',
+                'slot.floor',
+                'reservation'
+            ]);
+
+            // Format response with all fields mobile app expects
+            $transaksiData = $booking->transaksiParkir;
+            $parkiran = $transaksiData ? $transaksiData->parkiran : null;
+            $mall = $parkiran ? $parkiran->mall : null;
+            $kendaraan = $transaksiData ? $transaksiData->kendaraan : null;
+            $slot = $booking->slot;
+            $floor = $slot ? $slot->floor : null;
+
+            $bookingData = [
+                'id_transaksi' => $bookingId,
+                'id_booking' => $bookingId, // Mobile app expects this field
+                'id_mall' => $mall ? $mall->id_mall : null,
+                'id_parkiran' => $transaksiData ? $transaksiData->id_parkiran : null,
+                'id_kendaraan' => $transaksiData ? $transaksiData->id_kendaraan : null,
+                'id_slot' => $booking->id_slot,
+                'reservation_id' => $booking->reservation_id,
+                'qr_code' => $transaksiData ? ($transaksiData->qr_code ?? '') : '',
+                'waktu_mulai' => $booking->waktu_mulai,
+                'waktu_selesai' => $booking->waktu_selesai,
+                'durasi_booking' => $booking->durasi_booking,
+                'status' => $booking->status,
+                'biaya_estimasi' => 0, // TODO: Calculate from tarif
+                'dibooking_pada' => $booking->dibooking_pada,
+                // Additional display fields
+                'nama_mall' => $mall ? $mall->nama_mall : null,
+                'lokasi_mall' => $mall ? $mall->lokasi : null,
+                'plat_nomor' => $kendaraan ? $kendaraan->plat_nomor : null,
+                'jenis_kendaraan' => $kendaraan ? $kendaraan->jenis : null,
+                'kode_slot' => $slot ? $slot->slot_code : null,
+                'floor_name' => $floor ? $floor->nama_lantai : null,
+                'floor_number' => $floor ? $floor->nomor_lantai : null,
+                'slot_type' => $slot ? ($slot->tipe_slot ?? 'regular') : 'regular',
+            ];
+
+            Log::info('[BookingService] Booking created successfully', [
+                'id_transaksi' => $bookingId,
+                'id_booking' => $bookingId,
+                'id_slot' => $idSlot,
+                'id_mall' => $bookingData['id_mall'],
+                'response_data' => $bookingData
+            ]);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Booking berhasil dibuat',
-                'data' => $booking
+                'data' => $bookingData
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error creating booking: ' . $e->getMessage());
+            
+            // Log the error with context
+            Log::error('[BookingService] Error creating booking', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => $userId ?? null,
+                'id_parkiran' => $request->id_parkiran ?? null,
+                'id_kendaraan' => $request->id_kendaraan ?? null
+            ]);
+            
+            // Return user-friendly error message
+            $errorMessage = $e->getMessage();
+            
+            // Check for specific error types
+            if (str_contains($errorMessage, 'transaksi aktif')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'ACTIVE_BOOKING_EXISTS',
+                    'error' => 'Anda masih memiliki booking aktif. Selesaikan booking sebelumnya terlebih dahulu.'
+                ], 409);
+            }
+            
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to create booking',
-                'error' => $e->getMessage()
+                'error' => $errorMessage
             ], 500);
         }
     }
@@ -240,7 +331,7 @@ class BookingController extends Controller
                 $query->where('id_user', $userId)
                       ->whereIn('status', ['booked', 'active']);
             })
-            ->whereIn('status', ['confirmed', 'active'])
+            ->whereIn('status', ['aktif']) // Changed from 'confirmed', 'active' to match ENUM
             ->with(['transaksiParkir', 'slot.floor', 'reservation'])
             ->orderBy('waktu_mulai', 'desc')
             ->get();
@@ -300,6 +391,168 @@ class BookingController extends Controller
         } catch (\Exception $e) {
             Log::error('Error auto-assigning slot: ' . $e->getMessage());
             return null;
+        }
+    }
+
+    /**
+     * Get Midtrans Snap Token for payment
+     * 
+     * This endpoint generates a Midtrans Snap token for the booking payment.
+     * The token is used by the mobile app to open the Midtrans payment page.
+     * 
+     * @param int $id Booking ID (id_transaksi)
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getSnapToken($id)
+    {
+        try {
+            Log::info('[Payment] Requesting snap token', ['booking_id' => $id]);
+            
+            // Find booking
+            $booking = Booking::with(['transaksiParkir.parkiran.mall', 'transaksiParkir.kendaraan', 'transaksiParkir.user'])
+                ->where('id_transaksi', $id)
+                ->first();
+            
+            if (!$booking) {
+                Log::warning('[Payment] Booking not found', ['booking_id' => $id]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Booking not found'
+                ], 404);
+            }
+            
+            // Check if booking is still active
+            if ($booking->status !== 'aktif') {
+                Log::warning('[Payment] Booking not active', [
+                    'booking_id' => $id,
+                    'status' => $booking->status
+                ]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Booking is not active'
+                ], 400);
+            }
+            
+            $transaksi = $booking->transaksiParkir;
+            $mall = $transaksi && $transaksi->parkiran ? $transaksi->parkiran->mall : null;
+            $kendaraan = $transaksi ? $transaksi->kendaraan : null;
+            $user = $transaksi ? $transaksi->user : null;
+            
+            // Calculate amount (for now use biaya_estimasi, later calculate from tarif)
+            $amount = $booking->biaya_estimasi > 0 ? $booking->biaya_estimasi : 10000; // Default Rp 10.000
+            
+            // Prepare transaction details for Midtrans
+            $orderId = 'BOOKING-' . $id . '-' . time();
+            
+            $transactionDetails = [
+                'order_id' => $orderId,
+                'gross_amount' => (int) $amount,
+            ];
+            
+            $itemDetails = [
+                [
+                    'id' => 'PARKING-' . $id,
+                    'price' => (int) $amount,
+                    'quantity' => 1,
+                    'name' => 'Parking at ' . ($mall ? $mall->nama_mall : 'Mall'),
+                ]
+            ];
+            
+            $customerDetails = [
+                'first_name' => $user ? ($user->name ?? 'Customer') : 'Customer',
+                'email' => $user ? ($user->email ?? 'customer@example.com') : 'customer@example.com',
+                'phone' => $kendaraan ? $kendaraan->plat_nomor : '000000',
+            ];
+            
+            // Check if Midtrans is configured
+            $serverKey = config('services.midtrans.server_key');
+            
+            if (!$serverKey || $serverKey === 'your_server_key_here') {
+                // MOCK MODE - Midtrans not configured
+                $snapToken = 'MOCK-SNAP-TOKEN-' . $id . '-' . time();
+                
+                Log::info('[Payment] Snap token generated (MOCK MODE)', [
+                    'booking_id' => $id,
+                    'snap_token' => $snapToken,
+                    'amount' => $amount,
+                    'reason' => 'Midtrans not configured'
+                ]);
+                
+                return response()->json([
+                    'success' => true,
+                    'snap_token' => $snapToken,
+                    'order_id' => $orderId,
+                    'amount' => $amount,
+                    'booking_id' => $id,
+                    'message' => 'Snap token generated successfully (MOCK MODE - Configure Midtrans in .env)'
+                ]);
+            }
+            
+            // PRODUCTION MODE - Use real Midtrans API
+            try {
+                // Configure Midtrans
+                \Midtrans\Config::$serverKey = $serverKey;
+                \Midtrans\Config::$isProduction = config('services.midtrans.is_production', false);
+                \Midtrans\Config::$isSanitized = config('services.midtrans.is_sanitized', true);
+                \Midtrans\Config::$is3ds = config('services.midtrans.is_3ds', true);
+                
+                // Create transaction parameters
+                $params = [
+                    'transaction_details' => $transactionDetails,
+                    'item_details' => $itemDetails,
+                    'customer_details' => $customerDetails,
+                ];
+                
+                // Get real snap token from Midtrans
+                $snapToken = \Midtrans\Snap::getSnapToken($params);
+                
+                Log::info('[Payment] Snap token generated (PRODUCTION MODE)', [
+                    'booking_id' => $id,
+                    'order_id' => $orderId,
+                    'amount' => $amount,
+                    'snap_token_length' => strlen($snapToken)
+                ]);
+                
+                return response()->json([
+                    'success' => true,
+                    'snap_token' => $snapToken,
+                    'order_id' => $orderId,
+                    'amount' => $amount,
+                    'booking_id' => $id,
+                    'message' => 'Snap token generated successfully'
+                ]);
+                
+            } catch (\Exception $midtransError) {
+                Log::error('[Payment] Midtrans API error', [
+                    'booking_id' => $id,
+                    'error' => $midtransError->getMessage()
+                ]);
+                
+                // Fallback to MOCK if Midtrans fails
+                $snapToken = 'MOCK-SNAP-TOKEN-' . $id . '-' . time();
+                
+                return response()->json([
+                    'success' => true,
+                    'snap_token' => $snapToken,
+                    'order_id' => $orderId,
+                    'amount' => $amount,
+                    'booking_id' => $id,
+                    'message' => 'Snap token generated (MOCK MODE - Midtrans error: ' . $midtransError->getMessage() . ')'
+                ]);
+            }
+            
+        } catch (\Exception $e) {
+            Log::error('[Payment] Error generating snap token', [
+                'booking_id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to generate snap token',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 }

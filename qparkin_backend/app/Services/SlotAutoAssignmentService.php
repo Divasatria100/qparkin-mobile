@@ -58,11 +58,11 @@ class SlotAutoAssignmentService
                 return null;
             }
 
-            // Get available slot
-            $slot = $this->findAvailableSlot($idParkiran, $kendaraan->jenis_kendaraan, $waktuMulai, $durasiBooking);
+            // Get available slot (use 'jenis' field, not 'jenis_kendaraan')
+            $slot = $this->findAvailableSlot($idParkiran, $kendaraan->jenis, $waktuMulai, $durasiBooking);
             
             if (!$slot) {
-                Log::warning("No available slots for parkiran {$idParkiran}, vehicle type {$kendaraan->jenis_kendaraan}");
+                Log::warning("No available slots for parkiran {$idParkiran}, vehicle type {$kendaraan->jenis}");
                 DB::rollBack();
                 return null;
             }
@@ -70,6 +70,8 @@ class SlotAutoAssignmentService
             // Create temporary reservation to lock the slot
             $reservation = $this->createTemporaryReservation(
                 $slot->id_slot,
+                $slot->id_floor,
+                $idKendaraan,
                 $idUser,
                 $waktuMulai,
                 $durasiBooking
@@ -112,40 +114,48 @@ class SlotAutoAssignmentService
         $startTime = Carbon::parse($waktuMulai);
         $endTime = $startTime->copy()->addHours($durasiBooking);
 
+        Log::info("Finding available slot", [
+            'parkiran' => $idParkiran,
+            'vehicle_type' => $jenisKendaraan,
+            'start' => $startTime,
+            'end' => $endTime
+        ]);
+
         // Get floors for this parkiran
         $floors = ParkingFloor::where('id_parkiran', $idParkiran)
             ->where('status', 'active')
             ->where('available_slots', '>', 0)
             ->get();
 
+        Log::info("Found {$floors->count()} active floors with available slots");
+
         foreach ($floors as $floor) {
+            Log::info("Checking floor {$floor->id_floor}: {$floor->nama_lantai}, type: {$floor->jenis_kendaraan}");
+            
             // Find slots that are:
             // 1. On this floor
             // 2. Match vehicle type
             // 3. Currently available
-            // 4. Not reserved during the requested time period
+            // 4. Not reserved (no active reservations)
             $slot = ParkingSlot::where('id_floor', $floor->id_floor)
                 ->where('jenis_kendaraan', $jenisKendaraan)
                 ->where('status', 'available')
-                ->whereDoesntHave('reservations', function ($query) use ($startTime, $endTime) {
+                ->whereDoesntHave('reservations', function ($query) {
+                    // Check for active reservations (not expired)
                     $query->where('status', 'active')
-                        ->where(function ($q) use ($startTime, $endTime) {
-                            // Check for overlapping reservations
-                            $q->whereBetween('reserved_from', [$startTime, $endTime])
-                              ->orWhereBetween('reserved_until', [$startTime, $endTime])
-                              ->orWhere(function ($q2) use ($startTime, $endTime) {
-                                  $q2->where('reserved_from', '<=', $startTime)
-                                     ->where('reserved_until', '>=', $endTime);
-                              });
-                        });
+                          ->where('expires_at', '>', Carbon::now());
                 })
                 ->first();
 
             if ($slot) {
+                Log::info("Found available slot: {$slot->id_slot} ({$slot->slot_code})");
                 return $slot;
+            } else {
+                Log::warning("No available slot found on floor {$floor->id_floor} for vehicle type {$jenisKendaraan}");
             }
         }
 
+        Log::warning("No available slots found in any floor");
         return null;
     }
 
@@ -153,6 +163,8 @@ class SlotAutoAssignmentService
      * Create a temporary reservation to lock the slot
      * 
      * @param int $idSlot Slot ID
+     * @param int $idFloor Floor ID
+     * @param int $idKendaraan Vehicle ID
      * @param int $idUser User ID
      * @param string $waktuMulai Start time
      * @param int $durasiBooking Duration in hours
@@ -160,13 +172,14 @@ class SlotAutoAssignmentService
      */
     private function createTemporaryReservation(
         int $idSlot,
+        int $idFloor,
+        int $idKendaraan,
         int $idUser,
         string $waktuMulai,
         int $durasiBooking
     ): ?SlotReservation {
         try {
             $startTime = Carbon::parse($waktuMulai);
-            $endTime = $startTime->copy()->addHours($durasiBooking);
             
             // Generate reservation ID
             $reservationId = 'AUTO-' . uniqid() . '-' . time();
@@ -174,9 +187,10 @@ class SlotAutoAssignmentService
             $reservation = SlotReservation::create([
                 'reservation_id' => $reservationId,
                 'id_slot' => $idSlot,
+                'id_floor' => $idFloor,
+                'id_kendaraan' => $idKendaraan,
                 'id_user' => $idUser,
-                'reserved_from' => $startTime,
-                'reserved_until' => $endTime,
+                'reserved_at' => Carbon::now(),
                 'status' => 'active',
                 'expires_at' => $startTime, // Expires when booking starts
             ]);
@@ -187,6 +201,8 @@ class SlotAutoAssignmentService
                 $slot->status = 'reserved';
                 $slot->save();
             }
+
+            Log::info("Created temporary reservation {$reservationId} for slot {$idSlot}");
 
             return $reservation;
             

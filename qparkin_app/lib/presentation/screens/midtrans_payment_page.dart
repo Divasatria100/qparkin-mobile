@@ -94,7 +94,8 @@ class _MidtransPaymentPageState extends State<MidtransPaymentPage> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final snapToken = data['data']['snap_token'];
+        // Backend returns snap_token at root level, not nested in 'data'
+        final snapToken = data['snap_token'];
         
         if (snapToken == null || snapToken.isEmpty) {
           throw Exception('Snap token tidak valid');

@@ -45,6 +45,11 @@ class MallController extends Controller
                 )
                 ->get()
                 ->map(function ($mall) {
+                    // Get first parkiran ID for this mall
+                    $firstParkiran = \App\Models\Parkiran::where('id_mall', $mall->id_mall)
+                        ->where('status', 'Tersedia')
+                        ->first();
+
                     // Get tarif for this mall
                     $tarifs = \App\Models\TarifParkir::where('id_mall', $mall->id_mall)
                         ->select(['jenis_kendaraan', 'satu_jam_pertama', 'tarif_parkir_per_jam'])
@@ -59,6 +64,7 @@ class MallController extends Controller
 
                     return [
                         'id_mall' => $mall->id_mall,
+                        'id_parkiran' => $firstParkiran ? $firstParkiran->id_parkiran : null,
                         'nama_mall' => $mall->nama_mall,
                         'alamat_lengkap' => $mall->alamat_lengkap,
                         'latitude' => $mall->latitude ? (float) $mall->latitude : null,
@@ -113,11 +119,17 @@ class MallController extends Controller
                     ];
                 });
 
+            // Get first parkiran ID for this mall
+            $firstParkiran = $mall->parkiran()
+                ->where('status', 'Tersedia')
+                ->first();
+
             return response()->json([
                 'success' => true,
                 'message' => 'Mall details retrieved successfully',
                 'data' => [
                     'id_mall' => $mall->id_mall,
+                    'id_parkiran' => $firstParkiran ? $firstParkiran->id_parkiran : null,
                     'nama_mall' => $mall->nama_mall,
                     'alamat_lengkap' => $mall->alamat_lengkap,
                     'latitude' => $mall->latitude ? (float) $mall->latitude : null,

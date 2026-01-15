@@ -250,6 +250,11 @@ class _BookingPageContentState extends State<_BookingPageContent> {
     
     return Consumer<BookingProvider>(
       builder: (context, provider, child) {
+        // Check if parkiran is available for this mall
+        final hasParkiranError = provider.errorMessage != null && 
+            (provider.errorMessage!.contains('Parkiran tidak tersedia') ||
+             provider.errorMessage!.contains('parkiran configured'));
+        
         return Stack(
           children: [
             // Scrollable content
@@ -258,8 +263,53 @@ class _BookingPageContentState extends State<_BookingPageContent> {
               padding: EdgeInsets.fromLTRB(padding, padding, padding, bottomPadding),
               child: Column(
                 children: [
-                  // Error display (if any)
-                  if (provider.errorMessage != null && !provider.isLoading)
+                  // Parkiran availability warning (if no parkiran found)
+                  if (hasParkiranError)
+                    Container(
+                      margin: EdgeInsets.only(bottom: spacing),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.orange.shade300),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.warning_amber_rounded,
+                            color: Colors.orange.shade700,
+                            size: 32,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Parkiran Tidak Tersedia',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.orange.shade900,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  provider.errorMessage!,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.orange.shade800,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  
+                  // Error display (if any other errors)
+                  if (provider.errorMessage != null && !provider.isLoading && !hasParkiranError)
                     Padding(
                       padding: EdgeInsets.only(bottom: spacing),
                       child: ErrorRetryWidget(
