@@ -74,6 +74,12 @@ class _BookingPageContentState extends State<_BookingPageContent> {
   
   // Track orientation to detect changes
   Orientation? _previousOrientation;
+  
+  // Scroll controller for auto-scroll functionality
+  final ScrollController _scrollController = ScrollController();
+  
+  // Global key for PointUsageWidget to get its position
+  final GlobalKey _pointUsageKey = GlobalKey();
 
   @override
   void initState() {
@@ -139,6 +145,34 @@ class _BookingPageContentState extends State<_BookingPageContent> {
         _bookingProvider = Provider.of<BookingProvider>(context, listen: false);
         await _bookingProvider!.initialize(widget.mall);
       }
+    }
+  }
+  
+  /// Auto-scroll to PointUsageWidget when it expands
+  void _scrollToPointUsageWidget() {
+    try {
+      final context = _pointUsageKey.currentContext;
+      if (context != null) {
+        // Get the RenderBox of the widget
+        final box = context.findRenderObject() as RenderBox?;
+        if (box != null) {
+          // Get the position of the widget relative to the viewport
+          final position = box.localToGlobal(Offset.zero);
+          
+          // Calculate the target scroll position
+          // We want to scroll so the widget is visible with some padding from top
+          final targetScroll = _scrollController.offset + position.dy - 100;
+          
+          // Animate to the target position
+          _scrollController.animateTo(
+            targetScroll,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('[BookingPage] Error scrolling to PointUsageWidget: $e');
     }
   }
 
@@ -211,7 +245,8 @@ class _BookingPageContentState extends State<_BookingPageContent> {
     final isLandscape = orientation == Orientation.landscape;
     
     // Adjust bottom padding for landscape mode (smaller button area)
-    final bottomPadding = isLandscape ? 80.0 : 100.0;
+    // Increased padding to prevent PointUsageWidget from being cut off by confirm button
+    final bottomPadding = isLandscape ? 120.0 : 140.0;
     
     return Consumer<BookingProvider>(
       builder: (context, provider, child) {
@@ -219,6 +254,7 @@ class _BookingPageContentState extends State<_BookingPageContent> {
           children: [
             // Scrollable content
             SingleChildScrollView(
+              controller: _scrollController,
               padding: EdgeInsets.fromLTRB(padding, padding, padding, bottomPadding),
               child: Column(
                 children: [
@@ -369,11 +405,13 @@ class _BookingPageContentState extends State<_BookingPageContent> {
                       provider.bookingDuration != null && 
                       provider.estimatedCost > 0)
                     PointUsageWidget(
+                      key: _pointUsageKey,
                       parkingCost: provider.estimatedCost.toInt(),
                       onPointsSelected: (points) {
                         provider.setSelectedPoints(points);
                       },
                       initialPoints: provider.selectedPoints,
+                      onExpanded: _scrollToPointUsageWidget,
                     ),
                 ],
               ),
@@ -850,6 +888,9 @@ class _BookingPageContentState extends State<_BookingPageContent> {
   void dispose() {
     // Stop periodic availability check when leaving page
     _bookingProvider?.stopPeriodicAvailabilityCheck();
+    
+    // Dispose scroll controller
+    _scrollController.dispose();
     
     // Dispose vehicle service if it has a dispose method
     // Note: VehicleService doesn't have dispose in current implementation

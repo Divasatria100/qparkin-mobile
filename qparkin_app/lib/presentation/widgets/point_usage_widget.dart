@@ -40,12 +40,16 @@ class PointUsageWidget extends StatefulWidget {
   
   /// Initial points to use (optional)
   final int? initialPoints;
+  
+  /// Callback when widget is expanded (optional)
+  final VoidCallback? onExpanded;
 
   const PointUsageWidget({
     Key? key,
     required this.parkingCost,
     required this.onPointsSelected,
     this.initialPoints,
+    this.onExpanded,
   }) : super(key: key);
 
   @override
@@ -90,6 +94,14 @@ class _PointUsageWidgetState extends State<PointUsageWidget> {
         if (maxPoints >= PointService.minRedemption) {
           _selectedPoints = PointService.minRedemption.toDouble();
           widget.onPointsSelected(_selectedPoints.toInt());
+        }
+        
+        // Trigger auto-scroll callback when expanded
+        if (widget.onExpanded != null) {
+          // Delay to allow widget to expand first
+          Future.delayed(const Duration(milliseconds: 100), () {
+            widget.onExpanded!();
+          });
         }
       }
     });
