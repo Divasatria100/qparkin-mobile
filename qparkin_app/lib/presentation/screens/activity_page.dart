@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../widgets/bottom_nav.dart';
 import '../widgets/circular_timer_widget.dart';
-import '../widgets/booking_detail_card.dart';
 import '../widgets/qr_exit_button.dart';
 import '../widgets/shimmer_loading.dart';
 import '../widgets/pending_payment_card.dart';
@@ -170,6 +169,13 @@ class _ActivityPageState extends State<ActivityPage> with TickerProviderStateMix
   /// Fetch active parking and show snackbar on error
   Future<void> _fetchActiveParkingWithErrorHandling() async {
     final provider = Provider.of<ActiveParkingProvider>(context, listen: false);
+    
+    // Skip API call if in demo mode
+    if (provider.isDemoMode) {
+      debugPrint('[ActivityPage] Skipping API call - demo mode active');
+      return;
+    }
+    
     await provider.fetchActiveParking();
     
     // Show snackbar if there's an error
@@ -537,6 +543,11 @@ class _ActivityPageState extends State<ActivityPage> with TickerProviderStateMix
                       color: Colors.white,
                       child: RefreshIndicator(
                         onRefresh: () async {
+                          // Skip refresh in demo mode
+                          if (provider.isDemoMode) {
+                            _showSuccessSnackbar('Mode Demo - Data tidak diperbarui');
+                            return;
+                          }
                           await _fetchActiveParkingWithErrorHandling();
                           await _fetchPendingPayments();
                           if (mounted && provider.errorMessage == null) {
@@ -580,21 +591,16 @@ class _ActivityPageState extends State<ActivityPage> with TickerProviderStateMix
                                 const SizedBox(height: 16),
                               ],
                               
-                              // CircularTimerWidget at top as focal point
-                              CircularTimerWidget(
-                                startTime: parking.waktuMasuk,
-                                endTime: parking.waktuSelesaiEstimas,
-                                isBooking: parking.isBooking,
-                                onTimerUpdate: (duration) {
-                                  // Timer update callback handled by provider
-                                },
-                              ),
-                              
-                              const SizedBox(height: 24),
-                              
-                              // BookingDetailCard below timer
-                              BookingDetailCard(
-                                activeParking: parking,
+                              // CircularTimerWidget at top as focal point - ENLARGED
+                              Center(
+                                child: CircularTimerWidget(
+                                  startTime: parking.waktuMasuk,
+                                  endTime: parking.waktuSelesaiEstimas,
+                                  isBooking: parking.isBooking,
+                                  onTimerUpdate: (duration) {
+                                    // Timer update callback handled by provider
+                                  },
+                                ),
                               ),
                               
                               const SizedBox(height: 24),

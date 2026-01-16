@@ -212,8 +212,8 @@ class _CircularTimerWidgetState extends State<CircularTimerWidget> with WidgetsB
       label: 'Timer parkir',
       liveRegion: true,
       child: Container(
-        width: 240,
-        height: 240,
+        width: 300,
+        height: 300,
         decoration: BoxDecoration(
           color: Colors.white,
           shape: BoxShape.circle,
@@ -247,21 +247,21 @@ class _CircularTimerWidgetState extends State<CircularTimerWidget> with WidgetsB
                         child: Text(
                           _formatDuration(timerData.duration),
                           style: const TextStyle(
-                            fontSize: 48,
+                            fontSize: 56,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: Color(0xFF573ED1),
                             letterSpacing: 2,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 12),
                       ExcludeSemantics(
                         child: Text(
                           timerData.label,
                           style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.white.withValues(alpha: 0.7),
-                            fontWeight: FontWeight.normal,
+                            fontSize: 16,
+                            color: Colors.grey.shade600,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),

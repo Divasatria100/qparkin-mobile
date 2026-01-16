@@ -16,6 +16,7 @@ class ActiveParkingProvider extends ChangeNotifier with WidgetsBindingObserver {
   String? _errorMessage;
   DateTime? _lastSyncTime;
   int _consecutiveErrors = 0;
+  bool _isDemoMode = false; // Flag for demo mode
   
   // Timers
   Timer? _updateTimer;
@@ -35,6 +36,7 @@ class ActiveParkingProvider extends ChangeNotifier with WidgetsBindingObserver {
   DateTime? get lastSyncTime => _lastSyncTime;
   bool get hasRecentSync => _lastSyncTime != null && 
       DateTime.now().difference(_lastSyncTime!).inSeconds < 60;
+  bool get isDemoMode => _isDemoMode;
 
   ActiveParkingProvider({ParkingService? parkingService})
       : _parkingService = parkingService ?? ParkingService() {
@@ -100,8 +102,14 @@ class ActiveParkingProvider extends ChangeNotifier with WidgetsBindingObserver {
     }
   }
 
-  /// Fetch active parking data from API
+  /// Fetch active parking data from API or use dummy data in demo mode
   Future<void> fetchActiveParking({String? token}) async {
+    // If in demo mode, use dummy data instead of API call
+    if (_isDemoMode) {
+      _loadDummyData();
+      return;
+    }
+
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -385,8 +393,69 @@ class ActiveParkingProvider extends ChangeNotifier with WidgetsBindingObserver {
     _errorMessage = null;
     _lastSyncTime = null;
     _consecutiveErrors = 0;
+    _isDemoMode = false; // Reset demo mode
     _stopTimers();
     notifyListeners();
+  }
+
+  /// Enable demo mode with dummy data
+  void enableDemoMode() {
+    debugPrint('[ActiveParkingProvider] Enabling demo mode');
+    _isDemoMode = true;
+    _loadDummyData();
+  }
+
+  /// Disable demo mode
+  void disableDemoMode() {
+    debugPrint('[ActiveParkingProvider] Disabling demo mode');
+    _isDemoMode = false;
+    clear();
+  }
+
+  /// Load dummy data for demo purposes
+  void _loadDummyData() {
+    debugPrint('[ActiveParkingProvider] Loading dummy data for demo');
+    
+    final now = DateTime.now();
+    final startTime = now; // Start now
+    final endTime = now.add(const Duration(hours: 1)); // 1 hour duration
+    
+    // Create dummy active parking data
+    _activeParking = ActiveParkingModel(
+      idTransaksi: '999',
+      idBooking: '999',
+      qrCode: 'QPARKIN-DEMO-2024-001',
+      namaMall: 'Mega Mall Batam Centre',
+      lokasiMall: 'Jl. Engku Putri, Batam Centre',
+      idParkiran: '1',
+      kodeSlot: 'UTAMA-L1-A05',
+      platNomor: 'BP 1234 XY',
+      jenisKendaraan: 'Mobil',
+      merkKendaraan: 'Toyota',
+      tipeKendaraan: 'Avanza',
+      waktuMasuk: startTime,
+      waktuSelesaiEstimas: endTime,
+      biayaPerJam: 5000.0,
+      biayaJamPertama: 5000.0,
+      isBooking: true,
+      penalty: null,
+      statusParkir: 'booking_aktif',
+    );
+    
+    _lastSyncTime = DateTime.now();
+    _consecutiveErrors = 0;
+    _isLoading = false;
+    _errorMessage = null;
+    
+    // Initialize timer state
+    _updateTimerState();
+    
+    // Start timers for demo
+    _startUpdateTimer();
+    // Don't start refresh timer in demo mode (no API calls needed)
+    
+    notifyListeners();
+    debugPrint('[ActiveParkingProvider] Dummy data loaded successfully');
   }
 
   @override
